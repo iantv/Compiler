@@ -47,13 +47,13 @@ void Lexer::ScanNewString(){
 	if (fin.eof()) return;
 	getline(fin, new_s);
 	if (new_s.length() == 0) return;
-	s.assign(new_s); s += '\0'; /* because getline() return line without '\0' */
+	s.assign(new_s);
 	it = s.begin();
 	++pos.row; pos.col = 1;
 }
 
 bool Lexer::TokenCanExist(){
-	return  *it != '\0' || !fin.eof();
+	return  it != s.end() || !fin.eof();
 }
 
 void Lexer::Print(){
@@ -64,7 +64,7 @@ void Lexer::Print(){
 Token Lexer::GetNumber(){
 	Token t;
 	t.pos = pos;
-	while ((*it >= '0' && *it <= '9') || *it == '.'){ /* int or double value */
+	while (it != s.end() && ((*it >= '0' && *it <= '9') || *it == '.')){ /* int or double value */
 		t.src += *it;
 		if (*it == '.') t.type = TK_DOUBLE_VAL;
 		SkipSymbol();
@@ -76,7 +76,7 @@ Token Lexer::GetNumber(){
 Token Lexer::GetKeyWordOrIdent(){
 	Token t;
 	t.pos = pos;
-	while ((*it >= 'A' && *it <= 'Z') || (*it >= 'a' && *it <= 'z') || (*it >= '0' && *it <= '9')){
+	while (it != s.end() && ((*it >= 'A' && *it <= 'Z') || (*it >= 'a' && *it <= 'z') || (*it >= '0' && *it <= '9'))){
 		t.src += *it;
 		SkipSymbol();
 	}
@@ -101,8 +101,6 @@ Token Lexer::GetLiteral(const char c){
 		pos.col++;
 	}
 	it++;
-	if (t.src.length() > 4 && c == '\'')
-		throw 1;
 	t.type = (c == '\"') ? TK_STRING_LITERAL : TK_CHAR_VAL;
 	return t;
 }
@@ -119,7 +117,7 @@ void Lexer::SkipComment(){
 	} else if (*it == '*'){ /* multi-line comment */
 		while (*it != '*' || *(it + 1) != '/'){
 			SkipSymbol();
-			if (*it == '\0')
+			if (it == s.end())
 				ScanNewString();
 		}
 		it += 2; pos.col += 2;
@@ -131,7 +129,7 @@ inline void Lexer::SkipSymbol(){
 }
 
 Token Lexer::Next(){
-	if (*it == '\0')
+	if (it == s.end())
 		ScanNewString();	
 	while(*it == ' ' || *it == '\t')
 		SkipSymbol(); /* skip spaces and tabs */
