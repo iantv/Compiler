@@ -6,10 +6,10 @@ int main(int argc, const char **argv){
 		cout<<"fatal error: no input files\ncompilation terminated\n";
 	}
 	if (argc == 2){
-		Lexer L(argv[1]);
-		while (L.TokenCanExist()){
-			L.Next();
-			L.Print();
+		lexer L(argv[1]);
+		while (L.token_can_exist()){
+			L.next();
+			L.print();
 		}
 		
 	}

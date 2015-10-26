@@ -6,7 +6,7 @@
 
 #define FIRST_KWD 0
 
-enum TokenType{
+enum token_t{
 	/* Tokens of reserved words */
 	TK_DOUBLE = FIRST_KWD, TK_INT, TK_STRUCT,
 	TK_BREAK, TK_ELSE, TK_LONG, TK_SWITCH,
@@ -32,46 +32,43 @@ enum TokenType{
 #define LAST_KWD (TK_WHILE - FIRST_KWD)
 using namespace std;
 
-typedef struct position{
+struct position_t{
 	int row, col;
-	position(int r, int c){ row = r; col = c; };
-	position(){ row = col = 0; };
-	position (const struct position &p){ row = p.row; col = p.col; };
-} position_t;
-
-class Token{
-	position_t pos;
-	TokenType type;
-	string src;
-public:
-	friend class Lexer;
-	Token(int col, int row, TokenType tk_type, const string tk_src);
-	Token(const Token& tk){ pos = tk.pos; type = tk.type; src.assign(tk.src); };
-	Token(): pos(position(0, 0)), type(NOT_TK), src(""){};
+	position_t(int r, int c){ row = r; col = c; };
+	position_t(){ row = col = 0; };
+	position_t (const position_t &p){ row = p.row; col = p.col; };
 };
 
-class Lexer{
+class token{
+	position_t pos;
+	token_t type;
+	string src;
+public:
+	friend class lexer;
+	token(int col, int row, token_t tk_type, const string tk_src);
+	token(const token& tk){ pos = tk.pos; type = tk.type; src.assign(tk.src); };
+	token(): pos(position_t(0, 0)), type(NOT_TK), src(""){};
+};
+
+class lexer{
 	ifstream fin;
 	string s;
 	string::iterator it;
 	position_t pos;
-	Token tk;
-	void ScanNewString();
-	bool isKeyWord(TokenType tk_type);
-	bool isOperator(TokenType tk_type);
-	bool isDefinedByUser(TokenType tk_type);
-	bool LookForward(const char c);
-	Token GetNumber();
-	Token GetKeyWordOrIdent();
-	Token GetLiteral(const char c);
-	void SkipComment();
-	void SkipSymbol();
+	token tk;
+	void scan_new_line();
+	bool look_forward(const char c);
+	token get_number();
+	token get_kwd_or_id();
+	token get_literal(const char c);
+	void skip_comment();
+	void skip_symbol();
 public:
-	Lexer(const char *filename);
-	void Print();
-	Token Next();
-	Token Get();
-	bool TokenCanExist();
+	lexer(const char *filename);
+	void print();
+	token next();
+	token get();
+	bool token_can_exist();
 };
 
 #endif
