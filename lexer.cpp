@@ -22,7 +22,7 @@ static const char * const token_names[] = {
 
 
 token::token(int col, int row, token_t tk_type, const string tk_src){
-	pos = position_t(row, col);
+	pos = position(row, col);
 	type = tk_type;
 	src.assign(tk_src);
 }
@@ -212,7 +212,7 @@ token lexer::next(){
 	}
 }
 
-lexer::lexer(const char *filename): pos(position_t()){
+lexer::lexer(const char *filename): pos(position()){
 	fin.open(filename);
 	scan_new_line();
 }

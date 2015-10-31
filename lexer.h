@@ -32,29 +32,29 @@ enum token_t{
 #define LAST_KWD (TK_WHILE - FIRST_KWD)
 using namespace std;
 
-struct position_t{
+struct position{
 	int row, col;
-	position_t(int r, int c){ row = r; col = c; };
-	position_t(){ row = col = 0; };
-	position_t (const position_t &p){ row = p.row; col = p.col; };
+	position(int r, int c){ row = r; col = c; };
+	position(){ row = col = 0; };
+	position(const position &p){ row = p.row; col = p.col; };
 };
 
 class token{
-	position_t pos;
+	position pos;
 	token_t type;
 	string src;
 public:
 	friend class lexer;
 	token(int col, int row, token_t tk_type, const string tk_src);
 	token(const token& tk){ pos = tk.pos; type = tk.type; src.assign(tk.src); };
-	token(): pos(position_t(0, 0)), type(NOT_TK), src(""){};
+	token(): pos(position(0, 0)), type(NOT_TK), src(""){};
 };
 
 class lexer{
 	ifstream fin;
 	string s;
 	string::iterator it;
-	position_t pos;
+	position pos;
 	token tk;
 	void scan_new_line();
 	bool look_forward(const char c);
