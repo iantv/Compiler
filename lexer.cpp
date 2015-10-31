@@ -42,7 +42,8 @@ void lexer::scan_new_line(){
 }
 
 bool lexer::token_can_exist(){
-	return  it != s.end() || !fin.eof();
+	if (s.empty()) scan_new_line();
+	return  (it != s.end() || !fin.eof());
 }
 
 void lexer::print(){
@@ -53,7 +54,7 @@ void lexer::print(){
 token lexer::get_number(){
 	token t;
 	t.pos = pos;
-	while (it != s.end() && ((*it >= '0' && *it <= '9') || *it == '.')){ /* int or double value */
+	while (!s.empty() && (it != s.end() && ((*it >= '0' && *it <= '9') || *it == '.'))){ /* int or double value */
 		t.src += *it;
 		if (*it == '.') t.type = TK_DOUBLE_VAL;
 		skip_symbol();
@@ -118,11 +119,12 @@ inline void lexer::skip_symbol(){
 }
 
 token lexer::next(){
-	if (it == s.end())
-		scan_new_line();	
-	while(*it == ' ' || *it == '\t')
-		skip_symbol(); /* skip spaces and tabs */
-
+	while (it == s.end() || *it == ' ' || *it == '\t'){
+		if (it == s.end())
+			scan_new_line();
+		else
+			skip_symbol(); /* skip spaces and tabs */
+	}
 	if (*it >= '0' && *it <= '9'){ 
 		return tk = get_number();
 	} else if ((*it >= 'A' && *it <= 'Z') || (*it >= 'a' && *it <= 'z')){
