@@ -8,6 +8,7 @@ protected:
 	token tk;
 public:
 	virtual void print(ostream &os, int level) = 0;
+	void print_level(ostream &os, int level);
 };
 
 class expr_bin_op: public expr{
