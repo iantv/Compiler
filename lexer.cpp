@@ -42,7 +42,8 @@ void lexer::scan_new_line(){
 }
 
 bool lexer::token_can_exist(){
-	if (s.empty()) scan_new_line();
+	if (s.empty())
+		scan_new_line();
 	return  (it != s.end() || !fin.eof());
 }
 
@@ -120,8 +121,11 @@ inline void lexer::skip_symbol(){
 
 token lexer::next(){
 	while (it == s.end() || *it == ' ' || *it == '\t'){
-		if (it == s.end())
+		if (it == s.end()){
 			scan_new_line();
+			if (fin.eof())
+				return token();
+		}
 		else
 			skip_symbol(); /* skip spaces and tabs */
 	}
