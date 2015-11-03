@@ -10,22 +10,24 @@ static const char * const token_names[] = {
 	"continue", "for", "signed", "void",
 	"default", "sizeof", "do", "if", "while",
 
-	"+", "-", "*", "/", "%",
-	"|", "&", "=", "<", ">", "!",
-	"==", "<=", ">=", "!=",
-	"?", ":", ",", ";", ".",
-	"[", "]", "(", ")", "{", "}",
-	"++", "--", "||", "&&",
+	"+", "-", "*", "/", "%", "^", "|", "&", "<<", ">>", 
+	"=", "+=", "-=", "*=", "/=", "%=", "^=", "|=", "&=", "<<=", ">>=",
+	"++", "--", "^^", "||", "&&", 
+	"<", ">", "!", "==", "<=", ">=", "!=",
+	"?", ":", ",", ";", ".", "[", "]", "(", ")", "{", "}",
 
 	"identifier", "int_val", "dbl_val", "chr_val", "str_lit"
 };
 
-
-token::token(int col, int row, token_t tk_type, const string tk_src){
-	pos = position(row, col);
+token::token(position tk_pos, token_t tk_type){
+	pos = tk_pos;
 	type = tk_type;
-	src.assign(tk_src);
+	src.assign(token_names[type]);
 }
+/*
+bool token::is_operator(){
+	//return type <;
+}*/
 
 token lexer::get(){
 	return tk;
@@ -33,9 +35,10 @@ token lexer::get(){
 
 void lexer::scan_new_line(){
 	string new_s;
-	if (fin.eof()) return;
+	if (fin.eof())
+		return;
 	getline(fin, new_s);
-	if (new_s.length() == 0) return;
+	//if (new_s.length() == 0) return;
 	s.assign(new_s);
 	it = s.begin();
 	++pos.row; pos.col = 1;
@@ -47,9 +50,13 @@ bool lexer::token_can_exist(){
 	return  (it != s.end() || !fin.eof());
 }
 
-void lexer::print(){
-	if (tk.type != NOT_TK)
-		cout << tk.pos.row << "\t" << tk.pos.col << "\t" << tk.src.c_str() << "\t\t" << token_names[tk.type] << endl;
+void token::print(){
+	if (type != NOT_TK)
+		cout << pos.row << "\t" << pos.col << "\t" << src.c_str() << "\t\t" << token_names[type] << endl;
+}
+
+void lexer::tk_print(){
+	tk.print();
 }
 
 token lexer::get_number(){
@@ -88,8 +95,7 @@ token lexer::get_literal(const char c){
 	it++; /* skip the first char */
 	while (*it != c){
 		t.src += *it;
-		it++;
-		pos.col++;
+		skip_symbol();
 	}
 	it++;
 	t.type = (c == '\"') ? TK_STRING_LITERAL : TK_CHAR_VAL;
@@ -99,19 +105,25 @@ token lexer::get_literal(const char c){
 bool lexer::look_forward(const char c){
 	string::iterator local_it = it;
 	local_it++;
-	return *local_it == c;
+	if (local_it != s.end())
+		return *local_it == c;
+	return false; /* throw */
 }
 
 void lexer::skip_comment(){
 	if (*it == '/'){ /* single-line comment */
 		scan_new_line();
 	} else if (*it == '*'){ /* multi-line comment */
-		while (*it != '*' || *(it + 1) != '/'){
-			skip_symbol();
+		while (1){
+			if (it != s.end() && (*it == '*' && look_forward('/')))
+				break;
 			if (it == s.end())
 				scan_new_line();
+			else
+				skip_symbol();
 		}
-		it += 2; pos.col += 2;
+		skip_symbol();
+		skip_symbol();
 	}
 }
 
@@ -124,9 +136,8 @@ token lexer::next(){
 		if (it == s.end()){
 			scan_new_line();
 			if (fin.eof())
-				return token();
-		}
-		else
+				return tk = token();
+		} else
 			skip_symbol(); /* skip spaces and tabs */
 	}
 	if (*it >= '0' && *it <= '9'){ 
@@ -137,62 +148,103 @@ token lexer::next(){
 		return tk = get_literal('\"');
 	} else if (*it == '\''){
 		return tk = get_literal('\'');
-	} else if (*it == '+' || *it == '-' || *it == '|' || *it == '&' || *it == '='){
+	} else if (*it == '+' || *it == '-' || *it == '^' || *it == '|' || *it == '&' || *it == '=' || *it == '>' || *it == '<'){
 		token_t tt = NOT_TK;
 		if (look_forward(*it)){
 			switch (*it){
 				case '+': { tt = TK_INC; break; }
 				case '-': { tt = TK_DEC; break; }
+				case '^': { tt = TK_XORXOR; break; }
 				case '|': { tt = TK_OROR; break; }
 				case '&': { tt = TK_ANDAND; break; }
 				case '=': { tt = TK_EQ; break; }
+				case '>': {
+					skip_symbol();
+					tt = TK_SHR;
+					if (look_forward('=')){
+						tt = TK_SHR_ASSIGN;
+						pos.col--; it--;
+					}
+					break; 	  
+				}
+				case '<': {
+					skip_symbol();
+					tt = TK_SHL;
+					if (look_forward('=')){
+						tt = TK_SHL_ASSIGN;
+						pos.col--; it--;
+					}
+					break;
+				}
 			}
+			tk = token(pos,  tt);
 			skip_symbol();
-			tk = token(pos.col - 1, pos.row,  tt,  token_names[tt]);
-		} else{
+			if (tt == TK_SHR_ASSIGN || tt == TK_SHL_ASSIGN)
+				skip_symbol();	/* skip the third char '=' */
+		} else if(look_forward('=')){
+			switch (*it){
+				case '+': { tt = TK_PLUS_ASSIGN; break; }
+				case '-': { tt = TK_MINUS_ASSIGN; break; }
+				case '^': { tt = TK_XOR_ASSIGN; break; }
+				case '|': { tt = TK_OR_ASSIGN; break; }
+				case '&': { tt = TK_AND_ASSIGN; break; }
+				case '>': { tt = TK_GE; break; }
+				case '<': { tt = TK_LE; break; }
+			}
+			tk = token(pos,  tt);
+			skip_symbol();
+		} else {
 			switch (*it){
 				case '+': { tt = TK_PLUS; break; }
 				case '-': { tt = TK_MINUS; break; }
+				case '^': { tt = TK_XOR; break; }
 				case '|': { tt = TK_OR; break; }
 				case '&': { tt = TK_AND; break; }
 				case '=': { tt = TK_ASSIGN; break; }
+				case '>': { tt = TK_GT; break; }
+				case '<': { tt = TK_LT; break; }
 			}
-			tk = token(pos.col, pos.row, tt, token_names[tt]);
+			tk = token(pos, tt);
 		}
 		skip_symbol();
 		return tk;
 	} else if (*it == '*'){
+		if (look_forward('=')){
+			tk = token(pos, TK_MUL_ASSIGN);
+			skip_symbol();
+		} else {
+			tk = token(pos, TK_MUL);
+		}
 		skip_symbol();
-		return tk = token(pos.col - 1, pos.row, TK_MUL, "*");
+		return tk;
 	} else if (*it == '/'){
-		if (look_forward(*it) || look_forward('*')){
+		if (look_forward('/') || look_forward('*')){
 			it++;
 			skip_comment();
 			return next();
-		} else {
+		} else if(look_forward('=')){
+			tk = token(pos, TK_DIV_ASSIGN);
 			skip_symbol();
-			return tk = token(pos.col - 1, pos.row, TK_DIV, "/");
+		} else {
+			tk = token(pos, TK_DIV);
 		}
-	} else if (*it == '%'){
 		skip_symbol();
-		return tk = token(pos.col - 1, pos.row, TK_MOD, "%");
-	} else if (*it == '>' || *it == '<' || *it == '!'){
-		token_t tt = NOT_TK;
+		return tk;
+	} else if (*it == '%'){
+		if(look_forward('=')){
+			tk = token(pos, TK_MOD_ASSIGN);
+			skip_symbol();
+		} else {
+			tk = token(pos, TK_MOD);
+		}
+		skip_symbol();
+		return tk;
+	} else if (*it == '!'){
 		if (look_forward('=')){
-			switch (*it){
-				case '<': { tt = TK_LE; break; }
-				case '>': { tt = TK_GE; break; }
-				case '!': { tt = TK_NE; break; }
-			}
-			tk = token(pos.col, pos.row,  tt,  token_names[tt]);
+			tk = token(pos, TK_NE);
 			skip_symbol();
 		} else{
-			switch (*it){
-				case '<': { tt = TK_LT; break; }
-				case '>': { tt = TK_GT; break; }
-				case '!': { tt = TK_NOT; break; }
-			}
-			tk = token(pos.col, pos.row, tt, token_names[tt]);
+			tk = token(pos, TK_NOT);
 		}
 		skip_symbol();
 		return tk;
@@ -211,8 +263,9 @@ token lexer::next(){
 			case '{': { tt = TK_OPEN_BRACE; break; }
 			case '}': { tt = TK_CLOSE_BRACE; break; }
 		}
+		tk = token(pos, tt);
 		skip_symbol();
-		return tk = token(pos.col - 1, pos.row, tt, token_names[tt]);
+		return tk;
 	}
 }
 
