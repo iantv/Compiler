@@ -2,6 +2,7 @@
 #define PARSER
 
 #include "lexer.h"
+#include <stack>
 
 class expr{
 protected:
@@ -18,13 +19,13 @@ public:
 	void print(ostream &os, int level);
 };
 
-class expr_const:expr{
+class expr_literal: public expr{
 public:
-	expr_const(token t);
+	expr_literal(token t);
 	void print(ostream &os, int level);
 };
 
-class expr_var:expr{
+class expr_var: public expr{
 public:
 	expr_var(token t);
 	void print(ostream &os, int level);
@@ -36,6 +37,8 @@ class parser{
 	expr *expression();
 	expr *term();
 	expr *factor();
+	expr *left_associated(int level);
+	int level_op(token t);
 public:
 	parser(lexer *l);
 	void parse();	
