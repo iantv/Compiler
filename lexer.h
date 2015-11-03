@@ -5,12 +5,7 @@
 #include <string>
 
 #define FIRST_KWD 0
-/*
-	"|", "&", "<<", ">>",
-	"=", "+=", "-=", "*=", "/=", "%=", "^=", "|=", "&=", 
-	
-	"<", ">", "!",
-*/
+
 enum token_t{
 	/* Tokens of reserved words */
 	TK_DOUBLE = FIRST_KWD, TK_INT, TK_STRUCT,
