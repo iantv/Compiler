@@ -12,7 +12,7 @@ static const char * const token_names[] = {
 
 	"+", "-", "*", "/", "%", "^", "|", "&", "<<", ">>", 
 	"=", "+=", "-=", "*=", "/=", "%=", "^=", "|=", "&=", "<<=", ">>=",
-	"++", "--", "^^", "||", "&&", 
+	"++", "--", "^^", "||", "&&", "->",
 	"<", ">", "!", "==", "<=", ">=", "!=",
 	"?", ":", ",", ";", ".", "[", "]", "(", ")", "{", "}",
 
@@ -24,10 +24,6 @@ token::token(position tk_pos, token_t tk_type){
 	type = tk_type;
 	src.assign(token_names[type]);
 }
-/*
-bool token::is_operator(){
-	//return type <;
-}*/
 
 token lexer::get(){
 	return tk;
@@ -150,7 +146,11 @@ token lexer::next(){
 		return tk = get_literal('\'');
 	} else if (*it == '+' || *it == '-' || *it == '^' || *it == '|' || *it == '&' || *it == '=' || *it == '>' || *it == '<'){
 		token_t tt = NOT_TK;
-		if (look_forward(*it)){
+		if (*it == '-' && look_forward('>')){
+			tt = TK_PTROP;
+			tk = token(pos, tt);
+			skip_symbol();
+		} else if (look_forward(*it)){
 			switch (*it){
 				case '+': { tt = TK_INC; break; }
 				case '-': { tt = TK_DEC; break; }

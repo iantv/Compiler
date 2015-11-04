@@ -19,7 +19,7 @@ enum token_t{
 	TK_PLUS, TK_MINUS, TK_MUL, TK_DIV, TK_MOD, TK_XOR, TK_OR, TK_AND, TK_SHL, TK_SHR,
 	TK_ASSIGN, TK_PLUS_ASSIGN, TK_MINUS_ASSIGN, TK_MUL_ASSIGN, TK_DIV_ASSIGN,
 	TK_MOD_ASSIGN, TK_XOR_ASSIGN, TK_OR_ASSIGN, TK_AND_ASSIGN, TK_SHL_ASSIGN, TK_SHR_ASSIGN, 
-	TK_INC, TK_DEC, TK_XORXOR, TK_OROR, TK_ANDAND,
+	TK_INC, TK_DEC, TK_XORXOR, TK_OROR, TK_ANDAND, TK_PTROP, 
 	TK_LT, TK_GT, TK_NOT, TK_EQ, TK_LE, TK_GE, TK_NE,
 
 	TK_QUESTION, TK_COLON, TK_COMMA, TK_SEMICOLON, TK_POINT,
@@ -50,7 +50,6 @@ public:
 	token(const token& tk){ pos = tk.pos; type = tk.type; src.assign(tk.src); };
 	token(position tk_pos, token_t tk_type);
 	token(): pos(position(0, 0)), type(NOT_TK), src(""){};
-	//bool is_operator();
 	string get_src(){ return src; };
 	void print();
 };
