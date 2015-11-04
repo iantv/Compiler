@@ -29,24 +29,14 @@ void expr_var::print(ostream &os, int level){
 }
 
 parser::parser(lexer *l): lxr(l) {}
-/*
-int parser::level_op(token t){
-	switch (t.type){
-		case TK_COMMA: { return 1; }
-//		case TK_ASSIGN, case : { return 2; }
-	}
-}
-
-expr *parser::left_associated(int level){
-	
-}*/
 
 expr *parser::expression(){
 	expr *ex = term();
 	token tk = lxr->get();
-	if (tk.type == TK_PLUS || tk.type == TK_MINUS){
+	while (tk.type == TK_PLUS || tk.type == TK_MINUS){
 		lxr->next();
-		return new expr_bin_op(ex, expression(), tk);;
+		ex = new expr_bin_op(ex, term(), tk);
+		tk = lxr->get();
 	}
 	return ex;
 }
@@ -54,9 +44,10 @@ expr *parser::expression(){
 expr *parser::term(){
 	expr *ex = factor();
 	token tk = lxr->get();
-	if (tk.type == TK_MUL || tk.type == TK_DIV){
+	while (tk.type == TK_MUL || tk.type == TK_DIV){
 		lxr->next();
-		return new expr_bin_op(ex, term(), tk);
+		ex = new expr_bin_op(ex, factor(), tk);
+		tk = lxr->get();
 	}
 	return ex;
 }
@@ -64,7 +55,7 @@ expr *parser::term(){
 expr *parser::factor(){
 	token tk = lxr->get();
 	lxr->next();
-	if (tk.type == TK_ID){		
+	if (tk.type == TK_ID){
 		return new expr_var(tk);
 	}
 	if (tk.type == TK_OPEN_BRACKET){
@@ -77,11 +68,12 @@ expr *parser::factor(){
 	if (tk.type == TK_INT_VAL || tk.type == TK_DOUBLE_VAL || tk.type == TK_CHAR_VAL){
 		return new expr_literal(tk);
 	}
+	return e;
 }
 
 void parser::parse(){
 	lxr->next();
-	e = expression();
+	e = expression();	
 }
 
 void parser::print(ostream &os){

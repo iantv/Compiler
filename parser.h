@@ -37,8 +37,6 @@ class parser{
 	expr *expression();
 	expr *term();
 	expr *factor();
-	expr *left_associated(int level);
-	int level_op(token t);
 public:
 	parser(lexer *l);
 	void parse();	
