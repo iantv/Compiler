@@ -10,7 +10,7 @@ static const char * const token_names[] = {
 	"continue", "for", "signed", "void",
 	"default", "sizeof", "do", "if", "while",
 
-	"+", "-", "*", "/", "%", "^", "|", "&", "<<", ">>", 
+	"+", "-", "*", "/", "%", "^", "|", "&", "~", "<<", ">>", 
 	"=", "+=", "-=", "*=", "/=", "%=", "^=", "|=", "&=", "<<=", ">>=",
 	"++", "--", "^^", "||", "&&", "->",
 	"<", ">", "!", "==", "<=", ">=", "!=",
@@ -136,6 +136,7 @@ token lexer::next(){
 		} else
 			skip_symbol(); /* skip spaces and tabs */
 	}
+	token_t tt = NOT_TK;
 	if (*it >= '0' && *it <= '9'){ 
 		return tk = get_number();
 	} else if ((*it >= 'A' && *it <= 'Z') || (*it >= 'a' && *it <= 'z')){
@@ -145,7 +146,6 @@ token lexer::next(){
 	} else if (*it == '\''){
 		return tk = get_literal('\'');
 	} else if (*it == '+' || *it == '-' || *it == '^' || *it == '|' || *it == '&' || *it == '=' || *it == '>' || *it == '<'){
-		token_t tt = NOT_TK;
 		if (*it == '-' && look_forward('>')){
 			tt = TK_PTROP;
 			tk = token(pos, tt);
@@ -154,9 +154,9 @@ token lexer::next(){
 			switch (*it){
 				case '+': { tt = TK_INC; break; }
 				case '-': { tt = TK_DEC; break; }
-				case '^': { tt = TK_XORXOR; break; }
-				case '|': { tt = TK_OROR; break; }
-				case '&': { tt = TK_ANDAND; break; }
+				case '^': { tt = TK_XOR_LOG; break; }
+				case '|': { tt = TK_OR_LOG; break; }
+				case '&': { tt = TK_AND_LOG; break; }
 				case '=': { tt = TK_EQ; break; }
 				case '>': {
 					skip_symbol();
@@ -197,15 +197,19 @@ token lexer::next(){
 			switch (*it){
 				case '+': { tt = TK_PLUS; break; }
 				case '-': { tt = TK_MINUS; break; }
-				case '^': { tt = TK_XOR; break; }
-				case '|': { tt = TK_OR; break; }
-				case '&': { tt = TK_AND; break; }
+				case '^': { tt = TK_XOR_BIT; break; }
+				case '|': { tt = TK_OR_BIT; break; }
+				case '&': { tt = TK_AND_BIT; break; }
 				case '=': { tt = TK_ASSIGN; break; }
 				case '>': { tt = TK_GT; break; }
 				case '<': { tt = TK_LT; break; }
 			}
 			tk = token(pos, tt);
 		}
+		skip_symbol();
+		return tk;
+	} else if (*it == '~'){
+		tk = token(pos, TK_NOT_BIT);
 		skip_symbol();
 		return tk;
 	} else if (*it == '*'){
@@ -249,7 +253,6 @@ token lexer::next(){
 		skip_symbol();
 		return tk;
 	} else if (*it == ',' || *it == ';' || *it == '.' || *it >= '[' || *it == ']' || *it == '(' || *it == ')' || *it == '{' || *it == '}' || *it == '?' || *it == ':'){
-		token_t tt;
 		switch (*it){
 			case '?': { tt = TK_QUESTION; break; }
 			case ':': { tt = TK_COLON; break; }
@@ -267,6 +270,7 @@ token lexer::next(){
 		skip_symbol();
 		return tk;
 	}
+	return token();
 }
 
 lexer::lexer(const char *filename): pos(position()){

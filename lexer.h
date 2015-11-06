@@ -16,10 +16,10 @@ enum token_t{
 	TK_CONTINUE, TK_FOR, TK_SIGNED, TK_VOID,
 	TK_DEFAULT, TK_SIZEOF, TK_DO, TK_IF, TK_WHILE, 
 	/* Tokens of statements */
-	TK_PLUS, TK_MINUS, TK_MUL, TK_DIV, TK_MOD, TK_XOR, TK_OR, TK_AND, TK_SHL, TK_SHR,
+	TK_PLUS, TK_MINUS, TK_MUL, TK_DIV, TK_MOD, TK_XOR_BIT, TK_OR_BIT, TK_AND_BIT, TK_NOT_BIT, TK_SHL, TK_SHR,
 	TK_ASSIGN, TK_PLUS_ASSIGN, TK_MINUS_ASSIGN, TK_MUL_ASSIGN, TK_DIV_ASSIGN,
 	TK_MOD_ASSIGN, TK_XOR_ASSIGN, TK_OR_ASSIGN, TK_AND_ASSIGN, TK_SHL_ASSIGN, TK_SHR_ASSIGN, 
-	TK_INC, TK_DEC, TK_XORXOR, TK_OROR, TK_ANDAND, TK_PTROP, 
+	TK_INC, TK_DEC, TK_XOR_LOG, TK_OR_LOG, TK_AND_LOG, TK_PTROP, 
 	TK_LT, TK_GT, TK_NOT, TK_EQ, TK_LE, TK_GE, TK_NE,
 
 	TK_QUESTION, TK_COLON, TK_COMMA, TK_SEMICOLON, TK_POINT,
@@ -51,6 +51,7 @@ public:
 	token(position tk_pos, token_t tk_type);
 	token(): pos(position(0, 0)), type(NOT_TK), src(""){};
 	string get_src(){ return src; };
+	token_t get_token_type() { return type; };
 	void print();
 };
 
@@ -67,6 +68,7 @@ class lexer{
 	token get_literal(const char c);
 	void skip_comment();
 public:
+	friend class parser;
 	lexer(const char *filename);
 	token next();
 	token get();
