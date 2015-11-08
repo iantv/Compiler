@@ -3,7 +3,7 @@
 
 #include <fstream>
 #include <string>
-
+#include "Tests.h"
 #define FIRST_KWD 0
 
 enum token_t{
@@ -31,6 +31,25 @@ enum token_t{
 	NOT_TK
 };
 #define LAST_KWD (TK_WHILE - FIRST_KWD)
+
+static const char * const token_names[] = {
+	"double", "int", "struct",
+	"break", "else", "long", "switch",
+	"case", "enum", "register", "typedef",
+	"char", "return", "union",
+	"const", "float", "short", "unsigned",
+	"continue", "for", "signed", "void",
+	"default", "sizeof", "do", "if", "while",
+
+	"+", "-", "*", "/", "%", "^", "|", "&", "~", "<<", ">>", 
+	"=", "+=", "-=", "*=", "/=", "%=", "^=", "|=", "&=", "<<=", ">>=",
+	"++", "--", "^^", "||", "&&", "->",
+	"<", ">", "!", "==", "<=", ">=", "!=",
+	"?", ":", ",", ";", ".", "[", "]", "(", ")", "{", "}",
+
+	"identifier", "int_val", "dbl_val", "chr_val", "str_lit"
+};
+
 using namespace std;
 
 struct position{
@@ -38,6 +57,7 @@ struct position{
 	position(int r, int c){ row = r; col = c; };
 	position(){ row = col = 0; };
 	position(const position &p){ row = p.row; col = p.col; };
+	bool operator==(const position &p){ return row == p.row && col == p.col; };
 };
 
 class token{
@@ -47,12 +67,13 @@ class token{
 public:
 	friend class parser;
 	friend class lexer;
+	friend class tests;
 	token(const token& tk){ pos = tk.pos; type = tk.type; src.assign(tk.src); };
 	token(position tk_pos, token_t tk_type);
 	token(): pos(position(0, 0)), type(NOT_TK), src(""){};
 	string get_src(){ return src; };
 	token_t get_token_type() { return type; };
-	void print();
+	friend ostream &operator<<(ostream &os, const token tk);
 };
 
 class lexer{
@@ -74,7 +95,6 @@ public:
 	token get();
 	bool token_can_exist();
 	void skip_symbol();
-	void tk_print();
 };
 
 #endif

@@ -1,24 +1,6 @@
 #include <iostream>
 #include "lexer.h"
 
-static const char * const token_names[] = {
-	"double", "int", "struct",
-	"break", "else", "long", "switch",
-	"case", "enum", "register", "typedef",
-	"char", "return", "union",
-	"const", "float", "short", "unsigned",
-	"continue", "for", "signed", "void",
-	"default", "sizeof", "do", "if", "while",
-
-	"+", "-", "*", "/", "%", "^", "|", "&", "~", "<<", ">>", 
-	"=", "+=", "-=", "*=", "/=", "%=", "^=", "|=", "&=", "<<=", ">>=",
-	"++", "--", "^^", "||", "&&", "->",
-	"<", ">", "!", "==", "<=", ">=", "!=",
-	"?", ":", ",", ";", ".", "[", "]", "(", ")", "{", "}",
-
-	"identifier", "int_val", "dbl_val", "chr_val", "str_lit"
-};
-
 token::token(position tk_pos, token_t tk_type){
 	pos = tk_pos;
 	type = tk_type;
@@ -27,6 +9,12 @@ token::token(position tk_pos, token_t tk_type){
 
 token lexer::get(){
 	return tk;
+}
+
+ostream &operator<<(ostream &os, const token tk){
+	if (tk.type != NOT_TK)
+		os << tk.pos.row << "\t" << tk.pos.col << "\t" << tk.src.c_str() << "\t\t" << token_names[tk.type] << endl;
+	return os;
 }
 
 void lexer::scan_new_line(){
@@ -44,15 +32,6 @@ bool lexer::token_can_exist(){
 	if (s.empty())
 		scan_new_line();
 	return  (it != s.end() || !fin.eof());
-}
-
-void token::print(){
-	if (type != NOT_TK)
-		cout << pos.row << "\t" << pos.col << "\t" << src.c_str() << "\t\t" << token_names[type] << endl;
-}
-
-void lexer::tk_print(){
-	tk.print();
 }
 
 token lexer::get_number(){
@@ -88,12 +67,12 @@ token lexer::get_literal(const char c){
 	if (c != '\'' && c != '\"')
 		return t;
 	t.pos = pos;
-	it++; /* skip the first char */
+	skip_symbol(); /* skip the first char */
 	while (*it != c){
 		t.src += *it;
 		skip_symbol();
 	}
-	it++;
+	skip_symbol();
 	t.type = (c == '\"') ? TK_STRING_LITERAL : TK_CHAR_VAL;
 	return t;
 }
@@ -131,7 +110,7 @@ token lexer::next(){
 	while (it == s.end() || *it == ' ' || *it == '\t'){
 		if (it == s.end()){
 			scan_new_line();
-			if (fin.eof())
+			if (it == s.end())
 				return tk = token();
 		} else
 			skip_symbol(); /* skip spaces and tabs */
@@ -274,6 +253,7 @@ token lexer::next(){
 }
 
 lexer::lexer(const char *filename): pos(position()){
-	fin.open(filename);
+	s = ""; tk = token();
+	fin.open(filename, ios::in);
 	scan_new_line();
 }
