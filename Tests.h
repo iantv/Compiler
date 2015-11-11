@@ -10,6 +10,7 @@ class tests{
 public:
 	tests(unit_t unt): unit(unt) {};
 	void lexer_tests();
+	void parser_tests();
 };
 
 #endif
