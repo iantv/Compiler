@@ -47,7 +47,7 @@ static const char * const token_names[] = {
 	"<", ">", "!", "==", "<=", ">=", "!=",
 	"?", ":", ",", ";", ".", "[", "]", "(", ")", "{", "}",
 
-	"identifier", "int_val", "dbl_val", "chr_val", "str_lit"
+	"identifier", "int_val", "dbl_val", "chr_val", "str_lit", ""
 };
 
 using namespace std;

@@ -19,8 +19,9 @@ ostream &operator<<(ostream &os, const token tk){
 
 void lexer::scan_new_line(){
 	string new_s;
-	if (fin.eof())
-		return;
+	if (fin.eof()){
+	//	return;
+	}
 	getline(fin, new_s);
 	//if (new_s.length() == 0) return;
 	s.assign(new_s);
@@ -86,6 +87,7 @@ bool lexer::look_forward(const char c){
 }
 
 void lexer::skip_comment(){
+	skip_symbol();	/* skip / char */
 	if (*it == '/'){ /* single-line comment */
 		scan_new_line();
 	} else if (*it == '*'){ /* multi-line comment */
@@ -110,11 +112,13 @@ token lexer::next(){
 	while (it == s.end() || *it == ' ' || *it == '\t'){
 		if (it == s.end()){
 			scan_new_line();
-			if (it == s.end())
-				return tk = token();
 		} else
 			skip_symbol(); /* skip spaces and tabs */
+		if (s.empty() && fin.eof()){
+				return token();
+		}
 	}
+	
 	token_t tt = NOT_TK;
 	if (*it >= '0' && *it <= '9'){ 
 		return tk = get_number();
@@ -138,7 +142,7 @@ token lexer::next(){
 				case '&': { tt = TK_AND_LOG; break; }
 				case '=': { tt = TK_EQ; break; }
 				case '>': {
-					skip_symbol();
+					//skip_symbol();
 					tt = TK_SHR;
 					if (look_forward('=')){
 						tt = TK_SHR_ASSIGN;
@@ -147,7 +151,7 @@ token lexer::next(){
 					break; 	  
 				}
 				case '<': {
-					skip_symbol();
+					//skip_symbol();
 					tt = TK_SHL;
 					if (look_forward('=')){
 						tt = TK_SHL_ASSIGN;
@@ -202,7 +206,8 @@ token lexer::next(){
 		return tk;
 	} else if (*it == '/'){
 		if (look_forward('/') || look_forward('*')){
-			it++;
+			//it++;
+			//skip_symbol();
 			skip_comment();
 			return next();
 		} else if(look_forward('=')){
