@@ -6,11 +6,13 @@
 #include <string>
 #include <fstream>
 
-#define LTESTS	"Tests\\lexer\\";
+#define LTESTS	"Tests\\lexer\\"
+#define PTESTS	"Tests\\parser\\"
 #define IN ".in"
 #define OUT ".out"
 
 #define LCNT 15
+#define PCNT 4
 
 #define OK "OK"
 #define WA "WA"
@@ -30,7 +32,7 @@ char tk_name[10];
 void tests::lexer_tests(){
 	bool fail = 0;
 	token tk, cur_tk;
-
+	cout << "LEXER:" << endl;
 	for (int i = 1; i <= LCNT; i++){
 		string fin_name = LTESTS; fin_name += int2str(i); fin_name += IN;
 		string fout_name = LTESTS; fout_name += int2str(i); fout_name += OUT;
@@ -49,6 +51,36 @@ void tests::lexer_tests(){
 		}
 		if (fail) break;
 		cout << i << ". " << OK << endl;
+		fout.close();
+	}
+}
+
+void tests::parser_tests(){
+	bool fail = 0;
+	token tk, cur_tk;
+	cout << "PARSER:" << endl;
+	for (int i = 1; i <= PCNT; i++){
+		ofstream ans("Tests\\parser\\ans.a");
+		ifstream ans2("Tests\\parser\\ans.a");
+
+		string fin_name = PTESTS; fin_name += int2str(i); fin_name += IN;
+		string fout_name = PTESTS; fout_name += int2str(i); fout_name += OUT;
+		
+		lexer L(fin_name.c_str());
+		parser P(&L);
+		
+		ifstream fout(fout_name.c_str(), ios::in);
+
+		L.next();
+		expr *e = P.parse_expr();
+		e->print(ans, 0);
+		ans.close();
+		
+		string s1((istreambuf_iterator<char>(fout)), istreambuf_iterator<char>());
+		string s2((istreambuf_iterator<char>(ans2)), istreambuf_iterator<char>());
+		cout << i << ". " << ((s1 == s2) ? "OK" : "WA") << endl;
+		
+		ans2.close();
 		fout.close();
 	}
 }
