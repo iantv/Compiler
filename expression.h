@@ -26,13 +26,11 @@ public:
 	void print(ostream &os, int level) override;
 };
 
-
 class expr_unar_op: public expr{
 	expr *ex;
 public:
 	expr_unar_op(expr *e, token t);
 	void print(ostream &os, int level);
-	//int priority();
 };
 
 class expr_literal: public expr{
