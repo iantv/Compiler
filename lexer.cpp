@@ -142,18 +142,18 @@ token lexer::next(){
 				case '&': { tt = TK_AND_LOG; break; }
 				case '=': { tt = TK_EQ; break; }
 				case '>': {
-					//skip_symbol();
 					tt = TK_SHR;
-					if (look_forward('=')){
+					if ((it + 2) != s.end() && (*(it + 2) == '=')){
+						skip_symbol();
 						tt = TK_SHR_ASSIGN;
 						pos.col--; it--;
 					}
 					break; 	  
 				}
 				case '<': {
-					//skip_symbol();
 					tt = TK_SHL;
-					if (look_forward('=')){
+					if ((it + 2) != s.end() && (*(it + 2) == '=')){
+						skip_symbol();
 						tt = TK_SHL_ASSIGN;
 						pos.col--; it--;
 					}
@@ -206,8 +206,6 @@ token lexer::next(){
 		return tk;
 	} else if (*it == '/'){
 		if (look_forward('/') || look_forward('*')){
-			//it++;
-			//skip_symbol();
 			skip_comment();
 			return next();
 		} else if(look_forward('=')){
