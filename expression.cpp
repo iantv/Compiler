@@ -1,9 +1,10 @@
 #include "expression.h"
 
 expr_bin_op::expr_bin_op(expr *l, expr *r, token t): left(l), right(r){ tk = t; }
-//expr_unar_op::expr_unar_op(expr *e, token t): ex(e){ tk = t; }
+expr_unar_op::expr_unar_op(expr *e, token t): ex(e){ tk = t; }
 expr_literal::expr_literal(token t){ tk = t; }
 expr_var::expr_var(token t){ tk = t; }
+//expr_rel_op::expr_rel_op(expr *l, expr *r, token t): <static_cast>left(l), <static_cast>right(r){ tk = t; }
 ///expr_tern_op::expr_tern_op(expr *l, expr *m, expr *r, token t): left(l), middle(m), right(r){ tk = t; };
 
 void expr::print_level(ostream &os, int level){
@@ -19,12 +20,12 @@ void expr_bin_op::print(ostream &os, int level){
 	os << tk.get_src() << endl;
 	left->print(os, level + 1);
 }
-/*
+
 void expr_unar_op::print(ostream &os, int level){
 	ex->print(os, level + 1);
 	print_level(os, level);
 	os << tk.get_src() << endl;
-} */
+}
 
 void expr_literal::print(ostream &os, int level){
 	print_level(os, level);
@@ -46,7 +47,7 @@ void expr_var::print(ostream &os, int level){
 	left->print(os, level + 1);
 }*/
 
-int get_priority(token tk){
+int get_priority(token tk, bool unar){
 	switch (tk.get_token_type()){
 		case TK_ID:
 		case TK_INT_VAL:
@@ -60,18 +61,15 @@ int get_priority(token tk){
 		case TK_INC:
 		case TK_SIZEOF:
 		// DO BitNOT token
-		//case TK_PLUS:
-		//case TK_MINUS:
-		//case TK_AND:
-		//case TK_MUL:
 		case TK_NOT:		return 15;
 
-		case TK_MUL:
+		case TK_MUL:	  { return (unar) ? 15 : 13; }
+
 		case TK_DIV:
 		case TK_MOD:		return 13;
 		
 		case TK_PLUS:
-		case TK_MINUS:		return 12;
+		case TK_MINUS:	  { return (unar) ? 15 : 12; }
 
 		case TK_SHL:
 		case TK_SHR:		return 11;
@@ -84,7 +82,7 @@ int get_priority(token tk){
 		case TK_EQ:
 		case TK_NE:			return 9;
 
-		case TK_AND_BIT:	return 8;
+		case TK_AND_BIT:  { return (unar) ? 15: 8; }
 
 		case TK_XOR_BIT:	return 7;
 

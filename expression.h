@@ -4,10 +4,10 @@
 #include <iostream>
 #include "lexer.h"
 
-#define MAX_PRIORITY 16
+#define MAX_PRIORITY 13
 #define MIN_PRIORITY 1
 
-int get_priority(token tk);
+int get_priority(token tk, bool unar = 0);
 
 class expr{
 protected:
@@ -19,20 +19,21 @@ public:
 };
 
 class expr_bin_op: public expr{
+protected:
 	expr *left, *right;
 public:
 	expr_bin_op(expr *l, expr *r, token t);
 	void print(ostream &os, int level) override;
 };
 
-/*
+
 class expr_unar_op: public expr{
 	expr *ex;
 public:
 	expr_unar_op(expr *e, token t);
 	void print(ostream &os, int level);
-	int priority();
-};*/
+	//int priority();
+};
 
 class expr_literal: public expr{
 public:
@@ -58,6 +59,7 @@ public:
 class expr_rel_op: public expr_bin_op{
 public:
 	expr_rel_op(expr *l, expr *r, token t);
+	//void print(ostream &os, int level) override;
 };*/
 
 #endif
