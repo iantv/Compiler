@@ -2,9 +2,10 @@
 #define EXPRESSION
 
 #include <iostream>
+#include <vector>
 #include "lexer.h"
 
-#define MAX_PRIORITY 13
+#define MAX_PRIORITY 16
 #define MIN_PRIORITY 1
 
 int get_priority(token tk, bool unar = 0);
@@ -12,6 +13,7 @@ int get_priority(token tk, bool unar = 0);
 class expr{
 protected:
 	token tk;
+	string op;
 public:
 	virtual void print(ostream &os, int level) = 0;
 	void print_level(ostream &os, int level);
@@ -23,6 +25,7 @@ protected:
 	expr *left, *right;
 public:
 	expr_bin_op(expr *l, expr *r, token t);
+	expr_bin_op(expr *l, expr *r, string op);
 	void print(ostream &os, int level) override;
 };
 
@@ -45,19 +48,26 @@ public:
 	void print(ostream &os, int level) override;
 };
 
-/* DO */
-/*class expr_tern_op: public expr{
+class expr_tern_op: public expr{
 	expr *left, *middle, *right;
-	token expected_tk; 
 public:
-	expr_tern_op(expr* l, expr *m, expr *r, token t);
+	expr_tern_op(expr* l, expr *m, expr *r, string s);
 	void print(ostream &os, int level);
 };
 
-class expr_rel_op: public expr_bin_op{
+class function:public expr{
+	expr *fid;
+	vector<expr *>fargs;
 public:
-	expr_rel_op(expr *l, expr *r, token t);
-	//void print(ostream &os, int level) override;
-};*/
+	function(expr *id, const vector<expr *> &args);
+	void print(ostream &os, int level);
+};
 
+class structure:public expr{
+	string name;
+	expr_var *field;
+public:
+	structure(string &struct_name, expr_var *struct_field);
+	void print(ostream &os, int level);
+};
 #endif

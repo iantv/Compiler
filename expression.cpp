@@ -1,11 +1,13 @@
 #include "expression.h"
 
 expr_bin_op::expr_bin_op(expr *l, expr *r, token t): left(l), right(r){ tk = t; }
+expr_bin_op::expr_bin_op(expr *l, expr *r, string s): left(l), right(r){ op = s; }
 expr_unar_op::expr_unar_op(expr *e, token t): ex(e){ tk = t; }
 expr_literal::expr_literal(token t){ tk = t; }
 expr_var::expr_var(token t){ tk = t; }
-//expr_rel_op::expr_rel_op(expr *l, expr *r, token t): <static_cast>left(l), <static_cast>right(r){ tk = t; }
-///expr_tern_op::expr_tern_op(expr *l, expr *m, expr *r, token t): left(l), middle(m), right(r){ tk = t; };
+expr_tern_op::expr_tern_op(expr *l, expr *m, expr *r, string s): left(l), middle(m), right(r){ op = s; };
+function::function(expr *id, const vector<expr *> &args): fid(id) { fargs = args; };
+structure::structure(string &struct_name, expr_var *struct_field): field(struct_field){ name = struct_name.c_str(); };
 
 void expr::print_level(ostream &os, int level){
 	while (level){
@@ -17,7 +19,7 @@ void expr::print_level(ostream &os, int level){
 void expr_bin_op::print(ostream &os, int level){
 	right->print(os, level + 1);
 	print_level(os, level);
-	os << tk.get_src() << endl;
+	os << ((op == "") ? tk.get_src() : op) << endl;
 	left->print(os, level + 1);
 }
 
@@ -37,15 +39,32 @@ void expr_var::print(ostream &os, int level){
 	os << tk.get_src() << endl;
 }
 
-/*void expr_tern_op::print(ostream &os, int level){
+void expr_tern_op::print(ostream &os, int level){
 	right->print(os, level + 1);
 	print_level(os, level);
-	os << ':' << endl;
-	middle->print(os, level + 1);
+	os << "?:";
+	middle->print(os, 1);
 	print_level(os, level);
-	os << '?' << endl;
+	//os << '?' << endl;
 	left->print(os, level + 1);
-}*/
+}
+
+void function::print(ostream &os, int level){
+	for (int i = fargs.size() - 1; i >= 0; i--){
+		fargs[i]->print(os, level + 1);
+	}
+	print_level(os, level);
+	os << "()" <<endl;
+	fid->print(os, level + 1);
+}
+
+void structure::print(ostream &os, int level){
+	field->print(os, level + 1);
+	print_level(os, level);
+	os << "." << endl;
+	print_level(os, level + 1);
+	os << name << endl;
+}
 
 int get_priority(token tk, bool unar){
 	switch (tk.get_token_type()){
@@ -60,7 +79,7 @@ int get_priority(token tk, bool unar){
 		case TK_DEC:
 		case TK_INC:
 		case TK_SIZEOF:
-		// DO BitNOT token
+		case TK_NOT_BIT:
 		case TK_NOT:		return 15;
 
 		case TK_MUL:	  { return (unar) ? 15 : 13; }
@@ -91,6 +110,8 @@ int get_priority(token tk, bool unar){
 		case TK_AND_LOG:	return 5;
 
 		case TK_OR_LOG:		return 4;
+
+		case TK_QUESTION:	return 3;
 
 		case TK_ASSIGN:
 		case TK_PLUS_ASSIGN:

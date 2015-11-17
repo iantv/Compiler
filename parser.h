@@ -8,6 +8,9 @@ class parser{
 	lexer *lxr;
 	expr *expression(int priority);
 	expr *factor();
+	expr *tern_op(expr *first);
+	expr *parse_function();
+	vector<expr *> parse_fargs(); /* function's arguments */
 public:
 	parser(lexer *l);
 	expr *parse_expr();
