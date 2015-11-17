@@ -39,8 +39,8 @@ static const char * const token_names[] = {
 	"char", "return", "union",
 	"const", "float", "short", "unsigned",
 	"continue", "for", "signed", "void",
-	"default", "sizeof", "do", "if", "while",
-
+	"default", "sizeof", "do", "if", "while", 
+	
 	"+", "-", "*", "/", "%", "^", "|", "&", "~", "<<", ">>", 
 	"=", "+=", "-=", "*=", "/=", "%=", "^=", "|=", "&=", "<<=", ">>=",
 	"++", "--", "^^", "||", "&&", "->",
@@ -72,6 +72,7 @@ public:
 	token(position tk_pos, token_t tk_type);
 	token(): pos(position(0, 0)), type(NOT_TK), src(""){};
 	string get_src(){ return src; };
+	string set_src(const char *s){ src = s; return src; }
 	token_t get_token_type() { return type; };
 	friend ostream &operator<<(ostream &os, const token tk);
 };

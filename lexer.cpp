@@ -115,14 +115,21 @@ token lexer::next(){
 		} else
 			skip_symbol(); /* skip spaces and tabs */
 		if (s.empty() && fin.eof()){
-				return token();
+			return tk = token();
 		}
 	}
 	
 	token_t tt = NOT_TK;
 	if (*it >= '0' && *it <= '9'){ 
 		return tk = get_number();
-	} else if ((*it >= 'A' && *it <= 'Z') || (*it >= 'a' && *it <= 'z')){
+	}/*
+	if (size_t p = s.find("sizeof")){ //	DO sizeof
+		if (p && p < s.length() - 6 && s.substr(p, 6) == "sizeof"){
+			tk = token(pos, TK_SIZEOF);
+			return tk;
+		}
+	} */
+	if ((*it >= 'A' && *it <= 'Z') || (*it >= 'a' && *it <= 'z')){
 		return tk = get_kwd_or_id();
 	} else if (*it == '\"'){
 		return tk = get_literal('\"');
@@ -252,7 +259,7 @@ token lexer::next(){
 		skip_symbol();
 		return tk;
 	}
-	return token();
+	return tk = token();
 }
 
 lexer::lexer(const char *filename): pos(position()){

@@ -3,20 +3,43 @@
 #include "lexer.h"
 #include "parser.h"
 #include "Tests.h"
-//#include <math.h>
 
-int a, b, c, d, e, f, g, h, i, j, k;
 int main(int argc, const char *argv[]){
+	tests T = tests();
+ 	T.lexer_tests();
+ 	cout << endl;
+ 	T.parser_tests();
+	system("pause");
+	return 0;
+
 	if (argc == 1) {
 		cout<<"fatal error: no input files\ncompilation terminated\n";
-	}
-	b = c = d = e = f = g = h = i = j = k = 1;
-	a=((((((((((b+=1)-=c)*=d)/=e)%=f)^=g)|=h)&=i)<<=j)>>=k);
+	}/*
+	if (argc == 2){
+		lexer L(argv[1]);
+		while (L.token_can_exist()){
+			std::cout << L.next();
+			//L.print();
+		}
+		
+	} */
 	
-	tests T = tests();
-	T.lexer_tests();
-	cout << endl;
-	T.parser_tests();
+	if (argc == 3){
+		lexer L(argv[2]);
+		/*if (strcmp(argv[1], "-p") == 0){
+			parser P(&L);
+			P.parse();
+			P.print(std::cout);
+		}*/
+		if (strcmp(argv[1], "-l") == 0){
+			string fout(argv[2]); 
+			//int k = fout.find(".in");
+			//freopen(strcat(fout.substr(k, 3).c_str(), ".a"), "w", stdout);
+			while (L.token_can_exist()){
+				std::cout << L.next();
+			}
+		}
+	}
 
 	system("pause");
 	return 0;
