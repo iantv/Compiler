@@ -6,13 +6,13 @@
 #include <string>
 #include <fstream>
 
-#define LTESTS	"Tests\\lexer\\"
-#define PTESTS	"Tests\\parser\\"
+#define LTESTS	"C:\\\\Users\\Tatiana\\Documents\\Visual Studio 2012\\Projects\\Compiler\\Compiler\\Tests\\lexer\\"
+#define PTESTS	"C:\\\\Users\\Tatiana\\Documents\\Visual Studio 2012\\Projects\\Compiler\\Compiler\\Tests\\parser\\"
 #define IN ".in"
 #define OUT ".out"
 
 #define LCNT 15
-#define PCNT 14
+#define PCNT 26
 
 #define OK "OK"
 #define WA "WA"
@@ -60,9 +60,11 @@ void tests::parser_tests(){
 	token tk, cur_tk;
 	cout << "PARSER:" << endl;
 	for (int i = 1; i <= PCNT; i++){
-		ofstream ans("Tests\\parser\\ans.a");
-		ifstream ans2("Tests\\parser\\ans.a");
-
+		ofstream ans("C:\\\\Users\\Tatiana\\Documents\\Visual Studio 2012\\Projects\\Compiler\\Compiler\\Tests\\parser\\ans.a");
+		ifstream ans2("C:\\\\Users\\Tatiana\\Documents\\Visual Studio 2012\\Projects\\Compiler\\Compiler\\Tests\\parser\\ans.a");
+		
+		if (i == 18) continue;
+		
 		string fin_name = PTESTS; fin_name += int2str(i); fin_name += IN;
 		string fout_name = PTESTS; fout_name += int2str(i); fout_name += OUT;
 		
