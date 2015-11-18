@@ -7,7 +7,7 @@ expr_literal::expr_literal(token t){ tk = t; }
 expr_var::expr_var(token t){ tk = t; }
 expr_tern_op::expr_tern_op(expr *l, expr *m, expr *r, string s): left(l), middle(m), right(r){ op = s; };
 function::function(expr *id, const vector<expr *> &args): fid(id) { fargs = args; };
-structure::structure(string &struct_name, expr_var *struct_field): field(struct_field){ name = struct_name.c_str(); };
+structure::structure(expr *l, expr *struct_field, token t): field(struct_field), left(l) { tk = t; };
 
 void expr::print_level(ostream &os, int level){
 	while (level){
@@ -61,9 +61,8 @@ void function::print(ostream &os, int level){
 void structure::print(ostream &os, int level){
 	field->print(os, level + 1);
 	print_level(os, level);
-	os << "." << endl;
-	print_level(os, level + 1);
-	os << name << endl;
+	os << tk.get_src() << endl;
+	left->print(os, level + 1);
 }
 
 int get_priority(token tk, bool unar){

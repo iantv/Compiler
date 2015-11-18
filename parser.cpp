@@ -12,7 +12,7 @@ expr *parser::tern_op(expr *first){
 
 vector<expr *> parser::parse_fargs(){
 	vector<expr *> args;
-	token tk = lxr->next();
+	token tk = lxr->next(); /* skip TK_OPEN_BRACKET */
 	while (tk.type != TK_CLOSE_BRACKET){		
 		args.push_back(expression(2)); /* because priority of comma as statement equal 1, but when listing arguments of function comma is separator */
 		if (lxr->get().type == TK_CLOSE_BRACKET)
@@ -25,17 +25,21 @@ vector<expr *> parser::parse_fargs(){
 	return args;
 }
 
+expr *parser::parse_index(){
+	lxr->next(); /* skip TK_OPEN_SQUARE_BRACKET */
+	expr *ex = expression(1);
+	if (lxr->next().type == TK_CLOSE_SQUARE_BRACKET)
+		throw 1;
+	return ex;
+}
+
 expr *parser::expression(int priority){
 	if (priority > MAX_PRIORITY) return factor();		
 	expr *ex = expression(priority + 1);
 	token tk = lxr->get();
 	while (get_priority(tk) == priority){
 		lxr->next();
-
-		if (priority == 3){
-			ex = tern_op(ex);
-		} else
-			ex = new expr_bin_op(ex, expression(priority + 1), tk);
+		ex = new expr_bin_op(ex, expression(priority + 1), tk);
 		tk = lxr->get();
 	}
 	return ex;
@@ -45,23 +49,22 @@ expr *parser::factor(){
 	token tk = lxr->get();
 	token tk_next = lxr->next();
 	if (tk.type == TK_ID){
-		expr *ex;
-		if (tk_next.type == TK_OPEN_SQUARE_BRACKET){
-			lxr->next();
-			ex = expression(1);
-			if (lxr->next().type == TK_CLOSE_SQUARE_BRACKET){
-				throw 1;
+		expr *ex = new expr_var(tk);		
+		tk = tk_next;
+		while (tk.type == TK_OPEN_BRACKET || tk.type == TK_OPEN_SQUARE_BRACKET || tk.type == TK_POINT || tk.type == TK_PTROP){
+			if (lxr->get().type == TK_POINT || lxr->get().type == TK_PTROP){
+				if (lxr->next().type == TK_ID){
+					ex = new structure(ex, new expr_var(lxr->get()), tk);
+					lxr->next();
+				}
 			}
-			return new expr_bin_op(new expr_var(tk), ex, string("[]"));
-		}
-		ex = new expr_var(tk);;		
-		while (lxr->get().type == TK_OPEN_BRACKET){
-			ex = new function(ex, parse_fargs());
-		}
-		while (lxr->get().type == TK_POINT){
-			//lxr->next();
-			//expr *ex = factor();
-			return new structure(ex, factor(), string("."));
+			if (lxr->get().type == TK_OPEN_SQUARE_BRACKET){
+				ex = new expr_bin_op(ex, parse_index(), string("[]"));
+			}
+			if (lxr->get().type == TK_OPEN_BRACKET){
+				ex = new function(ex, parse_fargs());
+			}
+			tk = lxr->get();
 		}
 		return ex;
 	}

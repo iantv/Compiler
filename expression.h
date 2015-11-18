@@ -64,10 +64,11 @@ public:
 };
 
 class structure:public expr{
-	string name;
-	expr_var *field;
+	expr *left;
+	token tk;
+	expr *field;
 public:
-	structure(string &struct_name, expr_var *struct_field);
+	structure(expr *l, expr *r, token t);
 	void print(ostream &os, int level);
 };
 #endif

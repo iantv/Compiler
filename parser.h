@@ -10,6 +10,7 @@ class parser{
 	expr *factor();
 	expr *tern_op(expr *first);
 	expr *parse_function();
+	expr *parse_index();
 	vector<expr *> parse_fargs(); /* parse function's arguments */
 public:
 	parser(lexer *l);

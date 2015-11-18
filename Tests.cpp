@@ -12,7 +12,7 @@
 #define OUT ".out"
 
 #define LCNT 15
-#define PCNT 26
+#define PCNT 32
 
 #define OK "OK"
 #define WA "WA"
