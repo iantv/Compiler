@@ -11,6 +11,7 @@ class parser{
 	expr *tern_op(expr *first);
 	expr *parse_function();
 	expr *parse_index();
+	expr *try_parse_tern_op();
 	vector<expr *> parse_fargs(); /* parse function's arguments */
 public:
 	parser(lexer *l);

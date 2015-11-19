@@ -1,14 +1,7 @@
 #include "parser.h"
+#include "error.h"
 
 parser::parser(lexer *l): lxr(l) {}
-
-expr *parser::tern_op(expr *first){
-	expr *middle = factor();
-	if (lxr->get().type != TK_COLON)
-		throw 1;
-	expr *last = factor();
-	return new expr_tern_op(first, middle, last, "?:");
-};
 
 vector<expr *> parser::parse_fargs(){
 	vector<expr *> args;
@@ -20,28 +13,39 @@ vector<expr *> parser::parse_fargs(){
 		tk = lxr->next(); /* skip comma	*/
 	}
 	if (lxr->get().type != TK_CLOSE_BRACKET)
-		throw 1;
+		throw syntax_error(C2143, "missing \")\" before \";\"", lxr->pos);
 	lxr->next(); /* skip close bracket ')' */
 	return args;
 }
 
 expr *parser::parse_index(){
+	int a[100];
+
 	lxr->next(); /* skip TK_OPEN_SQUARE_BRACKET */
 	expr *ex = expression(1);
 	if (lxr->next().type == TK_CLOSE_SQUARE_BRACKET)
-		throw 1;
+		throw syntax_error(C2143, "missing \"]\" before \";\"", lxr->pos);
 	return ex;
 }
 
 expr *parser::expression(int priority){
 	if (priority > MAX_PRIORITY) return factor();		
-	expr *ex = expression(priority + 1);
+	expr *last = nullptr, *ex = expression(priority + 1);
 	token tk = lxr->get();
 	while (get_priority(tk) == priority){
 		lxr->next();
-		ex = new expr_bin_op(ex, expression(priority + 1), tk);
+		if (tk.type == TK_QUESTION){
+			expr *second = expression(4);
+			if (lxr->get().type != TK_COLON){
+				throw syntax_error(C2143, "missing \":\" before \";\"", lxr->pos);;
+			}
+			lxr->next();
+			ex = new expr_tern_op(ex, second, expression(4), string("?:"));
+		} else 
+			ex = new expr_bin_op(ex, expression(priority + 1), tk);
 		tk = lxr->get();
 	}
+	
 	return ex;
 }
 
@@ -70,8 +74,9 @@ expr *parser::factor(){
 	}
 	if (tk.type == TK_OPEN_BRACKET){
 		expr *ex = expression(1);
-		if (lxr->get().type != TK_CLOSE_BRACKET)
-			throw 1;
+		if (lxr->get().type != TK_CLOSE_BRACKET){
+			throw syntax_error(C2143, "missing \")\" before \";\"", lxr->pos);
+		}
 		lxr->next();
 		while (lxr->get().type == TK_OPEN_BRACKET){
 			ex = new function(ex, parse_fargs());
