@@ -19,10 +19,8 @@ vector<expr *> parser::parse_fargs(){
 }
 
 expr *parser::parse_index(){
-	int a[100];
-
 	lxr->next(); /* skip TK_OPEN_SQUARE_BRACKET */
-	expr *ex = expression(1);
+	expr *ex = expression(MIN_PRIORITY);
 	if (lxr->next().type == TK_CLOSE_SQUARE_BRACKET)
 		throw syntax_error(C2143, "missing \"]\" before \";\"", lxr->pos);
 	return ex;
@@ -35,12 +33,13 @@ expr *parser::expression(int priority){
 	while (get_priority(tk) == priority){
 		lxr->next();
 		if (tk.type == TK_QUESTION){
-			expr *second = expression(4);
+			expr *second = expression(3);
 			if (lxr->get().type != TK_COLON){
 				throw syntax_error(C2143, "missing \":\" before \";\"", lxr->pos);;
 			}
 			lxr->next();
-			ex = new expr_tern_op(ex, second, expression(4), string("?:"));
+			last = expression(3);
+			ex = new expr_tern_op(ex, second, last, string("?:"));
 		} else 
 			ex = new expr_bin_op(ex, expression(priority + 1), tk);
 		tk = lxr->get();
@@ -58,7 +57,7 @@ expr *parser::factor(){
 		while (tk.type == TK_OPEN_BRACKET || tk.type == TK_OPEN_SQUARE_BRACKET || tk.type == TK_POINT || tk.type == TK_PTROP){
 			if (lxr->get().type == TK_POINT || lxr->get().type == TK_PTROP){
 				if (lxr->next().type == TK_ID){
-					ex = new structure(ex, new expr_var(lxr->get()), tk);
+					ex = new struct_access(ex, new expr_var(lxr->get()), tk);
 					lxr->next();
 				}
 			}
@@ -73,7 +72,7 @@ expr *parser::factor(){
 		return ex;
 	}
 	if (tk.type == TK_OPEN_BRACKET){
-		expr *ex = expression(1);
+		expr *ex = expression(MIN_PRIORITY);
 		if (lxr->get().type != TK_CLOSE_BRACKET){
 			throw syntax_error(C2143, "missing \")\" before \";\"", lxr->pos);
 		}
@@ -90,7 +89,7 @@ expr *parser::factor(){
 		return new expr_unar_op(factor() , tk);
 	}
 	if (tk.type == TK_SIZEOF){
-		return new expr_unar_op(expression(1), tk);
+		return new expr_unar_op(expression(MIN_PRIORITY), tk);
 	}
 	return NULL;
 }
