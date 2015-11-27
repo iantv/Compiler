@@ -2,7 +2,7 @@
 #include <string.h>
 #include "lexer.h"
 #include "parser.h"
-#include "Tests.h"
+#include "tests.h"
 
 int main(int argc, const char *argv[]){
 	tests T = tests();
@@ -11,10 +11,11 @@ int main(int argc, const char *argv[]){
  	T.parser_tests();
 	system("pause");
 	return 0;
-
+	
 	if (argc == 1) {
 		cout<<"fatal error: no input files\ncompilation terminated\n";
-	}/*
+	}
+	/*
 	if (argc == 2){
 		lexer L(argv[1]);
 		while (L.token_can_exist()){

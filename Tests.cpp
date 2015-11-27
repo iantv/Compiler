@@ -1,4 +1,4 @@
-#include "Tests.h"
+#include "tests.h"
 
 #include "lexer.h"
 #include "parser.h"
@@ -6,13 +6,13 @@
 #include <string>
 #include <fstream>
 
-#define LTESTS	"C:\\\\Users\\Tatiana\\Documents\\Visual Studio 2012\\Projects\\Compiler\\Compiler\\Tests\\lexer\\"
-#define PTESTS	"C:\\\\Users\\Tatiana\\Documents\\Visual Studio 2012\\Projects\\Compiler\\Compiler\\Tests\\parser\\"
+#define LTESTS	"Tests\\lexer\\"
+#define PTESTS	"Tests\\parser\\"
 #define IN ".in"
 #define OUT ".out"
 
 #define LCNT 15
-#define PCNT 32
+#define PCNT 50
 
 #define OK "OK"
 #define WA "WA"
@@ -42,7 +42,7 @@ void tests::lexer_tests(){
 		while (L.token_can_exist()){
 			tk = token();
 			fout >> tk.pos.row >> tk.pos.col >> tk.src >> tk_name;
- 			cur_tk = L.next();
+			cur_tk = L.next();
 			if (!(cur_tk.pos == tk.pos && cur_tk.src == tk.src && strcmp(tk_name, token_names[cur_tk.type]) == 0)){
 				cout << i << ". " << WA << ": row = " << tk.pos.row << ", col = " << tk.pos.col << endl;
 				fail = 1;
@@ -60,10 +60,8 @@ void tests::parser_tests(){
 	token tk, cur_tk;
 	cout << "PARSER:" << endl;
 	for (int i = 1; i <= PCNT; i++){
-		ofstream ans("C:\\\\Users\\Tatiana\\Documents\\Visual Studio 2012\\Projects\\Compiler\\Compiler\\Tests\\parser\\ans.a");
-		ifstream ans2("C:\\\\Users\\Tatiana\\Documents\\Visual Studio 2012\\Projects\\Compiler\\Compiler\\Tests\\parser\\ans.a");
-		
-		if (i == 18) continue;
+		ofstream ans("Tests\\parser\\ans.a");
+		ifstream ans2("Tests\\parser\\ans.a");
 		
 		string fin_name = PTESTS; fin_name += int2str(i); fin_name += IN;
 		string fout_name = PTESTS; fout_name += int2str(i); fout_name += OUT;
