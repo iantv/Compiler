@@ -2,12 +2,13 @@
 
 expr_bin_op::expr_bin_op(expr *l, expr *r, token t): left(l), right(r){ tk = t; }
 expr_bin_op::expr_bin_op(expr *l, expr *r, string s): left(l), right(r){ op = s; }
-expr_unar_op::expr_unar_op(expr *e, token t): ex(e){ tk = t; }
+expr_prefix_unar_op::expr_prefix_unar_op(expr *e, token t): ex(e){ tk = t; }
+expr_postfix_unar_op::expr_postfix_unar_op(expr *e, token t): ex(e){ tk = t; }
 expr_literal::expr_literal(token t){ tk = t; }
 expr_var::expr_var(token t){ tk = t; }
 expr_tern_op::expr_tern_op(expr *l, expr *m, expr *r, string s): left(l), middle(m), right(r){ op = s; };
 function::function(expr *id, const vector<expr *> &args): fid(id) { fargs = args; };
-structure::structure(expr *l, expr *struct_field, token t): field(struct_field), left(l) { tk = t; };
+struct_access::struct_access(expr *l, expr *struct_field, token t): field(struct_field), left(l) { tk = t; };
 
 void expr::print_level(ostream &os, int level){
 	while (level){
@@ -23,10 +24,16 @@ void expr_bin_op::print(ostream &os, int level){
 	left->print(os, level + 1);
 }
 
-void expr_unar_op::print(ostream &os, int level){
+void expr_prefix_unar_op::print(ostream &os, int level){
 	ex->print(os, level + 1);
 	print_level(os, level);
 	os << tk.get_src() << endl;
+}
+
+void expr_postfix_unar_op::print(ostream &os, int level){
+	print_level(os, level);
+	os << tk.get_src() << endl;
+	ex->print(os, level + 1);
 }
 
 void expr_literal::print(ostream &os, int level){
@@ -41,11 +48,9 @@ void expr_var::print(ostream &os, int level){
 
 void expr_tern_op::print(ostream &os, int level){
 	right->print(os, level + 1);
+	middle->print(os, level + 1);
 	print_level(os, level);
-	os << "?:";
-	middle->print(os, 1);
-	print_level(os, level);
-	//os << '?' << endl;
+	os << "?:" << endl;
 	left->print(os, level + 1);
 }
 
@@ -58,7 +63,7 @@ void function::print(ostream &os, int level){
 	fid->print(os, level + 1);
 }
 
-void structure::print(ostream &os, int level){
+void struct_access::print(ostream &os, int level){
 	field->print(os, level + 1);
 	print_level(os, level);
 	os << tk.get_src() << endl;

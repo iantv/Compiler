@@ -28,7 +28,7 @@ expr *parser::parse_index(){
 
 expr *parser::expression(int priority){
 	if (priority > MAX_PRIORITY) return factor();		
-	expr *last = nullptr, *ex = expression(priority + 1);
+	expr *ex = expression(priority + 1);
 	token tk = lxr->get();
 	while (get_priority(tk) == priority){
 		lxr->next();
@@ -38,8 +38,11 @@ expr *parser::expression(int priority){
 				throw syntax_error(C2143, "missing \":\" before \";\"", lxr->pos);;
 			}
 			lxr->next();
-			last = expression(3);
-			ex = new expr_tern_op(ex, second, last, string("?:"));
+			ex = new expr_tern_op(ex, second, expression(3), string("?:"));
+		} else if (priority == 2){
+			ex = new expr_bin_op(ex, expression(priority), tk);
+		} else if (tk.type == TK_INC || tk.type == TK_DEC){
+			ex = new expr_postfix_unar_op(ex, tk);			
 		} else 
 			ex = new expr_bin_op(ex, expression(priority + 1), tk);
 		tk = lxr->get();
@@ -85,13 +88,13 @@ expr *parser::factor(){
 	if (tk.type == TK_INT_VAL || tk.type == TK_DOUBLE_VAL || tk.type == TK_CHAR_VAL){
 		return new expr_literal(tk);
 	}
-	if (tk.type == TK_PLUS || tk.type == TK_MINUS || tk.type == TK_MUL || tk.type == TK_AND_BIT || tk.type == TK_NOT_BIT){
-		return new expr_unar_op(factor() , tk);
+	if (tk.type == TK_PLUS || tk.type == TK_MINUS || tk.type == TK_MUL || tk.type == TK_AND_BIT || tk.type == TK_NOT_BIT || tk.type == TK_INC || tk.type == TK_DEC){
+		return new expr_prefix_unar_op(factor() , tk);
 	}
 	if (tk.type == TK_SIZEOF){
-		return new expr_unar_op(expression(MIN_PRIORITY), tk);
+		return new expr_prefix_unar_op(expression(MIN_PRIORITY), tk);
 	}
-	return NULL;
+	return nullptr;
 }
 
 expr *parser::parse_expr(){

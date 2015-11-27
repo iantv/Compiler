@@ -29,10 +29,17 @@ public:
 	void print(ostream &os, int level) override;
 };
 
-class expr_unar_op: public expr{
+class expr_prefix_unar_op: public expr{
 	expr *ex;
 public:
-	expr_unar_op(expr *e, token t);
+	expr_prefix_unar_op(expr *e, token t);
+	void print(ostream &os, int level);
+};
+
+class expr_postfix_unar_op: public expr{
+	expr *ex;
+public:
+	expr_postfix_unar_op(expr *e, token t);
 	void print(ostream &os, int level);
 };
 
@@ -51,6 +58,7 @@ public:
 class expr_tern_op: public expr{
 	expr *left, *middle, *right;
 public:
+	friend class parser;
 	expr_tern_op(expr* l, expr *m, expr *r, string s);
 	void print(ostream &os, int level);
 };
@@ -63,12 +71,13 @@ public:
 	void print(ostream &os, int level);
 };
 
-class structure:public expr{
+class struct_access:public expr{
 	expr *left;
 	token tk;
 	expr *field;
 public:
-	structure(expr *l, expr *r, token t);
+	struct_access(expr *l, expr *r, token t);
 	void print(ostream &os, int level);
 };
+
 #endif
