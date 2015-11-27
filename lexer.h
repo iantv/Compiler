@@ -3,7 +3,7 @@
 
 #include <fstream>
 #include <string>
-#include "Tests.h"
+#include "tests.h"
 #define FIRST_KWD 0
 
 enum token_t{

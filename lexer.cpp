@@ -40,7 +40,8 @@ token lexer::get_number(){
 	t.pos = pos;
 	while (!s.empty() && (it != s.end() && ((*it >= '0' && *it <= '9') || *it == '.'))){ /* int or double value */
 		t.src += *it;
-		if (*it == '.') t.type = TK_DOUBLE_VAL;
+		if (*it == '.')
+			t.type = TK_DOUBLE_VAL;
 		skip_symbol();
 	}
 	t.type = (t.type == NOT_TK) ? TK_INT_VAL : t.type;
@@ -120,16 +121,12 @@ token lexer::next(){
 	}
 	
 	token_t tt = NOT_TK;
-	if (*it >= '0' && *it <= '9'){ 
+	if ((*it >= '0' && *it <= '9') || (*it == '.' && 
+		(look_forward('0') || look_forward('1') || look_forward('2') || look_forward('3') ||
+		look_forward('4') || look_forward('5') || look_forward('6') || look_forward('7') ||
+		look_forward('8') || look_forward('9')))){ 
 		return tk = get_number();
-	}/*
-	if (size_t p = s.find("sizeof")){ //	DO sizeof
-		if (p && p < s.length() - 6 && s.substr(p, 6) == "sizeof"){
-			tk = token(pos, TK_SIZEOF);
-			return tk;
-		}
-	} */
-	if ((*it >= 'A' && *it <= 'Z') || (*it >= 'a' && *it <= 'z')){
+	} else if ((*it >= 'A' && *it <= 'Z') || (*it >= 'a' && *it <= 'z')){
 		return tk = get_kwd_or_id();
 	} else if (*it == '\"'){
 		return tk = get_literal('\"');
