@@ -1,0 +1,6 @@
+1	1	1		int_val
+1	3	12		int_val
+1	6	12.2324		dbl_val
+2	1	213.24124		dbl_val
+3	1	1.		dbl_val
+3	4	.12		dbl_val
