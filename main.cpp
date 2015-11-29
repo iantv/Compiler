@@ -3,12 +3,19 @@
 #include "lexer.h"
 #include "parser.h"
 #include "tests.h"
+#include "sym_table.h"
 
 int main(int argc, const char *argv[]){
-	tests T = tests();
+	/*tests T = tests();
  	T.lexer_tests();
  	cout << endl;
- 	T.parser_tests();
+ 	T.parser_tests();*/
+	sym_table st;
+	sym_const s(string("123"));
+
+	st.add_sym(s);
+	st.add_sym(sym_var(string("myvar")));
+	cout << st;
 	system("pause");
 	return 0;
 	
