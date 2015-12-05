@@ -1,38 +1,47 @@
 #include "sym_table.h"
+
 static void print_level(int level){
 	while (level){
 		cout << '\t';
 		level--;
 	}
 }
-ostream &operator<<(ostream &os, const symbol sym){ return os; }
 
-ostream &operator<<(ostream &os, const sym_const sym){
-	print_level(sym.level);
-	os << "const: " << sym.name << endl;	
+ostream &operator<<(ostream &os, symbol &sym){
+	sym.print(os);
 	return os;
 }
 
-ostream &operator<<(ostream &os, const sym_var sym){
-	print_level(sym.level);
-	os << "variable: " << sym.name << endl;	
-	return os;
+void sym_const::print(ostream &os){
+	//print_level(level);
+	os << "const: " << this->name << endl;		
 }
 
-void sym_table::add_sym(const symbol &sym){
-	symbols.insert(pair<string, symbol>(sym.name, sym));
+void sym_function::print(ostream &os){
+	//print_level(level);
+	os << "function: " << name << endl;
 }
 
-void sym_table::del_sym(const symbol& sym){
-	symbols.erase(sym.name);
+void sym_var::print(ostream &os){
+	//print_level(level);
+	os << "variable: " << name << endl;	
+}
+
+void sym_table::add_sym(symbol *sym){
+	symbols.insert(pair<string, symbol *>(sym->name, sym));
+}
+
+void sym_table::del_sym(symbol *sym){
+	symbols.erase(sym->name);
 }
 
 ostream &operator<<(ostream &os, const sym_table st){
 	print_level(st.level);
-	cout << '[' << endl;
+	cout << '{' << endl;
 	for (auto it = st.symbols.begin(); it != st.symbols.end(); ++it){
-		cout << (*it).second << endl;
+		print_level(st.level + 1);
+		cout << *((*it).second);
 	}
-	cout << ']' << endl;
+	cout << '}' << endl;
 	return os;
 }
