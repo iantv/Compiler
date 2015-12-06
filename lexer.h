@@ -3,7 +3,6 @@
 
 #include <fstream>
 #include <string>
-#include "tests.h"
 #define FIRST_KWD 0
 
 enum token_t{
@@ -84,8 +83,9 @@ class lexer{
 	position pos;
 	token tk;
 	void scan_new_line();
-	bool look_forward(const char c);
+	bool look_forward(int n, const char c, ...);
 	token get_number();
+	token try_parse_hex_number();
 	token get_kwd_or_id();
 	token get_literal(const char c);
 	void skip_comment();

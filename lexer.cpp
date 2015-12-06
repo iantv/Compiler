@@ -1,5 +1,6 @@
 #include <iostream>
-#include "lexer.h"
+#include "error.h"
+#include <stdarg.h>
 
 token::token(position tk_pos, token_t tk_type){
 	pos = tk_pos;
@@ -35,16 +36,54 @@ bool lexer::token_can_exist(){
 	return  (it != s.end() || !fin.eof());
 }
 
+token lexer::try_parse_hex_number(){
+	token t; t.pos = pos;
+	t.src += '0'; skip_symbol(); t.src += *it; skip_symbol();
+	while (!s.empty() && (it != s.end() && (
+			(*it >= '0' && *it <= '9') ||
+			(*it >= 'A' && *it <= 'F') ||
+			(*it >= 'a' && *it <= 'f')))){
+			t.src += *it;
+			skip_symbol();
+	}
+	if (look_forward(6, '`', '@', '#', '¹', '$', '_')){
+		throw syntax_error(C2143, "missing \";\" before \"{\"", t.pos);
+	}
+	if (!strcmp(t.src.c_str(), "0x") && !strcmp(t.src.c_str(), "0X")){
+		throw hex_error(C2153, "hex constants must have at least one hex digit", t.pos);
+	}
+	t.type = TK_INT_VAL;
+	return t;
+}
+
 token lexer::get_number(){
 	token t;
 	t.pos = pos;
-	while (!s.empty() && (it != s.end() && ((*it >= '0' && *it <= '9') || *it == '.'))){ /* int or double value */
+	char illegal_digit = 0;
+	if (*it == '0' && look_forward(2, 'x', 'X')){
+			return try_parse_hex_number();
+	}
+	
+	while (!s.empty() && (it != s.end() && ((*it >= '0' && *it <= '9') || (*it == '.' && t.type != TK_DOUBLE_VAL)))){
 		t.src += *it;
-		if (*it == '.')
+		if (*it == '.'){
 			t.type = TK_DOUBLE_VAL;
+			illegal_digit = 0;
+		}
+		if (t.type != TK_DOUBLE_VAL && (*it == '8' || *it == '9')){
+			illegal_digit = *it;
+		}
 		skip_symbol();
 	}
+	if (look_forward(6, '`', '@', '#', '¹', '$', '_')){
+		throw syntax_error(C2143, "missing \";\" before \"{\"", t.pos);
+	}
 	t.type = (t.type == NOT_TK) ? TK_INT_VAL : t.type;
+	if (illegal_digit && t.type == TK_INT_VAL){
+		string msg("illegal digit ");
+		msg += illegal_digit;
+		throw octal_error(C2153, msg, t.pos);
+	}
 	return t;
 }
 
@@ -79,11 +118,22 @@ token lexer::get_literal(const char c){
 	return t;
 }
 
-bool lexer::look_forward(const char c){
+bool lexer::look_forward(int n, const char c, ...){
+	va_list vl; char t = c;
 	string::iterator local_it = it;
+	if (local_it == s.end())
+		return false;
 	local_it++;
-	if (local_it != s.end())
-		return *local_it == c;
+	va_start(vl, c);
+	t = c;
+	for (int i = 0; i < n && local_it != s.end(); i++){
+		if (*local_it == t){
+			va_end(vl);
+			return true;
+		}
+		t = va_arg(vl, char);
+	}
+	va_end(vl);
 	return false; /* throw */
 }
 
@@ -93,13 +143,13 @@ void lexer::skip_comment(){
 		scan_new_line();
 	} else if (*it == '*'){ /* multi-line comment */
 		while (1){
-			if (it != s.end() && (*it == '*' && look_forward('/')))
+			if (it != s.end() && (*it == '*' && look_forward(1, '/')))
 				break;
 			if (it == s.end())
 				scan_new_line();
 			else
 				skip_symbol();
-		}
+		}	
 		skip_symbol();
 		skip_symbol();
 	}
@@ -119,12 +169,8 @@ token lexer::next(){
 			return tk = token();
 		}
 	}
-	
 	token_t tt = NOT_TK;
-	if ((*it >= '0' && *it <= '9') || (*it == '.' && 
-		(look_forward('0') || look_forward('1') || look_forward('2') || look_forward('3') ||
-		look_forward('4') || look_forward('5') || look_forward('6') || look_forward('7') ||
-		look_forward('8') || look_forward('9')))){ 
+	if ((*it >= '0' && *it <= '9') || (*it == '.' && look_forward(10, '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'))){ 
 		return tk = get_number();
 	} else if ((*it >= 'A' && *it <= 'Z') || (*it >= 'a' && *it <= 'z')){
 		return tk = get_kwd_or_id();
@@ -133,11 +179,11 @@ token lexer::next(){
 	} else if (*it == '\''){
 		return tk = get_literal('\'');
 	} else if (*it == '+' || *it == '-' || *it == '^' || *it == '|' || *it == '&' || *it == '=' || *it == '>' || *it == '<'){
-		if (*it == '-' && look_forward('>')){
+		if (*it == '-' && look_forward(1, '>')){
 			tt = TK_PTROP;
 			tk = token(pos, tt);
 			skip_symbol();
-		} else if (look_forward(*it)){
+		} else if (look_forward(1, *it)){
 			switch (*it){
 				case '+': { tt = TK_INC; break; }
 				case '-': { tt = TK_DEC; break; }
@@ -168,7 +214,7 @@ token lexer::next(){
 			skip_symbol();
 			if (tt == TK_SHR_ASSIGN || tt == TK_SHL_ASSIGN)
 				skip_symbol();	/* skip the third char '=' */
-		} else if(look_forward('=')){
+		} else if(look_forward(1, '=')){
 			switch (*it){
 				case '+': { tt = TK_PLUS_ASSIGN; break; }
 				case '-': { tt = TK_MINUS_ASSIGN; break; }
@@ -200,7 +246,7 @@ token lexer::next(){
 		skip_symbol();
 		return tk;
 	} else if (*it == '*'){
-		if (look_forward('=')){
+		if (look_forward(1, '=')){
 			tk = token(pos, TK_MUL_ASSIGN);
 			skip_symbol();
 		} else {
@@ -209,10 +255,10 @@ token lexer::next(){
 		skip_symbol();
 		return tk;
 	} else if (*it == '/'){
-		if (look_forward('/') || look_forward('*')){
+		if (look_forward(2, '/', '*')){
 			skip_comment();
 			return next();
-		} else if(look_forward('=')){
+		} else if(look_forward(1, '=')){
 			tk = token(pos, TK_DIV_ASSIGN);
 			skip_symbol();
 		} else {
@@ -221,7 +267,7 @@ token lexer::next(){
 		skip_symbol();
 		return tk;
 	} else if (*it == '%'){
-		if(look_forward('=')){
+		if(look_forward(1, '=')){
 			tk = token(pos, TK_MOD_ASSIGN);
 			skip_symbol();
 		} else {
@@ -230,7 +276,7 @@ token lexer::next(){
 		skip_symbol();
 		return tk;
 	} else if (*it == '!'){
-		if (look_forward('=')){
+		if (look_forward(1, '=')){
 			tk = token(pos, TK_NE);
 			skip_symbol();
 		} else{
