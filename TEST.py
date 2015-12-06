@@ -1,5 +1,5 @@
 import subprocess
-LTESTCNT = 15;
+LTESTCNT = 40;
 PTESTCNT = 50;
 
 print 'Lexer tests:'

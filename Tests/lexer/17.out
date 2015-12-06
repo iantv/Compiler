@@ -1,0 +1,6 @@
+1	1	in		identifier
+2	1	int		int
+3	1	intfor		identifier
+4	1	int1		identifier
+5	1	1		int_val
+5	2	int		int
