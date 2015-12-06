@@ -1,54 +1,31 @@
-#include <iostream>
-#include <string.h>
+#include <string>
+#include <fstream>
 #include "lexer.h"
 #include "parser.h"
-#include "tests.h"
 #include "sym_table.h"
 
 int main(int argc, const char *argv[]){
-	/*tests T = tests();
- 	T.lexer_tests();
- 	cout << endl;
- 	T.parser_tests();*/
-	sym_table st;
-	sym_const s(string("123"));
-
-	st.add_sym(s);
-	st.add_sym(sym_var(string("myvar")));
-	cout << st;
-	system("pause");
-	return 0;
-	
 	if (argc == 1) {
 		cout<<"fatal error: no input files\ncompilation terminated\n";
 	}
-	/*
-	if (argc == 2){
-		lexer L(argv[1]);
-		while (L.token_can_exist()){
-			std::cout << L.next();
-			//L.print();
-		}
-		
-	} */
-	
 	if (argc == 3){
 		lexer L(argv[2]);
-		/*if (strcmp(argv[1], "-p") == 0){
+		
+		if (strcmp(argv[1], "-p") == 0){
 			parser P(&L);
-			P.parse();
-			P.print(std::cout);
-		}*/
+			ofstream fout("parser.out");
+			L.next();
+			expr *e = P.parse_expr();
+			e->print(fout, 0);
+			fout.close();
+		}
 		if (strcmp(argv[1], "-l") == 0){
-			string fout(argv[2]); 
-			//int k = fout.find(".in");
-			//freopen(strcat(fout.substr(k, 3).c_str(), ".a"), "w", stdout);
+			ofstream fout("lexer.out");
 			while (L.token_can_exist()){
-				std::cout << L.next();
+				fout << L.next();
 			}
+			fout.close();
 		}
 	}
-
-	system("pause");
 	return 0;
 }
