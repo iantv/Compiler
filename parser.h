@@ -12,8 +12,11 @@ class parser{
 	expr *parse_index();
 	expr *try_parse_tern_op();
 	vector<expr *> parse_fargs(); /* parse function's arguments */
+	void parse_declare(ostream &os);
+	void parse_dir_declare(ostream &os);
 public:
 	parser(lexer *l);
+	void parse(ostream &prs_os);
 	expr *parse_expr();
 };
 
