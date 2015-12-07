@@ -23,4 +23,5 @@
 23	1	sizeof		sizeof
 24	1	do		do
 25	1	if		if
-26	1	while		while
+26	1	typedef		typedef
+27	1	while		while

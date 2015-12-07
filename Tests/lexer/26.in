@@ -23,4 +23,5 @@ default
 sizeof
 do
 if
+typedef
 while
