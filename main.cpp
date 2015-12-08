@@ -5,7 +5,7 @@
 #include "sym_table.h"
 
 int main(int argc, const char *argv[]){
-	if (argc == 1) {
+	if (argc == 1){
 		cout<<"fatal error: no input files\ncompilation terminated\n";
 	}
 	if (argc == 3){
@@ -14,9 +14,7 @@ int main(int argc, const char *argv[]){
 		if (strcmp(argv[1], "-p") == 0){
 			parser P(&L);
 			ofstream fout("parser.out");
-			L.next();
-			expr *e = P.parse_expr();
-			e->print(fout, 0);
+			P.parse(fout);
 			fout.close();
 		}
 		if (strcmp(argv[1], "-l") == 0){

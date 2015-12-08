@@ -74,6 +74,7 @@ public:
 	string set_src(const char *s){ src = s; return src; }
 	token_t get_token_type() { return type; };
 	friend ostream &operator<<(ostream &os, const token tk);
+	bool is_type_kwd();
 };
 
 class lexer{

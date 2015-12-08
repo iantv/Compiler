@@ -1,11 +1,11 @@
 #include "parser.h"
 #include "error.h"
 
-parser::parser(lexer *l): lxr(l) {}
+parser::parser(lexer *l): lxr(l) { }
 
 vector<expr *> parser::parse_fargs(){
 	vector<expr *> args;
-	token tk = lxr->next(); /* skip TK_OPEN_BRACKET */
+	token tk = lxr->next(); /* skip TK_OPEN_B;RACKET */
 	while (tk.type != TK_CLOSE_BRACKET){		
 		args.push_back(expression(2)); /* because priority of comma as statement equal 1, but when listing arguments of function comma is separator */
 		if (lxr->get().type == TK_CLOSE_BRACKET)
@@ -99,4 +99,52 @@ expr *parser::factor(){
 
 expr *parser::parse_expr(){
 	return expression(MIN_PRIORITY);
+}
+
+void parser::parse_declare(ostream &os){
+	int cnt = 0; /* count of stars */
+	token tk = lxr->get();
+	while (lxr->next().type == TK_MUL)
+		cnt++;
+	parse_dir_declare(os);
+	while (cnt--){
+		os << " pointer to";
+	}
+	if (tk.is_type_kwd()){
+		os << " " << token_names[tk.type] << endl;
+	}
+}
+
+void parser::parse_dir_declare(ostream &os){
+	int type = 0;
+	if (lxr->get().type == TK_OPEN_BRACKET){
+		parse_declare(os);
+		if (lxr->get().type != TK_CLOSE_BRACKET){
+			throw syntax_error(C2143, "missing \")\" before \";\"", lxr->pos);
+		}
+	} else if (lxr->get().type == TK_ID){
+		os << lxr->get().get_src() << ":";
+	} else {
+		throw syntax_error(C2059, token_names[lxr->get().type], lxr->pos);
+	}
+	token tk = lxr->get();
+	lxr->next();
+	while ((tk.type == TK_OPEN_BRACKET && lxr->look_forward(1, char(token_names[TK_CLOSE_BRACKET]))) ||
+		   (tk.type == TK_OPEN_SQUARE_BRACKET && lxr->look_forward(1, char(token_names[TK_CLOSE_SQUARE_BRACKET])))){
+			   if (tk.type == TK_OPEN_BRACKET){
+				   os << " function returns";
+			   } else {
+				   os << " array" << tk << " from";
+			   }
+	}
+}
+
+void parser::parse(ostream &prs_os){
+	token tk = lxr->next();
+	if (tk.type == TK_MINUS || tk.type == TK_PLUS || tk.type == TK_MUL || tk.type == TK_AND_BIT || tk.type == TK_INC || tk.type == TK_DEC || tk.type == TK_OPEN_BRACKET || (tk.type >= TK_ID && tk.type <= TK_CHAR_VAL)){
+		expr * e = parse_expr();
+		e->print(prs_os, 0);
+		return;
+	}
+	parse_declare(prs_os);
 }
