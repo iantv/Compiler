@@ -314,3 +314,7 @@ lexer::lexer(const char *filename): pos(position()){
 	fin.open(filename, ios::in);
 	scan_new_line();
 }
+
+bool token::is_operator(){
+	return type >= TK_PLUS && type <= TK_CLOSE_SQUARE_BRACKET;
+}

@@ -73,6 +73,7 @@ public:
 	string get_src(){ return src; };
 	string set_src(const char *s){ src = s; return src; }
 	token_t get_token_type() { return type; };
+	bool is_operator();
 	friend ostream &operator<<(ostream &os, const token tk);
 	bool is_type_kwd();
 };

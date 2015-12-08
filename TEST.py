@@ -1,7 +1,8 @@
 import subprocess
 LTESTCNT = 40;
 PTESTCNT = 50;
-PDTESTCNT = 1;
+
+PDTESTCNT = 2;
 
 print 'Lexer tests:'
 for i in range(1, LTESTCNT + 1):
@@ -12,8 +13,8 @@ for i in range(1, LTESTCNT + 1):
 	f1.close()
 	f2.close()
 
-print 
-print 'Parser tests:'
+print
+print 'Parser of expressions tests:'
 for i in range(1, PTESTCNT + 1):
 	subprocess.call('../Debug/Compiler.exe -p Tests/parser/{}.in'.format(i))
 	f1 = open('parser.out', 'r')
@@ -22,8 +23,8 @@ for i in range(1, PTESTCNT + 1):
 	f1.close()
 	f2.close()
 	
-print 
-print 'Parser declaration tests:'
+print
+print 'Parser of declaration tests:'
 for i in range(1, PDTESTCNT + 1):
 	subprocess.call('../Debug/Compiler.exe -p Tests/declar/{}.in'.format(i))
 	f1 = open('parser.out', 'r')
