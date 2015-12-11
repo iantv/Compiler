@@ -2,10 +2,6 @@
 #include "error.h"
 #include <stdarg.h>
 
-bool token::is_type_kwd(){
-	return type == TK_INT || type == TK_DOUBLE || type == TK_CHAR || type == TK_LONG || type == TK_SHORT || type == TK_FLOAT || type == TK_STRUCT;
-}
-
 token::token(position tk_pos, token_t tk_type){
 	pos = tk_pos;
 	type = tk_type;
@@ -317,4 +313,16 @@ lexer::lexer(const char *filename): pos(position()){
 
 bool token::is_operator(){
 	return type >= TK_PLUS && type <= TK_CLOSE_SQUARE_BRACKET;
+}
+
+bool token::is_type_specifier(){
+	return type == TK_INT || type == TK_DOUBLE || type == TK_FLOAT || type == TK_CHAR || type == TK_VOID || type == TK_SHORT || type == TK_LONG || type == TK_SIGNED || type == TK_UNSIGNED || type == TK_STRUCT || type == TK_UNION || type == TK_ENUM;
+}
+
+bool token::is_type_qualifier(){
+	return type == TK_CONST;
+}
+
+bool token::is_storage_class_specifier(){
+	return type == TK_TYPEDEF;
 }

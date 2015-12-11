@@ -75,7 +75,9 @@ public:
 	token_t get_token_type() { return type; };
 	bool is_operator();
 	friend ostream &operator<<(ostream &os, const token tk);
-	bool is_type_kwd();
+	bool is_type_specifier();
+	bool is_type_qualifier();
+	bool is_storage_class_specifier();
 };
 
 class lexer{

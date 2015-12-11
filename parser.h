@@ -3,17 +3,20 @@
 
 #include "lexer.h"
 #include "expression.h"
+#include "sym_table.h"
 
 class parser{
 	lexer *lxr;
+	sym_table *table;
 	expr *expression(int priority);
 	expr *factor();
 	expr *parse_function();
 	expr *parse_index();
 	expr *try_parse_tern_op();
 	vector<expr *> parse_fargs(); /* parse function's arguments */
-	void parse_dir_declare(ostream &os);
-	void parse_declare(ostream &os);
+	symbol *parse_dir_declare(sym_table *st);
+	symbol *parse_declare(sym_table *st);
+	void init_gst(); /* init global symtable */
 public:
 	parser(lexer *l);
 	expr *parse_expr();

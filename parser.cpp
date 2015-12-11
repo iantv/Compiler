@@ -1,7 +1,7 @@
 #include "parser.h"
 #include "error.h"
 
-parser::parser(lexer *l): lxr(l) { }
+parser::parser(lexer *l): lxr(l), table(new sym_table()) { }
 
 vector<expr *> parser::parse_fargs(){
 	vector<expr *> args;
@@ -101,29 +101,51 @@ expr *parser::parse_expr(){
 	return expression(MIN_PRIORITY);
 }
 
-void parser::parse_declare(ostream &os){
-	int cnt = 0; /* count of stars */
-	token tk = lxr->get();
-	while (lxr->next().type == TK_MUL)
-		cnt++;
-	parse_dir_declare(os);
-	while (cnt--){
-		os << " pointer to";
-	}
-	if (tk.is_type_kwd()){
-		os << " " << token_names[tk.type] << endl;
-	}
+symbol *add_elem_to_list(symbol *sym_list, symbol *sym2){
+	symbol *t = sym2;
+	t->next = sym_list;
+	return t;
 }
 
-void parser::parse_dir_declare(ostream &os){
-	int type = 0;
+symbol *parser::parse_declare(sym_table *st){
+	int cnt = 0; /* count of stars */
+	symbol *list = nullptr;
+	token tk = lxr->get();
+	if (tk.is_type_specifier()){
+		list = add_elem_to_list(list, new sym_type(tk.get_src()));
+	} else if (tk.is_type_qualifier()){
+		list = add_elem_to_list(list, new sym_const("const"));
+		lxr->next();
+		list = add_elem_to_list(list, parse_declare(st));
+		return list;
+	} else if (tk.is_storage_class_specifier()){
+		lxr->next();
+		return parse_declare(st);
+	} else
+		throw 1;
+
+	while (lxr->next().type == TK_MUL)
+		cnt++;
+	list = add_elem_to_list(list, parse_dir_declare(st));
+	
+	while (cnt--){
+		list = add_elem_to_list(list, new sym_pointer());
+	} 
+	if (tk.is_type_specifier()){
+		list = add_elem_to_list(list, new sym_type(tk.get_src()));
+	}
+	return list;
+}
+
+symbol *parser::parse_dir_declare(sym_table *st){
+	symbol *list = nullptr;
 	if (lxr->get().type == TK_OPEN_BRACKET){
-		parse_declare(os);
+		list  = add_elem_to_list(list, parse_declare(st));
 		if (lxr->get().type != TK_CLOSE_BRACKET){
 			throw syntax_error(C2143, "missing \")\" before \";\"", lxr->pos);
 		}
 	} else if (lxr->get().type == TK_ID){
-		os << lxr->get().get_src() << ":";
+		list = add_elem_to_list(list, new sym_var(lxr->get().get_src()));
 	} else {
 		throw syntax_error(C2059, token_names[lxr->get().type], lxr->pos);
 	}
@@ -132,19 +154,35 @@ void parser::parse_dir_declare(ostream &os){
 	while ((tk.type == TK_OPEN_BRACKET && lxr->look_forward(1, char(token_names[TK_CLOSE_BRACKET]))) ||
 		   (tk.type == TK_OPEN_SQUARE_BRACKET && lxr->look_forward(1, char(token_names[TK_CLOSE_SQUARE_BRACKET])))){
 			   if (tk.type == TK_OPEN_BRACKET){
-				   os << " function returns";
+				   list = add_elem_to_list(list, new sym_function("()"));
 			   } else {
-				   os << " array" << tk << " from";
+				   list = add_elem_to_list(list, new sym_array("[]"));
 			   }
 	}
+	return list;
 }
 
 void parser::parse(ostream &prs_os){
+	init_gst();
 	token tk = lxr->next();
-	if (tk.type == TK_MINUS || tk.type == TK_PLUS || tk.type == TK_MUL || tk.type == TK_AND_BIT || tk.type == TK_INC || tk.type == TK_DEC || tk.type == TK_OPEN_BRACKET || (tk.type >= TK_ID && tk.type <= TK_CHAR_VAL)){
-		expr * e = parse_expr();
-		e->print(prs_os, 0);
-		return;
+	while (tk.type != NOT_TK){
+		if (tk.is_type_specifier() || tk.is_type_qualifier() || tk.is_storage_class_specifier()){
+			//table->add_sym(parse_declare(table));
+			//DO prelude table, and parse chain and create symbol
+		}else {
+			expr *e = parse_expr();
+			e->print(prs_os, 0);
+		}
+		tk = lxr->get();
 	}
-	parse_declare(prs_os);
+}
+
+void parser::init_gst(){
+	table->add_sym(new sym_type(token_names[TK_INT]));
+	table->add_sym(new sym_type(token_names[TK_CHAR]));
+	table->add_sym(new sym_type(token_names[TK_LONG]));
+	table->add_sym(new sym_type(token_names[TK_SHORT]));
+	table->add_sym(new sym_type(token_names[TK_DOUBLE]));
+	table->add_sym(new sym_type(token_names[TK_FLOAT]));
+	table->add_sym(new sym_type(token_names[TK_VOID]));
 }

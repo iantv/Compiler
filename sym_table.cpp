@@ -12,6 +12,14 @@ ostream &operator<<(ostream &os, symbol &sym){
 	return os;
 }
 
+void sym_type::print(ostream &os){
+	os << "type: " << next;
+}
+
+void sym_pointer::print(ostream &os){
+	os << "pointer to ";
+}
+
 void sym_const::print(ostream &os){
 	//print_level(level);
 	os << "const: " << this->name << endl;		
@@ -27,12 +35,33 @@ void sym_var::print(ostream &os){
 	os << "variable: " << name << endl;	
 }
 
+void sym_array::print(ostream &os){
+	os << "array: ";
+}
+
+bool sym_table::local_exist(symbol *sym){
+	return symbols.find(sym->name) != symbols.end();
+}
+
+bool sym_table::global_exist(symbol *sym){
+	sym_table *st = prev;
+	while (st){
+		if (local_exist(sym))
+			return true;
+		st = st->prev;
+	}
+	return false;
+}
+
 void sym_table::add_sym(symbol *sym){
+	if (local_exist(sym))
+		throw 1;
 	symbols.insert(pair<string, symbol *>(sym->name, sym));
 }
 
 void sym_table::del_sym(symbol *sym){
-	symbols.erase(sym->name);
+	if (local_exist(sym))
+		symbols.erase(sym->name);
 }
 
 ostream &operator<<(ostream &os, const sym_table st){
