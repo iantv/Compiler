@@ -15,7 +15,6 @@ protected:
 	string name;
 	symbol *next;
 	virtual void print(ostream &os) = 0;
-	//void add_elem_to_symbols_chain(symbol *sym);
 public:
 	friend class parser;
 	friend class sym_table;
@@ -25,44 +24,104 @@ public:
 	symbol(const string &sym_name) { name = sym_name; }
 };
 
-class sym_type: public symbol{
-	void print(ostream &os) override;
-public:
-	sym_type(const string &sym_name) { name = sym_name; }
-};
-
-class sym_pointer: public symbol{
-	void print(ostream &os) override;
-public:
-	sym_pointer(){ name = "pointer"; }
-};
-
-class sym_const: public symbol{
-	expr *init_expr;
-	void print(ostream &os) override;
-public:
-	sym_const(const string &sym_name): init_expr(nullptr) { name = sym_name; }
-};
+/* SYM FUNCTON */
 
 class sym_function: public symbol{
 	void print(ostream &os) override;
+	
 public:
 	sym_function(const string &sym_name) { name = sym_name; }
 };
 
-class sym_var: public symbol{
-	expr *init_expr;
-	void print(ostream &os) override;
+/* SYM TYPE */
+
+class sym_type: public symbol{
+	void print(ostream &os);
 public:
-	sym_var(const string &sym_name): init_expr(nullptr) { name = sym_name; }
+	sym_type(){}
+	sym_type(const string &sym_name) { name = sym_name; }
 };
 
-class sym_array: public symbol{
-	expr *init_expr;
+class sym_scalar: public sym_type{
+	void print(ostream &os);
+public:
+	sym_scalar(){}
+};
+
+class sym_float: public sym_scalar{
+	void print(ostream &os);
+public:
+	sym_float(){}
+};
+
+class sym_integer: public sym_scalar{
+	void print(ostream &os);
+public:
+	sym_integer(){}
+};
+
+class sym_array: public sym_type{
+	sym_type *elem_type;
+	int length;
 	void print(ostream &os) override;
 public:
-	sym_array(const string &sym_name): init_expr(nullptr) { name = sym_name; }
+	sym_array(const string &sym_name){ name = sym_name; }
 };
+
+class sym_struct: public sym_type{
+	void print(ostream &os) override;
+public:
+	sym_struct(){}
+};
+
+class sym_alias: public sym_type{
+	void print(ostream &os) override;
+public:
+	sym_alias(){}
+};
+
+class sym_pointer: public sym_type{
+	void print(ostream &os);
+public:
+	sym_pointer(const string &sym_name){ name = "pointer"; }
+};
+
+/* SYM VARIABLE */
+
+class sym_var: public symbol{
+	expr *init_expr;
+	sym_type *type;
+	void print(ostream &os) override;
+public:
+	sym_var(){}
+	sym_var(const string &sym_name, sym_type *sym_vartype = nullptr, expr *sym_init_ex = nullptr);
+};
+
+class sym_var_param: public sym_var{
+	void print(ostream &os) override;
+public:
+	sym_var_param(){}
+};
+
+class sym_var_const: public sym_var{
+	void print(ostream &os) override;
+public:
+	sym_var_const(){}
+};
+
+class sym_var_local: public sym_var{
+	void print(ostream &os) override;
+public:
+	sym_var_local(){}
+};
+
+class sym_var_global: public sym_var{
+	void print(ostream &os) override;
+public:
+	sym_var_global(){}
+};
+
+/* SYM TABLE */
 
 class sym_table{
 	map<string, symbol *> symbols;

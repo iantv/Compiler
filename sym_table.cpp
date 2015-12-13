@@ -1,5 +1,8 @@
 #include "sym_table.h"
 
+sym_var::sym_var(const string &sym_name, sym_type *sym_vartype, expr *sym_init_ex): 
+	init_expr(sym_init_ex), type(sym_vartype){ name = sym_name; }
+
 static void print_level(int level){
 	while (level){
 		cout << '\t';
@@ -14,15 +17,6 @@ ostream &operator<<(ostream &os, symbol &sym){
 
 void sym_type::print(ostream &os){
 	os << "type: " << next;
-}
-
-void sym_pointer::print(ostream &os){
-	os << "pointer to ";
-}
-
-void sym_const::print(ostream &os){
-	//print_level(level);
-	os << "const: " << this->name << endl;		
 }
 
 void sym_function::print(ostream &os){

@@ -109,80 +109,24 @@ symbol *add_elem_to_list(symbol *sym_list, symbol *sym2){
 
 symbol *parser::parse_declare(sym_table *st){
 	int cnt = 0; /* count of stars */
-	symbol *list = nullptr;
-	token tk = lxr->get();
-	if (tk.is_type_specifier()){
-		list = add_elem_to_list(list, new sym_type(tk.get_src()));
-	} else if (tk.is_type_qualifier()){
-		list = add_elem_to_list(list, new sym_const("const"));
-		lxr->next();
-		list = add_elem_to_list(list, parse_declare(st));
-		return list;
-	} else if (tk.is_storage_class_specifier()){
-		lxr->next();
-		return parse_declare(st);
-	} else
-		throw 1;
+}
 
-	while (lxr->next().type == TK_MUL)
-		cnt++;
-	list = add_elem_to_list(list, parse_dir_declare(st));
-	
-	while (cnt--){
-		list = add_elem_to_list(list, new sym_pointer());
-	} 
-	if (tk.is_type_specifier()){
-		list = add_elem_to_list(list, new sym_type(tk.get_src()));
-	}
-	return list;
+symbol *parser::parse_identifier(sym_table *st){
 }
 
 symbol *parser::parse_dir_declare(sym_table *st){
-	symbol *list = nullptr;
-	if (lxr->get().type == TK_OPEN_BRACKET){
-		list  = add_elem_to_list(list, parse_declare(st));
-		if (lxr->get().type != TK_CLOSE_BRACKET){
-			throw syntax_error(C2143, "missing \")\" before \";\"", lxr->pos);
-		}
-	} else if (lxr->get().type == TK_ID){
-		list = add_elem_to_list(list, new sym_var(lxr->get().get_src()));
-	} else {
-		throw syntax_error(C2059, token_names[lxr->get().type], lxr->pos);
-	}
-	token tk = lxr->get();
-	lxr->next();
-	while ((tk.type == TK_OPEN_BRACKET && lxr->look_forward(1, char(token_names[TK_CLOSE_BRACKET]))) ||
-		   (tk.type == TK_OPEN_SQUARE_BRACKET && lxr->look_forward(1, char(token_names[TK_CLOSE_SQUARE_BRACKET])))){
-			   if (tk.type == TK_OPEN_BRACKET){
-				   list = add_elem_to_list(list, new sym_function("()"));
-			   } else {
-				   list = add_elem_to_list(list, new sym_array("[]"));
-			   }
-	}
-	return list;
 }
 
 void parser::parse(ostream &prs_os){
-	init_gst();
-	token tk = lxr->next();
-	while (tk.type != NOT_TK){
-		if (tk.is_type_specifier() || tk.is_type_qualifier() || tk.is_storage_class_specifier()){
-			//table->add_sym(parse_declare(table));
-			//DO prelude table, and parse chain and create symbol
-		}else {
-			expr *e = parse_expr();
-			e->print(prs_os, 0);
-		}
-		tk = lxr->get();
-	}
+	init_prelude();
 }
 
-void parser::init_gst(){
-	table->add_sym(new sym_type(token_names[TK_INT]));
-	table->add_sym(new sym_type(token_names[TK_CHAR]));
-	table->add_sym(new sym_type(token_names[TK_LONG]));
-	table->add_sym(new sym_type(token_names[TK_SHORT]));
-	table->add_sym(new sym_type(token_names[TK_DOUBLE]));
-	table->add_sym(new sym_type(token_names[TK_FLOAT]));
-	table->add_sym(new sym_type(token_names[TK_VOID]));
+void parser::init_prelude(){
+	prelude->add_sym(new sym_type(token_names[TK_INT]));
+	prelude->add_sym(new sym_type(token_names[TK_CHAR]));
+	prelude->add_sym(new sym_type(token_names[TK_LONG]));
+	prelude->add_sym(new sym_type(token_names[TK_SHORT]));
+	prelude->add_sym(new sym_type(token_names[TK_DOUBLE]));
+	prelude->add_sym(new sym_type(token_names[TK_FLOAT]));
+	prelude->add_sym(new sym_type(token_names[TK_VOID]));
 }

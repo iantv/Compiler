@@ -8,6 +8,7 @@
 class parser{
 	lexer *lxr;
 	sym_table *table;
+	sym_table *prelude;
 	expr *expression(int priority);
 	expr *factor();
 	expr *parse_function();
@@ -16,7 +17,8 @@ class parser{
 	vector<expr *> parse_fargs(); /* parse function's arguments */
 	symbol *parse_dir_declare(sym_table *st);
 	symbol *parse_declare(sym_table *st);
-	void init_gst(); /* init global symtable */
+	void init_prelude(); /* init global symtable prelude */
+	symbol *parse_identifier(sym_table *st);
 public:
 	parser(lexer *l);
 	expr *parse_expr();
