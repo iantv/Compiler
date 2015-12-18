@@ -5,6 +5,13 @@
 #include "expression.h"
 #include "sym_table.h"
 
+#include <list>
+
+typedef struct {
+	symbol *id;
+	sym_type *type;
+}dcl_data;
+
 class parser{
 	lexer *lxr;
 	sym_table *table;
@@ -15,14 +22,16 @@ class parser{
 	expr *parse_index();
 	expr *try_parse_tern_op();
 	vector<expr *> parse_fargs(); /* parse function's arguments */
-	symbol *parse_dir_declare(sym_table *st);
-	symbol *parse_declare(sym_table *st);
+	vector<sym_var_param> parse_fparams(); /* parse function's parametres */
+	size_t parse_size_of_array();
+	void parse_dir_declare(dcl_data &dcl);
+	dcl_data parse_declare();
 	void init_prelude(); /* init global symtable prelude */
-	symbol *parse_identifier(sym_table *st);
 public:
 	parser(lexer *l);
 	expr *parse_expr();
-	void parse(ostream &prs_os);
+	void parse(ostream &os);
+	void print_sym_table(ostream &os);
 };
 
 #endif

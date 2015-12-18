@@ -9,12 +9,13 @@
 
 using namespace std;
 class sym_type;
+class sym_var_param;
 
 class symbol{
 protected:
 	string name;
-	symbol *next;
 	virtual void print(ostream &os) = 0;
+	sym_type *type;
 public:
 	friend class parser;
 	friend class sym_table;
@@ -27,15 +28,17 @@ public:
 /* SYM FUNCTON */
 
 class sym_function: public symbol{
+	vector<sym_var_param> params;
+protected:
 	void print(ostream &os) override;
-	
 public:
-	sym_function(const string &sym_name) { name = sym_name; }
+	sym_function(const string &sym_name, vector<sym_var_param>sym_fparams);
 };
 
 /* SYM TYPE */
 
 class sym_type: public symbol{
+protected:
 	void print(ostream &os);
 public:
 	sym_type(){}
@@ -43,54 +46,67 @@ public:
 };
 
 class sym_scalar: public sym_type{
+protected:
 	void print(ostream &os);
 public:
 	sym_scalar(){}
 };
 
 class sym_float: public sym_scalar{
-	void print(ostream &os);
+protected:
+	void print(ostream &os) override;
 public:
-	sym_float(){}
+	sym_float(const string &sym_name){ name = sym_name; }
 };
 
 class sym_integer: public sym_scalar{
-	void print(ostream &os);
+protected:
+	void print(ostream &os) override;
 public:
-	sym_integer(){}
+	sym_integer(const string &sym_name){ name = sym_name; }
 };
 
 class sym_array: public sym_type{
-	sym_type *elem_type;
-	int length;
+	size_t length;
+protected:
 	void print(ostream &os) override;
 public:
-	sym_array(const string &sym_name){ name = sym_name; }
+	sym_array(size_t size){ name = "array of "; length = size; }
 };
 
 class sym_struct: public sym_type{
+protected:
 	void print(ostream &os) override;
 public:
-	sym_struct(){}
+	sym_struct(){}	// DO
 };
 
 class sym_alias: public sym_type{
+protected:
 	void print(ostream &os) override;
 public:
-	sym_alias(){}
+	sym_alias(){} // DO
 };
 
 class sym_pointer: public sym_type{
-	void print(ostream &os);
+protected:
+	void print(ostream &os) override;
 public:
-	sym_pointer(const string &sym_name){ name = "pointer"; }
+	sym_pointer(sym_type *stype){ name = "pointer to"; type = stype; }
+};
+
+class sym_func_type: public sym_type{
+protected:
+	void print(ostream &os) override;
+public:
+	sym_func_type(sym_type *stype){ name = "function returned "; type = stype; }
 };
 
 /* SYM VARIABLE */
 
 class sym_var: public symbol{
 	expr *init_expr;
-	sym_type *type;
+protected:
 	void print(ostream &os) override;
 public:
 	sym_var(){}
@@ -98,24 +114,28 @@ public:
 };
 
 class sym_var_param: public sym_var{
+protected:
 	void print(ostream &os) override;
 public:
 	sym_var_param(){}
 };
 
 class sym_var_const: public sym_var{
+protected:
 	void print(ostream &os) override;
 public:
 	sym_var_const(){}
 };
 
 class sym_var_local: public sym_var{
+protected:
 	void print(ostream &os) override;
 public:
 	sym_var_local(){}
 };
 
 class sym_var_global: public sym_var{
+protected:
 	void print(ostream &os) override;
 public:
 	sym_var_global(){}

@@ -3,6 +3,7 @@
 #include "lexer.h"
 #include "parser.h"
 #include "sym_table.h"
+#include <complex>
 
 int main(int argc, const char *argv[]){
 	if (argc == 1){
@@ -22,6 +23,16 @@ int main(int argc, const char *argv[]){
 			while (L.token_can_exist()){
 				fout << L.next();
 			}
+			fout.close();
+		}
+	}
+	if (argc == 4){
+		lexer L(argv[3]);
+		if (strcmp(argv[1], "-p") == 0 && strcmp(argv[2], "-decl") == 0){
+			parser P(&L);
+			ofstream fout("parser.out");
+			P.parse(fout);
+			P.print_sym_table(fout);
 			fout.close();
 		}
 	}

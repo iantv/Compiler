@@ -101,32 +101,90 @@ expr *parser::parse_expr(){
 	return expression(MIN_PRIORITY);
 }
 
-symbol *add_elem_to_list(symbol *sym_list, symbol *sym2){
-	symbol *t = sym2;
-	t->next = sym_list;
-	return t;
+size_t parser::parse_size_of_array(){
+	// DO
+	return size_t(0);
 }
 
-symbol *parser::parse_declare(sym_table *st){
-	int cnt = 0; /* count of stars */
+vector<sym_var_param> parser::parse_fparams(){
+	vector <sym_var_param> v;
+	// DO
+	return v;
 }
 
-symbol *parser::parse_identifier(sym_table *st){
+dcl_data parser::parse_declare(){
+	dcl_data dcld;
+	token tk = lxr->get();
+	if (tk.is_type_specifier()){
+		dcld.type = new sym_type(tk.get_src());
+	}
+	while (lxr->next().type == TK_MUL)
+		dcld.type = new sym_pointer(dcld.type);
+	parse_dir_declare(dcld);
+	return dcld;
 }
 
-symbol *parser::parse_dir_declare(sym_table *st){
+void parser::parse_dir_declare(dcl_data &dcl){
+	string name;
+	if (lxr->get().type == TK_OPEN_BRACKET){
+		dcl = parse_declare();
+		if (lxr->get().type != TK_CLOSE_BRACKET)
+			throw syntax_error(C2143, "missing \")\" before \";\"", lxr->pos);
+	} else if (lxr->get().type == TK_ID){
+		name = lxr->get().get_src();
+	}
+	token tk = lxr->get();
+	tk = lxr->next();
+	if (tk.type != TK_OPEN_BRACKET && tk.type != TK_OPEN_SQUARE_BRACKET){
+		dcl.id = new sym_var(name);
+	} else {
+		while ((tk.type == TK_OPEN_BRACKET) || (tk.type == TK_OPEN_SQUARE_BRACKET)){
+			if (tk.type == TK_OPEN_BRACKET){
+				if (name == "")
+					dcl.type = new sym_func_type(dcl.type);
+				else
+					dcl.id = new sym_function(name, parse_fparams());
+				if (lxr->next().type != TK_CLOSE_BRACKET)
+					throw syntax_error(C2143, "missing \")\" before \";\"", lxr->pos);
+			}
+			if (tk.type == TK_OPEN_SQUARE_BRACKET){
+				dcl.type = new sym_array(parse_size_of_array());
+				if (tk.type != TK_CLOSE_SQUARE_BRACKET)
+					throw syntax_error(C2143, "missing \"]\" before \";\"", lxr->pos);
+			}
+			tk = lxr->next();
+		}
+	}
+
 }
 
-void parser::parse(ostream &prs_os){
-	init_prelude();
+void parser::parse(ostream &os){
+	init_prelude(); 	
+	token tk = lxr->next();
+	while (tk.type != NOT_TK){
+		if (tk.is_type_specifier() || tk.is_type_qualifier() || tk.is_storage_class_specifier()){
+			dcl_data t = parse_declare();
+			t.id->type = t.type;
+			table->add_sym(t.id);
+		} else {
+			expr *e = parse_expr();
+			e->print(os, 0);
+		}
+		tk = lxr->next();
+	}
 }
 
 void parser::init_prelude(){
-	prelude->add_sym(new sym_type(token_names[TK_INT]));
+	prelude = new sym_table();
+	prelude->add_sym(new sym_integer(token_names[TK_INT]));
 	prelude->add_sym(new sym_type(token_names[TK_CHAR]));
 	prelude->add_sym(new sym_type(token_names[TK_LONG]));
 	prelude->add_sym(new sym_type(token_names[TK_SHORT]));
 	prelude->add_sym(new sym_type(token_names[TK_DOUBLE]));
-	prelude->add_sym(new sym_type(token_names[TK_FLOAT]));
+	prelude->add_sym(new sym_float(token_names[TK_FLOAT]));
 	prelude->add_sym(new sym_type(token_names[TK_VOID]));
+}
+
+void parser::print_sym_table(ostream &os){
+	os << (*table);
 }
