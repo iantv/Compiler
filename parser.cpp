@@ -214,34 +214,17 @@ declar parser::parse_dir_declare(){
 					info.set_name(name);
 				} else 
 					info.set_type(new sym_array(parse_size_of_array()));		
+			} else if (tk.type == TK_OPEN_BRACKET){
+				sym_table *st = new sym_table(table);
+				parse_fparams(st);
+				if (info.check_id(nullptr)){
+					info.set_id(new sym_function(name, st));
+				} else 
+					info.set_type(new sym_func_type(info.get_type(), st));
 			}
 			tk = lxr->next();
 		}
 	}
-	/*if (tk.type != TK_OPEN_BRACKET && tk.type != TK_OPEN_SQUARE_BRACKET){
-		info.set_id(new sym_var(name));
-	} else {
-		while ((tk.type == TK_OPEN_BRACKET) || (tk.type == TK_OPEN_SQUARE_BRACKET)){
-			if (tk.type == TK_OPEN_BRACKET){
-				sym_table *st = new sym_table(table);
-				parse_fparams(st);
-				if (name == "")
-					dcl.type = new sym_func_type(dcl.type, st);
-				else {
-					dcl.id = new sym_function(name, st);
-					name = "";
-				}
-				if (lxr->get().type != TK_CLOSE_BRACKET)
-					throw syntax_error(C2143, "missing \")\" before \";\"", lxr->pos);
-			} else 
-			if (tk.type == TK_OPEN_SQUARE_BRACKET){
-				info.set_type(new sym_array(parse_size_of_array()));
-				if (lxr->next().type != TK_CLOSE_SQUARE_BRACKET)
-					throw syntax_error(C2143, "missing \"]\" before \";\"", lxr->pos);
-			}
-			tk = lxr->next();
-		}
-	}*/
 	return info;
 }
 

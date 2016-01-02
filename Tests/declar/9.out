@@ -1,0 +1,7 @@
+myfunc: function
+	a: parameter
+		int
+	b: parameter
+		int
+returned
+	int
