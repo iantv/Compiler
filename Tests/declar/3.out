@@ -1,0 +1,5 @@
+a: variable
+	pointer(s) to
+		pointer(s) to
+			pointer(s) to
+				int

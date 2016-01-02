@@ -43,7 +43,7 @@ void sym_integer::print(ostream &os){
 
 void sym_integer::print(ostream &os, int level){
 	print_level(os, level);
-	os << "int " << endl;
+	os << "int" << endl;
 }
 
 void sym_float::print(ostream &os){
@@ -61,7 +61,8 @@ void sym_pointer::print(ostream &os){
 
 void sym_pointer::print(ostream &os, int level){
 	print_level(os, level);
-	os << name << ": pointer to " << endl;
+	os << name << "pointer(s) to" << endl;
+	type->print(os, level + 1);
 }
 
 void sym_func_type::print(ostream &os){
@@ -140,7 +141,11 @@ void sym_array::print(ostream &os){
 
 void sym_array::print(ostream &os, int level){
 	print_level(os, level);
-	os << "array" << endl;
+	os << name << ((name == "") ? "" : ": ") << "array of";
+	if (length)
+		os << " " << length << " of" << endl;
+	else 
+		os << endl;
 	type->print(os, level + 1);
 }
 

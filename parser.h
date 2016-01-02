@@ -12,6 +12,23 @@ typedef struct {
 	sym_type *type;
 }dcl_data;
 
+class declar{
+	symbol *id;
+	sym_type *type;
+public:
+	declar();
+	declar(declar &);
+	void set_id(symbol *);
+	void set_type(sym_type *);
+	void set_name(string);
+	sym_type *get_type();
+	symbol *get_id();
+	const string &get_name();
+	void rebuild(declar &);
+	void reset_type(sym_type *);
+	bool check_id(symbol *);
+};
+
 class parser{
 	lexer *lxr;
 	sym_table *table;
@@ -24,8 +41,8 @@ class parser{
 	vector<expr *> parse_fargs(); /* parse function's arguments */
 	void parse_fparams(sym_table *lst); /* parse function's parametres */
 	size_t parse_size_of_array();
-	void parse_dir_declare(dcl_data &dcl);
-	dcl_data parse_declare();
+	declar parse_dir_declare();
+	declar parse_declare();
 	void init_prelude(); /* init global symtable prelude */
 public:
 	parser(lexer *l);

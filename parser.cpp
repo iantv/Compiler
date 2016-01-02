@@ -1,5 +1,52 @@
 #include "parser.h"
 #include "error.h"
+/*---class declar---*/
+declar::declar(): id(nullptr), type(nullptr){ }
+
+void declar::set_id(symbol *decl_id){ id = decl_id; }
+void declar::set_type(sym_type *decl_type){ type = decl_type; }
+symbol *declar::get_id(){ return id; }
+sym_type *declar::get_type(){ return type; }
+
+declar::declar(declar &dcl){
+	id = dcl.id;
+	type = dcl.type;
+}
+
+void declar::rebuild(declar &dcl){
+	id = dcl.id;
+	sym_type *t = type;
+	if (dcl.type){
+		sym_type *last = dcl.type;
+		while (last->type){
+			last = last->type;
+		}
+		last->type = t;
+		type = dcl.type;
+	} 
+}
+
+void declar::reset_type(sym_type *t){
+	sym_type *last = type;
+	while (last){
+		last = last->type;
+	}
+	last = t;
+}
+
+void declar::set_name(string s){
+	id->name = s;
+}
+
+const string &declar::get_name(){
+	return id->name; 
+}
+
+bool declar::check_id(symbol *sym){
+	return id == sym;
+}
+/*------------------*/
+parser::parser(lexer *l): lxr(l), table(new sym_table()) { }
 
 vector<expr *> parser::parse_fargs(){
 	vector<expr *> args;
@@ -99,9 +146,17 @@ expr *parser::parse_expr(){
 	return expression(MIN_PRIORITY);
 }
 
-size_t parser::parse_size_of_array(){
-	// DO
-	return size_t(0);
+size_t parser::parse_size_of_array(){ /* Size is only const integer value */
+	token tk = lxr->next();
+	size_t t = 0;
+	if (tk.type != TK_CLOSE_SQUARE_BRACKET){
+		if (tk.type != TK_INT_VAL && tk.type != TK_CHAR_VAL )
+			throw 1;
+		t = atoi(tk.get_src().c_str());
+		if (lxr->next().type != TK_CLOSE_SQUARE_BRACKET)
+			throw syntax_error(C2143, "missing \"]\" before \";\"", lxr->pos);
+	}
+	return t;
 }
 
 void parser::parse_fparams(sym_table *lst){
@@ -126,22 +181,23 @@ void parser::parse_fparams(sym_table *lst){
 	}
 }
 
-dcl_data parser::parse_declare(){
-	dcl_data dcld;
+declar parser::parse_declare(){
+	declar info;
 	token tk = lxr->get();
 	if (tk.is_type_specifier()){ // is_users_type(tk)
-		dcld.type = prelude->get_type_specifier(tk.get_src());
+		info.set_type(prelude->get_type_specifier(tk.get_src()));
 	}
 	while (lxr->next().type == TK_MUL)
-		dcld.type = new sym_pointer(dcld.type);
-	parse_dir_declare(dcld);
-	return dcld;
+		info.set_type(new sym_pointer(info.get_type()));
+	info.rebuild(parse_dir_declare());
+	return info;
 }
 
-void parser::parse_dir_declare(dcl_data &dcl){
+declar parser::parse_dir_declare(){
 	string name;
+	declar info = declar();
 	if (lxr->get().type == TK_OPEN_BRACKET){
-		dcl = parse_declare();
+		info = parse_declare();
 		if (lxr->get().type != TK_CLOSE_BRACKET)
 			throw syntax_error(C2143, "missing \")\" before \";\"", lxr->pos);
 	} else if (lxr->get().type == TK_ID){
@@ -149,7 +205,21 @@ void parser::parse_dir_declare(dcl_data &dcl){
 	}
 	token tk = lxr->next();
 	if (tk.type != TK_OPEN_BRACKET && tk.type != TK_OPEN_SQUARE_BRACKET){
-		dcl.id = new sym_var(name);
+		info.set_id(new sym_var(name));
+	} else {
+		while ((tk.type == TK_OPEN_BRACKET) || (tk.type == TK_OPEN_SQUARE_BRACKET)){
+			if (tk.type == TK_OPEN_SQUARE_BRACKET){
+				if (info.check_id(nullptr)){
+					info.set_id(new sym_array(parse_size_of_array()));
+					info.set_name(name);
+				} else 
+					info.set_type(new sym_array(parse_size_of_array()));		
+			}
+			tk = lxr->next();
+		}
+	}
+	/*if (tk.type != TK_OPEN_BRACKET && tk.type != TK_OPEN_SQUARE_BRACKET){
+		info.set_id(new sym_var(name));
 	} else {
 		while ((tk.type == TK_OPEN_BRACKET) || (tk.type == TK_OPEN_SQUARE_BRACKET)){
 			if (tk.type == TK_OPEN_BRACKET){
@@ -163,16 +233,16 @@ void parser::parse_dir_declare(dcl_data &dcl){
 				}
 				if (lxr->get().type != TK_CLOSE_BRACKET)
 					throw syntax_error(C2143, "missing \")\" before \";\"", lxr->pos);
-			}
+			} else 
 			if (tk.type == TK_OPEN_SQUARE_BRACKET){
-				dcl.type = new sym_array(parse_size_of_array());
-				if (tk.type != TK_CLOSE_SQUARE_BRACKET)
+				info.set_type(new sym_array(parse_size_of_array()));
+				if (lxr->next().type != TK_CLOSE_SQUARE_BRACKET)
 					throw syntax_error(C2143, "missing \"]\" before \";\"", lxr->pos);
 			}
 			tk = lxr->next();
 		}
-	}
-
+	}*/
+	return info;
 }
 
 void parser::parse(ostream &os){
@@ -180,9 +250,10 @@ void parser::parse(ostream &os){
 	token tk = lxr->next();
 	while (tk.type != NOT_TK){
 		if (tk.is_type_specifier() || tk.is_type_qualifier() || tk.is_storage_class_specifier()){
-			dcl_data t = parse_declare();
-			t.id->type = t.type;
-			table->add_sym(t.id);
+			declar t = parse_declare();
+			symbol *sym = t.get_id();
+			sym->type = t.get_type();
+			table->add_sym(sym);
 		} else {
 			expr *e = parse_expr();
 			e->print(os, 0);

@@ -19,6 +19,7 @@ protected:
 public:
 	friend class parser;
 	friend class sym_table;
+	friend class declar;
 	friend ostream &operator<<(ostream &os, symbol &sym);
 	virtual void print(ostream &os, int level) = 0;
 	friend symbol *add_elem_to_list(symbol *sym_list, symbol *sym2);
@@ -43,6 +44,7 @@ class sym_type: public symbol{
 protected:
 	void print(ostream &os);
 public:
+	friend class declar;
 	void print(ostream &os, int level);
 	sym_type(){}
 	sym_type(const string &sym_name) { name = sym_name; }
@@ -78,7 +80,7 @@ protected:
 	void print(ostream &os) override;
 public:
 	void print(ostream &os, int level) override;
-	sym_array(size_t size){ name = "array of "; length = size; }
+	sym_array(size_t size){ length = size; }
 };
 
 class sym_struct: public sym_type{
@@ -102,7 +104,7 @@ protected:
 	void print(ostream &os) override;
 public:
 	void print(ostream &os, int level) override;
-	sym_pointer(sym_type *stype){ name = "pointer to"; type = stype; }
+	sym_pointer(sym_type *stype){ type = stype; }
 };
 
 class sym_func_type: public sym_type{

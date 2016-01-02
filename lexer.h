@@ -70,7 +70,7 @@ public:
 	token(const token& tk){ pos = tk.pos; type = tk.type; src.assign(tk.src); };
 	token(position tk_pos, token_t tk_type);
 	token(): pos(position(0, 0)), type(NOT_TK), src(""){};
-	string get_src(){ return src; };
+	const string &get_src(){ return src; };
 	string set_src(const char *s){ src = s; return src; }
 	token_t get_token_type() { return type; };
 	bool is_operator();
