@@ -1,11 +1,18 @@
 #include "sym_table.h"
 
-sym_function::sym_function(const string &sym_name, vector<sym_var_param>sym_fparams){
-	name = sym_name; params = sym_fparams;
+sym_function::sym_function(const string &sym_name, sym_table *lst){
+	name = sym_name;
+	table = lst;
 }
 
-sym_var::sym_var(const string &sym_name, sym_type *sym_vartype, expr *sym_init_ex): init_expr(sym_init_ex) {
+sym_var::sym_var(const string &sym_name, sym_type *sym_vartype, expr *sym_init_ex):
+	init_expr(sym_init_ex) {
 	name = sym_name; type = sym_vartype;
+}
+
+sym_var_param::sym_var_param(const string &sym_name, sym_type *sym_param_type, expr *sym_init_val):
+	init_val(sym_init_val){
+	name = sym_name; type = sym_param_type; 
 }
 
 static void print_level(ostream &os, int level){
@@ -24,50 +31,129 @@ void sym_scalar::print(ostream &os){
 	os << "scalar ";
 }
 
+void sym_scalar::print(ostream &os, int level){
+	print_level(os, level);
+	os << name << ": scalar" << endl;
+	type->print(os, level + 1);
+}
+
 void sym_integer::print(ostream &os){
 	os << "int ";
+}
+
+void sym_integer::print(ostream &os, int level){
+	print_level(os, level);
+	os << "int " << endl;
 }
 
 void sym_float::print(ostream &os){
 	os << "float ";
 }
 
+void sym_float::print(ostream &os, int level){
+	print_level(os, level);
+	os << "float " << endl;
+}
+
 void sym_pointer::print(ostream &os){
 	os << "pointer to ";
 }
 
+void sym_pointer::print(ostream &os, int level){
+	print_level(os, level);
+	os << name << ": pointer to " << endl;
+}
+
 void sym_func_type::print(ostream &os){
-	os << "function returned ";
+	os << "function\n" << (*table) << "\treturned " << (*type);
+}
+
+void sym_func_type::print(ostream &os, int level){
+	print_level(os, level);
+	os << name << "function" << endl;
+	table->print(os, level);
+	print_level(os, level);
+	os << "returned" << endl;
+	type->print(os, level  + 1);
 }
 
 void sym_type::print(ostream &os){
 	os << name << endl;
 }
 
+void sym_type::print(ostream &os, int level){
+	print_level(os, level);
+	os << name << endl;
+}
+
 void sym_function::print(ostream &os){
-	os << name << ": function returned " << (*type);
+	os << name << ": function\n" << (*table) << "\t\treturned " << (*type);
+}
+
+void sym_function::print(ostream &os, int level){
+	print_level(os, level);
+	os << name << ": function" << endl;
+	table->print(os, level);
+	print_level(os, level);
+	os << "returned" << endl;
+	type->print(os, level  + 1);
 }
 
 void sym_var::print(ostream &os){
-	os << "variable: " << name << endl;	
+	os << name << ": variable " << (*type) << endl;	
+	if (init_expr != nullptr){
+		init_expr->print(os, MIN_PRIORITY);
+	}
+}
+
+void sym_var::print(ostream &os, int level){
+	print_level(os, level);
+	os << name << ": variable" << endl;	
+	type->print(os, level + 1);
+	if (init_expr != nullptr){
+		init_expr->print(os, MIN_PRIORITY);
+	}
 }
 
 void sym_var_param::print(ostream &os){
-	os << "param: " << name;
+	os << name << ": parameter " << (*type) << endl;
+}
+
+void sym_var_param::print(ostream &os, int level){
+	print_level(os, level);
+	os << name << ": parameter" << endl;
+	type->print(os, level + 1);
 }
 
 void sym_struct::print(ostream &os){
 	os << "struct ";
 }
 
-void sym_array::print(ostream &os){
-	os << "array: ";
+void sym_struct::print(ostream &os, int level){
+	print_level(os, level);
+	os << name << ": struct" << endl;
+	// DO fields
 }
+void sym_array::print(ostream &os){
+	os << "array ";
+}
+
+void sym_array::print(ostream &os, int level){
+	print_level(os, level);
+	os << "array" << endl;
+	type->print(os, level + 1);
+}
+
 bool sym_table::local_exist(symbol *sym){
 	if (symbols.size() == 0)
 		return false;
 	return symbols.find(sym->name) != symbols.end();
 }
+
+sym_type* sym_table::get_type_specifier(string s){
+	map<string, symbol *>::iterator it = symbols.find(s.c_str());
+	return dynamic_cast<sym_type *>(it->second);
+};
 
 bool sym_table::global_exist(symbol *sym){
 	sym_table *st = prev;
@@ -91,12 +177,16 @@ void sym_table::del_sym(symbol *sym){
 }
 
 ostream &operator<<(ostream &os, const sym_table st){
-	print_level(os, st.level);
-	os << '{' << endl;
 	for (auto it = st.symbols.begin(); it != st.symbols.end(); ++it){
-		print_level(os, st.level + 1);
-		os << *((*it).second);
+		it->second->print(os, st.level);
 	}
-	os << '}' << endl;
 	return os;
+}
+
+
+
+void sym_table::print(ostream &os, int level){
+	for (auto it = symbols.begin(); it != symbols.end(); ++it){
+		it->second->print(os, this->level + level);
+	}
 }

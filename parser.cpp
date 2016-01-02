@@ -1,8 +1,6 @@
 #include "parser.h"
 #include "error.h"
 
-parser::parser(lexer *l): lxr(l), table(new sym_table()) { }
-
 vector<expr *> parser::parse_fargs(){
 	vector<expr *> args;
 	token tk = lxr->next(); /* skip TK_OPEN_B;RACKET */
@@ -106,17 +104,33 @@ size_t parser::parse_size_of_array(){
 	return size_t(0);
 }
 
-vector<sym_var_param> parser::parse_fparams(){
-	vector <sym_var_param> v;
-	// DO
-	return v;
+void parser::parse_fparams(sym_table *lst){
+	dcl_data param;
+	//expr *ex = nullptr;
+	token tk = lxr->next(); /* skip ')' */
+	while (tk.type != TK_CLOSE_BRACKET){
+		if (tk.is_type_specifier()){
+			param.type = prelude->get_type_specifier(tk.get_src());
+			if ((tk = lxr->next()).type == TK_ID){
+				param.id = new sym_var_param(tk.get_src());
+			}
+			tk = lxr->next();	/* */
+			if (tk.type != TK_COMMA){
+				if (tk.type != TK_CLOSE_BRACKET)
+					throw 1;
+			} else {
+				tk = lxr->next(); 
+			}
+			lst->add_sym(new sym_var_param(param.id->name, param.type));
+		} else throw 1;
+	}
 }
 
 dcl_data parser::parse_declare(){
 	dcl_data dcld;
 	token tk = lxr->get();
-	if (tk.is_type_specifier()){
-		dcld.type = new sym_type(tk.get_src());
+	if (tk.is_type_specifier()){ // is_users_type(tk)
+		dcld.type = prelude->get_type_specifier(tk.get_src());
 	}
 	while (lxr->next().type == TK_MUL)
 		dcld.type = new sym_pointer(dcld.type);
@@ -133,18 +147,21 @@ void parser::parse_dir_declare(dcl_data &dcl){
 	} else if (lxr->get().type == TK_ID){
 		name = lxr->get().get_src();
 	}
-	token tk = lxr->get();
-	tk = lxr->next();
+	token tk = lxr->next();
 	if (tk.type != TK_OPEN_BRACKET && tk.type != TK_OPEN_SQUARE_BRACKET){
 		dcl.id = new sym_var(name);
 	} else {
 		while ((tk.type == TK_OPEN_BRACKET) || (tk.type == TK_OPEN_SQUARE_BRACKET)){
 			if (tk.type == TK_OPEN_BRACKET){
+				sym_table *st = new sym_table(table);
+				parse_fparams(st);
 				if (name == "")
-					dcl.type = new sym_func_type(dcl.type);
-				else
-					dcl.id = new sym_function(name, parse_fparams());
-				if (lxr->next().type != TK_CLOSE_BRACKET)
+					dcl.type = new sym_func_type(dcl.type, st);
+				else {
+					dcl.id = new sym_function(name, st);
+					name = "";
+				}
+				if (lxr->get().type != TK_CLOSE_BRACKET)
 					throw syntax_error(C2143, "missing \")\" before \";\"", lxr->pos);
 			}
 			if (tk.type == TK_OPEN_SQUARE_BRACKET){
@@ -177,11 +194,8 @@ void parser::parse(ostream &os){
 void parser::init_prelude(){
 	prelude = new sym_table();
 	prelude->add_sym(new sym_integer(token_names[TK_INT]));
-	prelude->add_sym(new sym_type(token_names[TK_CHAR]));
-	prelude->add_sym(new sym_type(token_names[TK_LONG]));
-	prelude->add_sym(new sym_type(token_names[TK_SHORT]));
+	prelude->add_sym(new sym_integer(token_names[TK_CHAR]));
 	prelude->add_sym(new sym_type(token_names[TK_DOUBLE]));
-	prelude->add_sym(new sym_float(token_names[TK_FLOAT]));
 	prelude->add_sym(new sym_type(token_names[TK_VOID]));
 }
 

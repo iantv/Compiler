@@ -22,7 +22,7 @@ class parser{
 	expr *parse_index();
 	expr *try_parse_tern_op();
 	vector<expr *> parse_fargs(); /* parse function's arguments */
-	vector<sym_var_param> parse_fparams(); /* parse function's parametres */
+	void parse_fparams(sym_table *lst); /* parse function's parametres */
 	size_t parse_size_of_array();
 	void parse_dir_declare(dcl_data &dcl);
 	dcl_data parse_declare();
