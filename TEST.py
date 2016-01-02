@@ -2,7 +2,7 @@ import subprocess
 LTESTCNT = 40;
 PTESTCNT = 50;
 
-PDTESTCNT = 6;
+PDTESTCNT = 7;
 
 print 'Lexer tests:'
 for i in range(1, LTESTCNT + 1):

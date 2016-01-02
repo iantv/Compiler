@@ -23,7 +23,7 @@ public:
 	friend ostream &operator<<(ostream &os, symbol &sym);
 	virtual void print(ostream &os, int level) = 0;
 	friend symbol *add_elem_to_list(symbol *sym_list, symbol *sym2);
-	symbol(){ name = ""; }
+	symbol(){ name = ""; type = nullptr; }
 	symbol(const string &sym_name) { name = sym_name; }
 };
 
@@ -47,7 +47,7 @@ public:
 	friend class declar;
 	void print(ostream &os, int level);
 	sym_type(){}
-	sym_type(const string &sym_name) { name = sym_name; }
+	sym_type(const string &sym_name) { name = sym_name; type = nullptr; }
 };
 
 class sym_scalar: public sym_type{
