@@ -1,0 +1,4 @@
+comp: function
+returned
+	pointer(s) to
+		void
