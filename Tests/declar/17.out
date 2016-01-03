@@ -3,10 +3,10 @@ func: function
 		int
 	b: parameter
 		double
-returned
+returns
 	pointer(s) to
 		function
 			c: parameter
 				char
-		returned
+		returns
 			double

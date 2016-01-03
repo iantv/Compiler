@@ -33,7 +33,7 @@ void sym_func_type::print(ostream &os, int level){
 	os << name << "function" << endl;
 	table->print(os, level);
 	print_level(os, level);
-	os << "returned" << endl;
+	os << "returns" << endl;
 	type->print(os, level  + 1);
 }
 
@@ -47,7 +47,7 @@ void sym_function::print(ostream &os, int level){
 	os << name << ": function" << endl;
 	table->print(os, level);
 	print_level(os, level);
-	os << "returned" << endl;
+	os << "returns" << endl;
 	type->print(os, level  + 1);
 }
 

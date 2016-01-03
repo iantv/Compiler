@@ -1,0 +1,7 @@
+f: pointer(s) to
+	function
+	returns
+		pointer(s) to
+			function
+			returns
+				int

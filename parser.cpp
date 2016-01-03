@@ -1,6 +1,6 @@
 #include "parser.h"
 #include "error.h"
-
+#include <typeinfo.h>
 /*---class declar---*/
 declar::declar(): id(nullptr), type(nullptr){ }
 
@@ -265,7 +265,12 @@ declar parser::parse_dir_declare(){
 				if (info.check_id(nullptr)){
 					info.set_id(new sym_function(name, st));
 				} else {
-					
+					string s = (info.get_type() == nullptr) ? typeid(*info.get_id()).name() : typeid(*info.get_type()).name();
+					if (s == "class sym_array"){
+						throw error(C2092, "element type of array cannot be function", lxr->pos);
+					} else if (s == "class sym_function" || s == "class sym_func_type"){
+						throw error(C2091, "function returns function", lxr->pos);
+					}
 					if (dir_dcl)
 						info.set_back_type(new sym_func_type(nullptr, st));
 					else

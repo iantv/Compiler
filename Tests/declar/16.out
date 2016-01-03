@@ -1,7 +1,7 @@
 x: array of 3 of
 	pointer(s) to
 		function
-		returned
+		returns
 			pointer(s) to
 				array of 5 of
 					char

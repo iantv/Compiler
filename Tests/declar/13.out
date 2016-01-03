@@ -1,4 +1,4 @@
 comp: function
-returned
+returns
 	pointer(s) to
 		void

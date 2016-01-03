@@ -3,5 +3,5 @@ myfunc: function
 		int
 	b: parameter
 		int
-returned
+returns
 	int

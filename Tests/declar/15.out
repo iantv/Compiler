@@ -1,8 +1,8 @@
 x: function
-returned
+returns
 	pointer(s) to
 		array of
 			pointer(s) to
 				function
-				returned
+				returns
 					char
