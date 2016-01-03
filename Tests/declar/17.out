@@ -1,0 +1,12 @@
+func: function
+	a: parameter
+		int
+	b: parameter
+		double
+returned
+	pointer(s) to
+		function
+			c: parameter
+				char
+		returned
+			double
