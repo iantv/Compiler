@@ -10,6 +10,7 @@
 using namespace std;
 class sym_type;
 class sym_var_param;
+class sym_var;
 
 class symbol{
 protected:
@@ -19,6 +20,7 @@ public:
 	friend class parser;
 	friend class sym_table;
 	friend class declar;
+	friend class sym_var;
 	virtual void print(ostream &os, int level) = 0;
 	friend symbol *add_elem_to_list(symbol *sym_list, symbol *sym2);
 	symbol(){ name = ""; type = nullptr; }

@@ -24,7 +24,7 @@ void declar::set_back_type(sym_type *decl_type){
 		}
 		t->type = decl_type;
 	} else 
-		t = decl_type;
+		type = decl_type;
 }
 
 void declar::reset_type(sym_type *decl_type){
@@ -233,8 +233,10 @@ declar parser::parse_dir_declare(){
 					info.set_id(new sym_array(parse_size_of_array()));
 					info.set_name(name);
 				} else {
-					if (dir_dcl) info.set_back_type(new sym_array(parse_size_of_array()));
-					else info.set_type(new sym_array(parse_size_of_array()));		
+					if (dir_dcl)
+						info.set_back_type(new sym_array(parse_size_of_array()));
+					else
+						info.set_type(new sym_array(parse_size_of_array()));		
 				}
 			} else if (tk.type == TK_OPEN_BRACKET){
 				sym_table *st = new sym_table(table);

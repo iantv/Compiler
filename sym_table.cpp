@@ -69,8 +69,13 @@ void sym_function::print(ostream &os, int level){
 
 void sym_var::print(ostream &os, int level){
 	print_level(os, level);
-	os << name << ": variable" << endl;	
-	type->print(os, level + 1);
+	os << name << ": ";	
+	int lvl = level;
+	if (type->type == nullptr){
+		os << "variable" << endl;
+		lvl += 1;
+	}
+	type->print(os, lvl);
 	if (init_expr != nullptr){
 		init_expr->print(os, MIN_PRIORITY);
 	}

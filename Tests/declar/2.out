@@ -1,3 +1,2 @@
-a: variable
-	pointer(s) to
-		int
+a: pointer(s) to
+	int
