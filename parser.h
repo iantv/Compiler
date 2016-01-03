@@ -28,6 +28,7 @@ public:
 	void rebuild(declar &);
 	void reset_type(sym_type *);
 	bool check_id(symbol *);
+	friend symbol *make_symbol(declar &dcl);
 };
 
 class parser{

@@ -1,4 +1,11 @@
 #include "sym_table.h"
+#include "parser.h"
+
+symbol *make_symbol(declar &dcl){
+	symbol *t = dcl.get_id();
+	t->type = dcl.get_type();
+	return t;
+}
 
 sym_function::sym_function(const string &sym_name, sym_table *lst){
 	name = sym_name;

@@ -232,17 +232,30 @@ declar parser::try_parse_struct(){
 	if (tk.type == TK_OPEN_BRACE){
 		tk = lxr->next(); /* skip open square bracket '{' */
 		while (tk.type != TK_CLOSE_BRACE){
-			declar t = parse_declare();
-			symbol *sym = t.get_id();
-			sym->type = t.get_type();
-			slt->add_sym(sym);
+			slt->add_sym(make_symbol(parse_declare()));
 			tk = lxr->next();
 			/*if (tk.type != TK_SEMICOLON)
 				throw 1;*/
 		}
 	} else throw 1;
 	tk = lxr->next();
-	info.set_id(new sym_struct(tag, slt));
+	sym_type *st = new sym_struct(tag, slt);
+	info.set_id(st);
+	while (tk.type == TK_ID){
+		symbol *sym = new sym_var(tk.get_src());
+		sym->type = st;
+		table->add_sym(sym);
+		tk = lxr->next();
+		if (tk.type == TK_SEMICOLON)
+			break;
+		else if (tk.type == TK_COMMA){
+			tk = lxr->next();
+		} else throw 1;
+	} 
+	if(tk.type == TK_SEMICOLON){
+		lxr->next();
+	} else
+		throw 1;
 	return info;
 }
 
@@ -317,10 +330,7 @@ void parser::parse(ostream &os){
 	token tk = lxr->next();
 	while (tk.type != NOT_TK){
 		if (tk.is_type_specifier() || tk.is_type_qualifier() || tk.is_storage_class_specifier()){
-			declar t = parse_declare();
-			symbol *sym = t.get_id();
-			sym->type = t.get_type();
-			table->add_sym(sym);
+			table->add_sym(make_symbol(parse_declare()));
 		} else {
 			expr *e = parse_expr();
 			e->print(os, 0);

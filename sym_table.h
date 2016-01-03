@@ -21,11 +21,14 @@ public:
 	friend class sym_table;
 	friend class declar;
 	friend class sym_var;
+	friend symbol *make_symbol(declar &dcl);
 	virtual void print(ostream &os, int level) = 0;
 	friend symbol *add_elem_to_list(symbol *sym_list, symbol *sym2);
 	symbol(){ name = ""; type = nullptr; }
 	symbol(const string &sym_name) { name = sym_name; }
 };
+
+symbol *make_symbol(declar &);
 
 /* SYM FUNCTON */
 

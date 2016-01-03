@@ -2,7 +2,7 @@ import subprocess
 LTESTCNT = 40
 PTESTCNT = 50
 
-PDTESTCNT = 18
+PDTESTCNT = 20
 
 ERRPRSDCL = 7 #Error Parser Declare
 def testproc(testname, cmd, N, output, ansdir):
