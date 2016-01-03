@@ -265,6 +265,7 @@ declar parser::parse_dir_declare(){
 				if (info.check_id(nullptr)){
 					info.set_id(new sym_function(name, st));
 				} else {
+					
 					if (dir_dcl)
 						info.set_back_type(new sym_func_type(nullptr, st));
 					else

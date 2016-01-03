@@ -6,6 +6,9 @@
 
 #define C2059 "C2059"
 #define C2065 "C2065"
+#define C2091 "C2091"
+#define C2092 "C2092"
+
 #define C2143 "C2143"
 #define C2144 "C2144"
 #define C2146 "C2146"
