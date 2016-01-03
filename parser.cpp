@@ -4,7 +4,21 @@
 declar::declar(): id(nullptr), type(nullptr){ }
 
 void declar::set_id(symbol *decl_id){ id = decl_id; }
-void declar::set_type(sym_type *decl_type){ type = decl_type; }
+void declar::set_type(sym_type *decl_type){ 
+	sym_type *t = decl_type;
+	if (t != nullptr){
+		while (t->type){
+			t = t->type;
+		}
+		t->type = type;
+	}
+	type = decl_type;
+}
+
+void declar::reset_type(sym_type *decl_type){
+	type = decl_type;	
+}
+
 symbol *declar::get_id(){ return id; }
 sym_type *declar::get_type(){ return type; }
 
@@ -24,14 +38,6 @@ void declar::rebuild(declar &dcl){
 		last->type = t;
 		type = dcl.type;
 	} 
-}
-
-void declar::reset_type(sym_type *t){
-	sym_type *last = type;
-	while (last){
-		last = last->type;
-	}
-	last = t;
 }
 
 void declar::set_name(string s){
@@ -188,7 +194,7 @@ declar parser::parse_declare(){
 		info.set_type(prelude->get_type_specifier(tk.get_src()));
 	}
 	while (lxr->next().type == TK_MUL)
-		info.set_type(new sym_pointer(info.get_type()));
+		info.reset_type(new sym_pointer(info.get_type()));
 	info.rebuild(parse_dir_declare());
 	return info;
 }
@@ -197,7 +203,7 @@ declar parser::parse_dir_declare(){
 	string name;
 	declar info = declar();
 	if (lxr->get().type == TK_OPEN_BRACKET){
-		info = parse_declare();
+		info.rebuild(parse_declare());
 		if (lxr->get().type != TK_CLOSE_BRACKET)
 			throw syntax_error(C2143, "missing \")\" before \";\"", lxr->pos);
 	} else if (lxr->get().type == TK_ID){

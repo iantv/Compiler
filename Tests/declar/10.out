@@ -1,0 +1,3 @@
+parr: array of 10 of
+	pointer(s) to
+		int
