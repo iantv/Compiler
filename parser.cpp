@@ -74,6 +74,22 @@ vector<expr *> parser::parse_fargs(){
 		args.push_back(expression(2)); /* because priority of comma as statement equal 1, but when listing arguments of function comma is separator */
 		if (lxr->get().type == TK_CLOSE_BRACKET)
 			break;
+		else if (lxr->get().type != TK_COMMA){
+			if (lxr->get().is_type_specifier()){
+				string s = lxr->get().get_src();
+				s += " should be preceded by ";
+				s += "\")\"";
+				throw syntax_error(C2144, s, lxr->pos);
+			} else if (lxr->get().type == TK_ID){
+				string s = "missing \",\" before identifier ";
+				s += lxr->get().get_src();
+				throw syntax_error(C2146, s, lxr->pos);
+			} else {
+				string s = "missing \",\" before ";
+				s += lxr->get().get_src();
+				throw syntax_error(C2146, s, lxr->pos);
+			}
+		}
 		tk = lxr->next(); /* skip comma	*/
 	}
 	if (lxr->get().type != TK_CLOSE_BRACKET)

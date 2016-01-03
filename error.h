@@ -7,6 +7,8 @@
 #define C2059 "C2059"
 #define C2143 "C2143"
 #define C2153 "C2153"
+#define C2144 "C2144"
+#define C2146 "C2146"
 
 class error{
 protected:
