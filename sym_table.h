@@ -54,9 +54,10 @@ public:
 };
 
 class sym_struct: public sym_type{
+	sym_table *table;
 public:
 	void print(ostream &os, int level) override;
-	sym_struct(){}	// DO
+	sym_struct(const string &sym_name, sym_table *lst);
 };
 
 class sym_alias: public sym_type{

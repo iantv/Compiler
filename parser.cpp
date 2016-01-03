@@ -220,10 +220,39 @@ void parser::parse_fparams(sym_table *lst){
 	}
 }
 
+declar parser::try_parse_struct(){
+	declar info;
+	token tk = lxr->next();
+	string tag;
+	if (tk.type == TK_ID){
+		tag = tk.get_src();
+		tk = lxr->next();
+	}
+	sym_table *slt = new sym_table(table); /* struct local table */
+	if (tk.type == TK_OPEN_BRACE){
+		tk = lxr->next(); /* skip open square bracket '{' */
+		while (tk.type != TK_CLOSE_BRACE){
+			declar t = parse_declare();
+			symbol *sym = t.get_id();
+			sym->type = t.get_type();
+			slt->add_sym(sym);
+			tk = lxr->next();
+			/*if (tk.type != TK_SEMICOLON)
+				throw 1;*/
+		}
+	} else throw 1;
+	tk = lxr->next();
+	info.set_id(new sym_struct(tag, slt));
+	return info;
+}
+
 declar parser::parse_declare(){
 	declar info;
 	token tk = lxr->get();
 	if (tk.is_type_specifier()){ // is_users_type(tk)
+		if (tk.type == TK_STRUCT){
+			return try_parse_struct();
+		}
 		info.set_type(prelude->get_type_specifier(tk.get_src()));
 	}
 	while (lxr->next().type == TK_MUL)

@@ -5,6 +5,11 @@ sym_function::sym_function(const string &sym_name, sym_table *lst){
 	table = lst;
 }
 
+sym_struct::sym_struct(const string &sym_name, sym_table *lst){
+	name = sym_name;
+	table = lst;
+}
+
 sym_var::sym_var(const string &sym_name, sym_type *sym_vartype, expr *sym_init_ex):
 	init_expr(sym_init_ex) {
 	name = sym_name; type = sym_vartype;
@@ -73,8 +78,8 @@ void sym_var_param::print(ostream &os, int level){
 
 void sym_struct::print(ostream &os, int level){
 	print_level(os, level);
-	os << name << ": struct" << endl;
-	// DO fields
+	os << "struct " << name << endl;
+	table->print(os, level);
 }
 
 void sym_array::print(ostream &os, int level){

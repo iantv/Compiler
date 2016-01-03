@@ -44,6 +44,7 @@ class parser{
 	size_t parse_size_of_array();
 	declar parse_dir_declare();
 	declar parse_declare();
+	declar try_parse_struct();
 	void init_prelude(); /* init global symtable prelude */
 public:
 	parser(lexer *l);
