@@ -14,13 +14,11 @@ class sym_var_param;
 class symbol{
 protected:
 	string name;
-	virtual void print(ostream &os) = 0;
 	sym_type *type;
 public:
 	friend class parser;
 	friend class sym_table;
 	friend class declar;
-	friend ostream &operator<<(ostream &os, symbol &sym);
 	virtual void print(ostream &os, int level) = 0;
 	friend symbol *add_elem_to_list(symbol *sym_list, symbol *sym2);
 	symbol(){ name = ""; type = nullptr; }
@@ -31,8 +29,6 @@ public:
 
 class sym_function: public symbol{
 	sym_table *table;
-protected:
-	void print(ostream &os) override;
 public:
 	void print(ostream &os, int level) override;
 	sym_function(const string &sym_name, sym_table *lst); /* lst is pointer to Local Symbol Table */
@@ -41,8 +37,6 @@ public:
 /* SYM TYPE */
 
 class sym_type: public symbol{
-protected:
-	void print(ostream &os);
 public:
 	friend class declar;
 	void print(ostream &os, int level);
@@ -51,24 +45,18 @@ public:
 };
 
 class sym_scalar: public sym_type{
-protected:
-	void print(ostream &os);
 public:
 	void print(ostream &os, int level);
 	sym_scalar(){}
 };
 
 class sym_float: public sym_scalar{
-protected:
-	void print(ostream &os) override;
 public: 
 	void print(ostream &os, int level) override;
 	sym_float(const string &sym_name){ name = sym_name; }
 };
 
 class sym_integer: public sym_scalar{
-protected:
-	void print(ostream &os) override;
 public:
 	void print(ostream &os, int level) override;
 	sym_integer(const string &sym_name){ name = sym_name; }
@@ -76,32 +64,24 @@ public:
 
 class sym_array: public sym_type{
 	size_t length;
-protected:
-	void print(ostream &os) override;
 public:
 	void print(ostream &os, int level) override;
 	sym_array(size_t size){ length = size; }
 };
 
 class sym_struct: public sym_type{
-protected:
-	void print(ostream &os) override;
 public:
 	void print(ostream &os, int level) override;
 	sym_struct(){}	// DO
 };
 
 class sym_alias: public sym_type{
-protected:
-	void print(ostream &os) override;
 public:
 	void print(ostream &os, int level) override;
 	sym_alias(){} // DO
 };
 
 class sym_pointer: public sym_type{
-protected:
-	void print(ostream &os) override;
 public:
 	void print(ostream &os, int level) override;
 	sym_pointer(sym_type *stype){ type = stype; }
@@ -109,8 +89,6 @@ public:
 
 class sym_func_type: public sym_type{
 	sym_table *table;
-protected:
-	void print(ostream &os) override;
 public:
 	void print(ostream &os, int level) override;
 	sym_func_type(sym_type *stype, sym_table *lst){ name = ""; type = stype; table = lst; }
@@ -121,7 +99,6 @@ public:
 class sym_var: public symbol{
 protected:
 	expr *init_expr;
-	void print(ostream &os) override;
 public:
 	sym_var(){}
 	void print(ostream &os, int level) override;
@@ -130,32 +107,24 @@ public:
 
 class sym_var_param: public sym_var{
 	expr *init_val;
-protected:
-	void print(ostream &os) override;
 public:
 	void print(ostream &os, int level) override;
 	sym_var_param(const string &sym_name, sym_type *sym_param_type = nullptr, expr *sym_init_val = nullptr);
 };
 
 class sym_var_const: public sym_var{
-protected:
-	void print(ostream &os) override;
 public:
 	void print(ostream &os, int level) override;
 	sym_var_const(){}
 };
 
 class sym_var_local: public sym_var{
-protected:
-	void print(ostream &os) override;
 public:
 	void print(ostream &os, int level) override;
 	sym_var_local(){}
 };
 
 class sym_var_global: public sym_var{
-protected:
-	void print(ostream &os) override;
 public:
 	void print(ostream &os, int level) override;
 	sym_var_global(){}

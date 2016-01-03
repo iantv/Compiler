@@ -22,23 +22,10 @@ static void print_level(ostream &os, int level){
 	}
 }
 
-ostream &operator<<(ostream &os, symbol &sym){
-	sym.print(os);
-	return os;
-}
-
-void sym_scalar::print(ostream &os){
-	os << "scalar ";
-}
-
 void sym_scalar::print(ostream &os, int level){
 	print_level(os, level);
 	os << name << ": scalar" << endl;
 	type->print(os, level + 1);
-}
-
-void sym_integer::print(ostream &os){
-	os << "int ";
 }
 
 void sym_integer::print(ostream &os, int level){
@@ -46,27 +33,15 @@ void sym_integer::print(ostream &os, int level){
 	os << "int" << endl;
 }
 
-void sym_float::print(ostream &os){
-	os << "float ";
-}
-
 void sym_float::print(ostream &os, int level){
 	print_level(os, level);
 	os << "float " << endl;
-}
-
-void sym_pointer::print(ostream &os){
-	os << "pointer to ";
 }
 
 void sym_pointer::print(ostream &os, int level){
 	print_level(os, level);
 	os << name << "pointer(s) to" << endl;
 	type->print(os, level + 1);
-}
-
-void sym_func_type::print(ostream &os){
-	os << "function\n" << (*table) << "\treturned " << (*type);
 }
 
 void sym_func_type::print(ostream &os, int level){
@@ -78,17 +53,9 @@ void sym_func_type::print(ostream &os, int level){
 	type->print(os, level  + 1);
 }
 
-void sym_type::print(ostream &os){
-	os << name << endl;
-}
-
 void sym_type::print(ostream &os, int level){
 	print_level(os, level);
 	os << name << endl;
-}
-
-void sym_function::print(ostream &os){
-	os << name << ": function\n" << (*table) << "\t\treturned " << (*type);
 }
 
 void sym_function::print(ostream &os, int level){
@@ -100,13 +67,6 @@ void sym_function::print(ostream &os, int level){
 	type->print(os, level  + 1);
 }
 
-void sym_var::print(ostream &os){
-	os << name << ": variable " << (*type) << endl;	
-	if (init_expr != nullptr){
-		init_expr->print(os, MIN_PRIORITY);
-	}
-}
-
 void sym_var::print(ostream &os, int level){
 	print_level(os, level);
 	os << name << ": variable" << endl;	
@@ -116,27 +76,16 @@ void sym_var::print(ostream &os, int level){
 	}
 }
 
-void sym_var_param::print(ostream &os){
-	os << name << ": parameter " << (*type) << endl;
-}
-
 void sym_var_param::print(ostream &os, int level){
 	print_level(os, level);
 	os << name << ": parameter" << endl;
 	type->print(os, level + 1);
 }
 
-void sym_struct::print(ostream &os){
-	os << "struct ";
-}
-
 void sym_struct::print(ostream &os, int level){
 	print_level(os, level);
 	os << name << ": struct" << endl;
 	// DO fields
-}
-void sym_array::print(ostream &os){
-	os << "array ";
 }
 
 void sym_array::print(ostream &os, int level){
