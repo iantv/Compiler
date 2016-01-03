@@ -20,6 +20,7 @@ public:
 	declar(declar &);
 	void set_id(symbol *);
 	void set_type(sym_type *);
+	void set_back_type(sym_type *);
 	void set_name(string);
 	sym_type *get_type();
 	symbol *get_id();

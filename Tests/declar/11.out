@@ -1,0 +1,4 @@
+parr: variable
+	pointer(s) to
+		array of 10 of
+			int

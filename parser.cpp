@@ -15,6 +15,17 @@ void declar::set_type(sym_type *decl_type){
 	type = decl_type;
 }
 
+void declar::set_back_type(sym_type *decl_type){
+	sym_type *t = type;
+	if (t != nullptr){
+		while (t->type){
+			t = t->type;
+		}
+		t->type = decl_type;
+	} else 
+		t = decl_type;
+}
+
 void declar::reset_type(sym_type *decl_type){
 	type = decl_type;	
 }
@@ -202,10 +213,12 @@ declar parser::parse_declare(){
 declar parser::parse_dir_declare(){
 	string name;
 	declar info = declar();
+	bool dir_dcl= false;
 	if (lxr->get().type == TK_OPEN_BRACKET){
 		info.rebuild(parse_declare());
 		if (lxr->get().type != TK_CLOSE_BRACKET)
 			throw syntax_error(C2143, "missing \")\" before \";\"", lxr->pos);
+		dir_dcl = true;
 	} else if (lxr->get().type == TK_ID){
 		name = lxr->get().get_src();
 	}
@@ -218,15 +231,19 @@ declar parser::parse_dir_declare(){
 				if (info.check_id(nullptr)){
 					info.set_id(new sym_array(parse_size_of_array()));
 					info.set_name(name);
-				} else 
-					info.set_type(new sym_array(parse_size_of_array()));		
+				} else {
+					if (dir_dcl) info.set_back_type(new sym_array(parse_size_of_array()));
+					else info.set_type(new sym_array(parse_size_of_array()));		
+				}
 			} else if (tk.type == TK_OPEN_BRACKET){
 				sym_table *st = new sym_table(table);
 				parse_fparams(st);
 				if (info.check_id(nullptr)){
 					info.set_id(new sym_function(name, st));
-				} else 
-					info.set_type(new sym_func_type(info.get_type(), st));
+				} else {
+					if (dir_dcl) info.set_back_type(new sym_func_type(info.get_type(), st));
+					else info.set_type(new sym_func_type(info.get_type(), st));
+				}
 			}
 			tk = lxr->next();
 		}
