@@ -46,24 +46,6 @@ public:
 	sym_type(const string &sym_name) { name = sym_name; type = nullptr; }
 };
 
-class sym_scalar: public sym_type{
-public:
-	void print(ostream &os, int level);
-	sym_scalar(){}
-};
-
-class sym_float: public sym_scalar{
-public: 
-	void print(ostream &os, int level) override;
-	sym_float(const string &sym_name){ name = sym_name; }
-};
-
-class sym_integer: public sym_scalar{
-public:
-	void print(ostream &os, int level) override;
-	sym_integer(const string &sym_name){ name = sym_name; }
-};
-
 class sym_array: public sym_type{
 	size_t length;
 public:

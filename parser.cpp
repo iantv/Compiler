@@ -244,8 +244,10 @@ declar parser::parse_dir_declare(){
 				if (info.check_id(nullptr)){
 					info.set_id(new sym_function(name, st));
 				} else {
-					if (dir_dcl) info.set_back_type(new sym_func_type(info.get_type(), st));
-					else info.set_type(new sym_func_type(info.get_type(), st));
+					if (dir_dcl)
+						info.set_back_type(new sym_func_type(nullptr, st));
+					else
+						info.set_type(new sym_func_type(nullptr, st));
 				}
 			}
 			tk = lxr->next();
@@ -273,8 +275,8 @@ void parser::parse(ostream &os){
 
 void parser::init_prelude(){
 	prelude = new sym_table();
-	prelude->add_sym(new sym_integer(token_names[TK_INT]));
-	prelude->add_sym(new sym_integer(token_names[TK_CHAR]));
+	prelude->add_sym(new sym_type(token_names[TK_INT]));
+	prelude->add_sym(new sym_type(token_names[TK_CHAR]));
 	prelude->add_sym(new sym_type(token_names[TK_DOUBLE]));
 	prelude->add_sym(new sym_type(token_names[TK_VOID]));
 }

@@ -22,22 +22,6 @@ static void print_level(ostream &os, int level){
 	}
 }
 
-void sym_scalar::print(ostream &os, int level){
-	print_level(os, level);
-	os << name << ": scalar" << endl;
-	type->print(os, level + 1);
-}
-
-void sym_integer::print(ostream &os, int level){
-	print_level(os, level);
-	os << "int" << endl;
-}
-
-void sym_float::print(ostream &os, int level){
-	print_level(os, level);
-	os << "float " << endl;
-}
-
 void sym_pointer::print(ostream &os, int level){
 	print_level(os, level);
 	os << name << "pointer(s) to" << endl;
