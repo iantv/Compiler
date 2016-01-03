@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "error.h"
+
 /*---class declar---*/
 declar::declar(): id(nullptr), type(nullptr){ }
 
@@ -62,12 +63,13 @@ const string &declar::get_name(){
 bool declar::check_id(symbol *sym){
 	return id == sym;
 }
-/*------------------*/
+
+/*---class parser ----*/
 parser::parser(lexer *l): lxr(l), table(new sym_table()) { }
 
 vector<expr *> parser::parse_fargs(){
 	vector<expr *> args;
-	token tk = lxr->next(); /* skip TK_OPEN_B;RACKET */
+	token tk = lxr->next(); /* skip open bracket '(' */
 	while (tk.type != TK_CLOSE_BRACKET){		
 		args.push_back(expression(2)); /* because priority of comma as statement equal 1, but when listing arguments of function comma is separator */
 		if (lxr->get().type == TK_CLOSE_BRACKET)
@@ -81,7 +83,7 @@ vector<expr *> parser::parse_fargs(){
 }
 
 expr *parser::parse_index(){
-	lxr->next(); /* skip TK_OPEN_SQUARE_BRACKET */
+	lxr->next(); /* skip open square bracket '[' */
 	expr *ex = expression(MIN_PRIORITY);
 	if (lxr->next().type == TK_CLOSE_SQUARE_BRACKET)
 		throw syntax_error(C2143, "missing \"]\" before \";\"", lxr->pos);
@@ -178,15 +180,14 @@ size_t parser::parse_size_of_array(){ /* Size is only const integer value */
 
 void parser::parse_fparams(sym_table *lst){
 	dcl_data param;
-	//expr *ex = nullptr;
-	token tk = lxr->next(); /* skip ')' */
+	token tk = lxr->next(); /* skip open bracket '(' */
 	while (tk.type != TK_CLOSE_BRACKET){
 		if (tk.is_type_specifier()){
 			param.type = prelude->get_type_specifier(tk.get_src());
 			if ((tk = lxr->next()).type == TK_ID){
 				param.id = new sym_var_param(tk.get_src());
 			}
-			tk = lxr->next();	/* */
+			tk = lxr->next();
 			if (tk.type != TK_COMMA){
 				if (tk.type != TK_CLOSE_BRACKET)
 					throw 1;
