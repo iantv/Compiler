@@ -5,19 +5,21 @@
 #include "lexer.h"
 
 #define C2059 "C2059"
+#define C2065 "C2065"
 #define C2143 "C2143"
-#define C2153 "C2153"
 #define C2144 "C2144"
 #define C2146 "C2146"
+#define C2153 "C2153"
+
+static const string pos_to_string(const position pos){
+	return "line " + to_string(pos.row) + " column " + to_string(pos.col) + "\n"; 
+};
 
 class error: public exception{
 public:
 	string msg;
 	error(const string err_msg, position err_pos): msg(err_msg) {};
-};
-
-static const string pos_to_string(const position pos){
-	return "line " + to_string(pos.row) + " column " + to_string(pos.col) + "\n"; 
+	error(const string err_code, const string err_msg, position err_pos) { msg = "error " + err_code + ": " + err_msg + " in " + pos_to_string(err_pos);}  
 };
 
 class syntax_error: public error{

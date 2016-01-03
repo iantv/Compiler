@@ -208,7 +208,15 @@ void parser::parse_fparams(sym_table *lst){
 			} else
 				tk = lxr->next();
 			lst->add_sym(new sym_var_param(param.id->name, param.type));
-		} else throw 1;
+		} else {
+			if (tk.type == TK_ID){
+				string s = tk.get_src();
+				s += ": undeclared identifier";
+				throw error(C2065, s, lxr->pos);
+			} else {
+				throw syntax_error(C2059, tk.get_src(), lxr->get().pos);
+			}
+		}
 	}
 }
 
