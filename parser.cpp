@@ -220,7 +220,7 @@ void parser::parse_fparams(sym_table *lst){
 	}
 }
 
-declar parser::try_parse_struct(){
+sym_type *parser::try_parse_struct(sym_table *sym_tbl){
 	declar info;
 	token tk = lxr->next();
 	string tag;
@@ -232,54 +232,51 @@ declar parser::try_parse_struct(){
 	if (tk.type == TK_OPEN_BRACE){
 		tk = lxr->next(); /* skip open square bracket '{' */
 		while (tk.type != TK_CLOSE_BRACE){
-			slt->add_sym(make_symbol(parse_declare()));
-			tk = lxr->next();
-			/*if (tk.type != TK_SEMICOLON)
-				throw 1;*/
+			slt->add_sym(make_symbol(parse_declare(slt)));
+			tk = lxr->get();
+			if (tk.type == TK_SEMICOLON)
+				tk = lxr->next();
+			else{
+				string s = "\"" + tk.get_src() + "\" should be preceded by \";\"";
+				throw syntax_error(C2144, s, tk.pos);
+			}
 		}
 	} else throw 1;
-	tk = lxr->next();
 	sym_type *st = new sym_struct(tag, slt);
 	info.set_id(st);
-	while (tk.type == TK_ID){
-		symbol *sym = new sym_var(tk.get_src());
-		sym->type = st;
-		table->add_sym(sym);
-		tk = lxr->next();
-		if (tk.type == TK_SEMICOLON)
-			break;
-		else if (tk.type == TK_COMMA){
-			tk = lxr->next();
-		} else throw 1;
-	} 
-	if(tk.type == TK_SEMICOLON){
-		lxr->next();
-	} else
-		throw 1;
-	return info;
+	return dynamic_cast<sym_type *>(make_symbol(info));
 }
 
-declar parser::parse_declare(){
+declar parser::parse_declare(sym_table *sym_tbl){
 	declar info;
 	token tk = lxr->get();
 	if (tk.is_type_specifier()){ // is_users_type(tk)
 		if (tk.type == TK_STRUCT){
-			return try_parse_struct();
+			sym_type *t = try_parse_struct(sym_tbl);
+			string::iterator it = lxr->it;
+			if ((*it) == ';'){
+				lxr->next();
+				info.set_id(t);
+				return info;
+			}
+			sym_tbl->add_sym(t);
+			info.set_type(t);
+		} else {
+			info.set_type(prelude->get_type_specifier(tk.get_src()));
 		}
-		info.set_type(prelude->get_type_specifier(tk.get_src()));
 	}
 	while (lxr->next().type == TK_MUL)
 		info.reset_type(new sym_pointer(info.get_type()));
-	info.rebuild(parse_dir_declare());
+	info.rebuild(parse_dir_declare(sym_tbl));
 	return info;
 }
 
-declar parser::parse_dir_declare(){
+declar parser::parse_dir_declare(sym_table *sym_tbl){
 	string name;
 	declar info = declar();
 	bool dir_dcl= false;
 	if (lxr->get().type == TK_OPEN_BRACKET){
-		info.rebuild(parse_declare());
+		info.rebuild(parse_declare(sym_tbl));
 		if (lxr->get().type != TK_CLOSE_BRACKET)
 			throw syntax_error(C2143, "missing \")\" before \";\"", lxr->pos);
 		dir_dcl = true;
@@ -302,7 +299,7 @@ declar parser::parse_dir_declare(){
 						info.set_type(new sym_array(parse_size_of_array()));		
 				}
 			} else if (tk.type == TK_OPEN_BRACKET){
-				sym_table *st = new sym_table(table);
+				sym_table *st = new sym_table(sym_tbl);
 				parse_fparams(st);
 				if (info.check_id(nullptr)){
 					info.set_id(new sym_function(name, st));
@@ -328,14 +325,25 @@ declar parser::parse_dir_declare(){
 void parser::parse(ostream &os){
 	init_prelude(); 	
 	token tk = lxr->next();
+	sym_type *stype = nullptr;
 	while (tk.type != NOT_TK){
 		if (tk.is_type_specifier() || tk.is_type_qualifier() || tk.is_storage_class_specifier()){
-			table->add_sym(make_symbol(parse_declare()));
+			symbol *t = make_symbol(parse_declare(table));
+			table->add_sym(t);
+			stype = t->type;
+		} else if (tk.type == TK_SEMICOLON){
+			tk = lxr->next();
+			stype = nullptr;
+			continue;
+		} else if (tk.type == TK_COMMA && stype != nullptr){
+			declar dcl = parse_declare(table);
+			dcl.set_type(stype);
+			table->add_sym(make_symbol(dcl));
 		} else {
 			expr *e = parse_expr();
 			e->print(os, 0);
 		}
-		tk = lxr->next();
+		tk = lxr->get();
 	}
 }
 

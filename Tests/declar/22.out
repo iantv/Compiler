@@ -1,0 +1,11 @@
+people: array of 100 of
+	struct person
+		age: variable
+			int
+		name: array of 10 of
+			char
+struct person
+	age: variable
+		int
+	name: array of 10 of
+		char

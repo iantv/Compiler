@@ -2,7 +2,7 @@ import subprocess
 LTESTCNT = 40
 PTESTCNT = 50
 
-PDTESTCNT = 20
+PDTESTCNT = 22
 
 ERRPRSDCL = 7 #Error Parser Declare
 def testproc(testname, cmd, N, output, ansdir):
@@ -19,4 +19,4 @@ def testproc(testname, cmd, N, output, ansdir):
 testproc('Lexer','-l', LTESTCNT, 'lexer.out', 'Tests/lexer/')
 testproc('Parser of expression', '-p', PTESTCNT, 'parser.out', 'Tests/parser/')
 testproc('Parser of declarations', '-p -decl', PDTESTCNT, 'parser.out', 'Tests/declar/')
-testproc('Errors of declarrations parsing', '-p -decl', ERRPRSDCL, 'parser.out', 'Tests/errors/declar/')
+#testproc('Errors of declarrations parsing', '-p -decl', ERRPRSDCL, 'parser.out', 'Tests/errors/declar/')
