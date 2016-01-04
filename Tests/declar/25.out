@@ -1,0 +1,8 @@
+struct abc
+	a: variable
+		int
+func: function
+returns
+	struct abc
+		a: variable
+			int

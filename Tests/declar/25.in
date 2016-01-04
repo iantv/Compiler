@@ -1,0 +1,4 @@
+struct abc{
+	int a;
+};
+struct abc func();
