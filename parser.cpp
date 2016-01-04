@@ -227,7 +227,12 @@ symbol *parser::try_parse_struct(string &struct_tag, sym_table *sym_tbl){
 	if (tk.type == TK_OPEN_BRACE){
 		tk = lxr->next(); /* skip open square bracket '{' */
 		while (tk.type != TK_CLOSE_BRACE){
-			slt->add_sym(make_symbol(parse_declare(slt)));
+			symbol *sym = make_symbol(parse_declare(slt));
+			string s = typeid(*sym).name();
+			if (s == "class sym_struct" && sym->name == struct_tag){
+				throw error(C3769, "\"" + struct_tag + "\" : a nested class cannot have the same name as the immediately enclosing class", lxr->pos);
+			}
+			slt->add_sym(sym);
 			tk = lxr->get();
 			if (tk.type == TK_SEMICOLON)
 				tk = lxr->next();
