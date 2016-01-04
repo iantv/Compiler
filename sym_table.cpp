@@ -99,6 +99,12 @@ void sym_array::print(ostream &os, int level){
 	type->print(os, level + 1);
 }
 
+void sym_alias::print(ostream &os, int level){
+	print_level(os, level);
+	os << name << "alias for" << endl;
+	type->print(os, level + 1);
+}
+
 bool sym_table::local_exist(string &name){
 	if (symbols.size() == 0)
 		return false;

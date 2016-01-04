@@ -10,9 +10,10 @@
 class declar{
 	symbol *id;
 	sym_type *type;
+	string name;
 public:
 	declar();
-	declar(declar &);
+	declar(const declar &);
 	void set_id(symbol *);
 	void set_type(sym_type *);
 	void set_back_type(sym_type *);
@@ -24,6 +25,7 @@ public:
 	void reset_type(sym_type *);
 	bool check_id(symbol *);
 	friend symbol *make_symbol(declar &dcl);
+	friend class parser;
 };
 
 class parser{

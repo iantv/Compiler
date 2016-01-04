@@ -67,7 +67,7 @@ public:
 class sym_alias: public sym_type{
 public:
 	void print(ostream &os, int level) override;
-	sym_alias(){} // DO
+	sym_alias(sym_type *stype){ type = stype; }
 };
 
 class sym_pointer: public sym_type{
