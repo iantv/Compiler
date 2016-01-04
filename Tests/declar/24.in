@@ -1,5 +1,5 @@
 struct a{
 	struct y{
-		struct a{};
+		int b;
 	};
 };

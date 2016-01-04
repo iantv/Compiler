@@ -1,0 +1,10 @@
+struct a{
+	struct y{
+		int var;
+		struct a{
+			int t;
+		};
+		int b;
+	};
+	int c;
+};

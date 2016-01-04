@@ -59,6 +59,7 @@ public:
 class sym_struct: public sym_type{
 	sym_table *table;
 public:
+	friend parser;
 	void print(ostream &os, int level) override;
 	sym_struct(const string &sym_name, sym_table *lst);
 };
@@ -130,6 +131,7 @@ public:
 	friend ostream &operator<<(ostream &os, const sym_table st);
 	friend class sym_function;
 	friend class sym_func_type;
+	friend class parser;
 	void print(ostream &os, int level);
 	void add_sym(symbol *sym);
 	void del_sym(symbol *sym);

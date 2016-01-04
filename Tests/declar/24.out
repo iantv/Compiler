@@ -1,3 +1,4 @@
 struct a
 	struct y
-		struct a
+		b: variable
+			int

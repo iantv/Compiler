@@ -220,19 +220,37 @@ void parser::parse_fparams(sym_table *lst){
 	}
 }
 
+void parser::check_struct_member(symbol *member, string struct_tag, position pos){
+	string s = typeid(*member).name();
+	if (s != "class sym_struct")
+		return;
+	if (member->name == struct_tag)
+		throw error(C3769, "\"" + struct_tag + "\" : a nested class cannot have the same name as the immediately enclosing class", lxr->pos);
+	sym_table *table = (dynamic_cast<sym_struct *>(member))->table->prev;
+	while (table->prev != nullptr){
+		table = table->prev;
+		if (table->global_exist(member->name)){
+			sym_type *t = table->get_type_specifier(member->name);
+			string str = typeid(*t).name();
+			if (str == "class sym_struct"){
+				throw error(C2020, member->name + ": struct redifinition", pos);
+			}
+		}
+	}
+};
+
 symbol *parser::try_parse_struct(string &struct_tag, sym_table *sym_tbl){
 	declar info;
 	token tk = lxr->get();
-	sym_table *slt = new sym_table(table); /* struct local table */
+	sym_table *slt = new sym_table(sym_tbl); /* struct local table */
+	sym_type *t = new sym_struct(struct_tag, slt);
+	sym_tbl->add_sym(t);
 	if (tk.type == TK_OPEN_BRACE){
 		tk = lxr->next(); /* skip open square bracket '{' */
 		while (tk.type != TK_CLOSE_BRACE){
 			symbol *sym = make_symbol(parse_declare(slt));
-			string s = typeid(*sym).name();
-			if (s == "class sym_struct" && sym->name == struct_tag){
-				throw error(C3769, "\"" + struct_tag + "\" : a nested class cannot have the same name as the immediately enclosing class", lxr->pos);
-			}
 			slt->add_sym(sym);
+			check_struct_member(sym, struct_tag, lxr->get().pos);
 			tk = lxr->get();
 			if (tk.type == TK_SEMICOLON)
 				tk = lxr->next();
@@ -242,8 +260,8 @@ symbol *parser::try_parse_struct(string &struct_tag, sym_table *sym_tbl){
 			}
 		}
 	} else throw 1;
-	sym_type *st = new sym_struct(struct_tag, slt);
-	info.set_id(st);
+	sym_tbl->del_sym(t);
+	info.set_id(t);
 	return make_symbol(info);
 }
 

@@ -43,7 +43,7 @@ void sym_pointer::print(ostream &os, int level){
 void sym_func_type::print(ostream &os, int level){
 	print_level(os, level);
 	os << name << "function" << endl;
-	table->print(os, level);
+	table->print(os, level + 1);
 	print_level(os, level);
 	os << "returns" << endl;
 	type->print(os, level  + 1);
@@ -57,7 +57,7 @@ void sym_type::print(ostream &os, int level){
 void sym_function::print(ostream &os, int level){
 	print_level(os, level);
 	os << name << ": function" << endl;
-	table->print(os, level);
+	table->print(os, level + 1);
 	print_level(os, level);
 	os << "returns" << endl;
 	type->print(os, level  + 1);
@@ -86,7 +86,7 @@ void sym_var_param::print(ostream &os, int level){
 void sym_struct::print(ostream &os, int level){
 	print_level(os, level);
 	os << "struct " << name << endl;
-	table->print(os, level);
+	table->print(os, level + 1);
 }
 
 void sym_array::print(ostream &os, int level){
@@ -108,19 +108,26 @@ bool sym_table::local_exist(string &name){
 sym_type* sym_table::get_type_specifier(string s){
 	map<string, symbol *>::iterator it;
 	sym_type *t = nullptr;
-	if (prev){
-		t = prev->get_type_specifier(s);
-	}
-	if (t == nullptr)
-		it = symbols.find(s.c_str());
-	// DO check if it == symbols.end();
-	return dynamic_cast<sym_type *>(it->second);
+	sym_table *st = prev;
+
+	it = symbols.find(s.c_str());
+	if (it == symbols.end()){
+		while (st){
+			t = st->get_type_specifier(s);
+			if (t == nullptr)
+				st = st->prev;
+			else 
+				return t;
+		}
+	} else
+		return dynamic_cast<sym_type *>(it->second);
+	return nullptr;
 };
 
 bool sym_table::global_exist(string &name){
 	sym_table *st = prev;
 	while (st){
-		if (local_exist(name))
+		if (st->local_exist(name))
 			return true;
 		st = st->prev;
 	}
@@ -145,10 +152,8 @@ ostream &operator<<(ostream &os, const sym_table st){
 	return os;
 }
 
-
-
 void sym_table::print(ostream &os, int level){
 	for (auto it = symbols.begin(); it != symbols.end(); ++it){
-		it->second->print(os, this->level + level);
+		it->second->print(os, level);
 	}
 }
