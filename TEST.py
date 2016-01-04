@@ -4,7 +4,7 @@ PTESTCNT = 50
 
 PDTESTCNT = 23
 
-ERRPRSDCL = 7 #Error Parser Declare
+ERRPRSDCL = 8 #Error Parser Declare
 def testproc(testname, cmd, N, output, ansdir):
 	print testname
 	for i in range(1, N + 1):

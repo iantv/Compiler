@@ -259,8 +259,7 @@ declar parser::parse_declare(sym_table *sym_tbl){
 						info.set_name(tk.get_src());
 						return info;
 					} else {
-						// DO exception for undeclared structure
-						throw 1;
+						throw error(C2079, "\"" + tk.get_src() + "\" uses undefined struct \"" + tag + "\"", tk.pos);
 					}		
 				}
 			}
