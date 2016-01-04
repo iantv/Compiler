@@ -1,0 +1,10 @@
+func: function
+	struct a
+		c: variable
+			int
+	b: parameter
+		struct a
+			c: variable
+				int
+returns
+	void

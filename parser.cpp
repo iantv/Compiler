@@ -179,15 +179,12 @@ size_t parser::parse_size_of_array(){ /* Size is only const integer value */
 }
 
 void parser::parse_fparams(sym_table *lst){
-	dcl_data param;
+	declar param;
 	token tk = lxr->next(); /* skip open bracket '(' */
 	while (tk.type != TK_CLOSE_BRACKET){
 		if (tk.is_type_specifier()){
-			param.type = prelude->get_type_specifier(tk.get_src());
-			if ((tk = lxr->next()).type == TK_ID){
-				param.id = new sym_var_param(tk.get_src());
-			}
-			tk = lxr->next();
+			param = parse_declare(lst);
+			tk = lxr->get();
 			if (tk.type != TK_COMMA){
 				if (tk.type != TK_CLOSE_BRACKET){
 					if (tk.is_type_specifier()){
@@ -207,7 +204,7 @@ void parser::parse_fparams(sym_table *lst){
 				}
 			} else
 				tk = lxr->next();
-			lst->add_sym(new sym_var_param(param.id->name, param.type));
+			lst->add_sym(new sym_var_param(param.get_name(), param.get_type()));
 		} else {
 			if (tk.type == TK_ID){
 				string s = tk.get_src();
@@ -252,7 +249,9 @@ symbol *parser::try_parse_struct(string &struct_tag, sym_table *sym_tbl){
 			slt->add_sym(sym);
 			check_struct_member(sym, struct_tag, lxr->get().pos);
 			tk = lxr->get();
-			if (tk.type == TK_SEMICOLON)
+			if (tk.type == TK_CLOSE_BRACE){
+				break;
+			} else if (tk.type == TK_SEMICOLON)
 				tk = lxr->next();
 			else {
 				string s = "\"" + tk.get_src() + "\" should be preceded by \";\"";

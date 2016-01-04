@@ -7,11 +7,6 @@
 
 #include <list>
 
-typedef struct {
-	symbol *id;
-	sym_type *type;
-}dcl_data;
-
 class declar{
 	symbol *id;
 	sym_type *type;
