@@ -99,21 +99,28 @@ void sym_array::print(ostream &os, int level){
 	type->print(os, level + 1);
 }
 
-bool sym_table::local_exist(symbol *sym){
+bool sym_table::local_exist(string &name){
 	if (symbols.size() == 0)
 		return false;
-	return symbols.find(sym->name) != symbols.end();
+	return symbols.find(name) != symbols.end();
 }
 
 sym_type* sym_table::get_type_specifier(string s){
-	map<string, symbol *>::iterator it = symbols.find(s.c_str());
+	map<string, symbol *>::iterator it;
+	sym_type *t = nullptr;
+	if (prev){
+		t = prev->get_type_specifier(s);
+	}
+	if (t == nullptr)
+		it = symbols.find(s.c_str());
+	// DO check if it == symbols.end();
 	return dynamic_cast<sym_type *>(it->second);
 };
 
-bool sym_table::global_exist(symbol *sym){
+bool sym_table::global_exist(string &name){
 	sym_table *st = prev;
 	while (st){
-		if (local_exist(sym))
+		if (local_exist(name))
 			return true;
 		st = st->prev;
 	}
@@ -121,13 +128,13 @@ bool sym_table::global_exist(symbol *sym){
 }
 
 void sym_table::add_sym(symbol *sym){
-	if (local_exist(sym))
+	if (local_exist(sym->name))
 		throw 1;
 	symbols.insert(pair<string, symbol *>(sym->name, sym));
 }
 
 void sym_table::del_sym(symbol *sym){
-	if (local_exist(sym))
+	if (local_exist(sym->name))
 		symbols.erase(sym->name);
 }
 

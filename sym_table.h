@@ -133,8 +133,8 @@ public:
 	void print(ostream &os, int level);
 	void add_sym(symbol *sym);
 	void del_sym(symbol *sym);
-	bool local_exist(symbol *sym);
-	bool global_exist(symbol *sym);
+	bool local_exist(string &name);
+	bool global_exist(string &name);
 	sym_type *get_type_specifier(string);
 };
 

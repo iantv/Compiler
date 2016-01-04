@@ -45,7 +45,7 @@ class parser{
 	size_t parse_size_of_array();
 	declar parse_dir_declare(sym_table *sym_tbl);
 	declar parse_declare(sym_table *sym_tbl);
-	sym_type *try_parse_struct(sym_table *sym_tbl);
+	symbol *try_parse_struct(string &struct_tag, sym_table *sym_tbl);
 	void init_prelude(); /* init global symtable prelude */
 public:
 	parser(lexer *l);

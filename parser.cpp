@@ -220,14 +220,9 @@ void parser::parse_fparams(sym_table *lst){
 	}
 }
 
-sym_type *parser::try_parse_struct(sym_table *sym_tbl){
+symbol *parser::try_parse_struct(string &struct_tag, sym_table *sym_tbl){
 	declar info;
-	token tk = lxr->next();
-	string tag;
-	if (tk.type == TK_ID){
-		tag = tk.get_src();
-		tk = lxr->next();
-	}
+	token tk = lxr->get();
 	sym_table *slt = new sym_table(table); /* struct local table */
 	if (tk.type == TK_OPEN_BRACE){
 		tk = lxr->next(); /* skip open square bracket '{' */
@@ -236,15 +231,15 @@ sym_type *parser::try_parse_struct(sym_table *sym_tbl){
 			tk = lxr->get();
 			if (tk.type == TK_SEMICOLON)
 				tk = lxr->next();
-			else{
+			else {
 				string s = "\"" + tk.get_src() + "\" should be preceded by \";\"";
 				throw syntax_error(C2144, s, tk.pos);
 			}
 		}
 	} else throw 1;
-	sym_type *st = new sym_struct(tag, slt);
+	sym_type *st = new sym_struct(struct_tag, slt);
 	info.set_id(st);
-	return dynamic_cast<sym_type *>(make_symbol(info));
+	return make_symbol(info);
 }
 
 declar parser::parse_declare(sym_table *sym_tbl){
@@ -252,15 +247,32 @@ declar parser::parse_declare(sym_table *sym_tbl){
 	token tk = lxr->get();
 	if (tk.is_type_specifier()){ // is_users_type(tk)
 		if (tk.type == TK_STRUCT){
-			sym_type *t = try_parse_struct(sym_tbl);
+			tk = lxr->next();
+			string tag;
+			if (tk.type == TK_ID){
+				tag = tk.get_src();
+				tk = lxr->next();
+				if (tk.type == TK_ID){
+					if (sym_tbl->global_exist(tag) || sym_tbl->local_exist(tag)){
+						info.set_type(sym_tbl->get_type_specifier(tag));
+						info.rebuild(parse_dir_declare(sym_tbl));
+						info.set_name(tk.get_src());
+						return info;
+					} else {
+						// DO exception for undeclared structure
+						throw 1;
+					}		
+				}
+			}
+			symbol *t = try_parse_struct(tag, sym_tbl);
 			string::iterator it = lxr->it;
-			if ((*it) == ';'){
+			if (it != lxr->s.end() && (*it) == ';'){
 				lxr->next();
 				info.set_id(t);
 				return info;
 			}
 			sym_tbl->add_sym(t);
-			info.set_type(t);
+			info.set_type(dynamic_cast<sym_type *>(t));
 		} else {
 			info.set_type(prelude->get_type_specifier(tk.get_src()));
 		}
