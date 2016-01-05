@@ -341,7 +341,6 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 	if (tk.type != TK_OPEN_BRACKET && tk.type != TK_OPEN_SQUARE_BRACKET){
 		if (tconst){
 			info.set_type(new sym_const(info.type));
-//			info.set_name(info.name);
 		}
 		if (tdef){
 			info.set_id(new sym_alias(info.type));
@@ -398,23 +397,15 @@ void parser::parse(ostream &os){
 			tk = lxr->next();
 			stype = nullptr;
 			continue;
-		} else if (tk.is_storage_class_specifier()){
-			tk = lxr->next(); /* skip storage class specifier */
+		} else if (tk.is_storage_class_specifier() || tk.is_type_qualifier()){
 			bool tconst = false;
-			while (tk.is_type_qualifier()){
-				tk = lxr->next();
-				tconst = true;
-			}
-			declar info = parse_declare(table, true, tconst);
-			symbol *t = make_symbol(info);
-			table->add_sym(t);
-		} else if (tk.is_type_qualifier()){
 			bool tdef = false;
 			while (tk.is_type_qualifier() || tk.is_storage_class_specifier()){
 				tdef = (!tdef) ? tk.is_storage_class_specifier() : tdef;
+				tconst = (!tconst) ? tk.is_type_qualifier() : tconst;
 				tk = lxr->next();
 			}
-			table->add_sym(make_symbol(parse_declare(table, tdef, true)));
+			table->add_sym(make_symbol(parse_declare(table, tdef, tconst)));
 		} else if (tk.type == TK_COMMA && stype != nullptr){
 			declar dcl = parse_declare(table);
 			dcl.set_type(stype);
