@@ -254,14 +254,17 @@ symbol *parser::try_parse_struct(string &struct_tag, sym_table *sym_tbl){
 			tk = lxr->get();
 			if (tk.type == TK_CLOSE_BRACE){
 				break;
-			} else if (tk.type == TK_SEMICOLON)
+			} else if (tk.type == TK_SEMICOLON){
 				tk = lxr->next();
-			else {
+			} else {
 				string s = "\"" + tk.get_src() + "\" should be preceded by \";\"";
 				throw syntax_error(C2144, s, tk.pos);
 			}
 		}
-	} else throw 1;
+		if (tk.type == TK_CLOSE_BRACE && !slt->count_symbols())
+			throw error(C2016, "C requires that a struct or union has at least one member", tk.pos);
+	} else
+		throw error(C2332, "struct: missing tag name", tk.pos);
 	sym_tbl->del_sym(t);
 	info.set_id(t);
 	return make_symbol(info);

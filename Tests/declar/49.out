@@ -1,0 +1,6 @@
+a: variable
+	int
+b: variable
+	int
+c: variable
+	int

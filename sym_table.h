@@ -145,6 +145,7 @@ public:
 	sym_type *get_type_specifier(string);
 	bool type_synonym_exist(string);
 	sym_type *get_type_by_synonym(string s);
+	int count_symbols(){ return symbols.size(); }
 };
 
 #endif
