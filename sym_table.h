@@ -83,6 +83,11 @@ public:
 	sym_func_type(sym_type *stype, sym_table *lst){ name = ""; type = stype; table = lst; }
 };
 
+class sym_const: public sym_type{
+public:
+	void print(ostream &os, int level) override;
+	sym_const(sym_type *stype){ type = stype; }
+};
 /* SYM VARIABLE */
 
 class sym_var: public symbol{

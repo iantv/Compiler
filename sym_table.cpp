@@ -109,6 +109,12 @@ void sym_alias::print(ostream &os, int level){
 	type->print(os, level + 1);
 }
 
+void sym_const::print(ostream &os, int level){
+	print_level(os, level);
+	os << "const" << endl;
+	type->print(os, level + 1);
+}
+
 bool sym_table::local_exist(string &name){
 	if (symbols.size() == 0)
 		return false;

@@ -1,0 +1,6 @@
+b: alias for
+	const
+		int
+cint: alias for
+	const
+		int
