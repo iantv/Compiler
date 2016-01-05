@@ -1,0 +1,5 @@
+CHAR: alias for
+	char
+PSTR: alias for
+	pointer(s) to
+		char

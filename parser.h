@@ -40,7 +40,8 @@ class parser{
 	vector<expr *> parse_fargs(); /* parse function's arguments */
 	void parse_fparams(sym_table *lst); /* parse function's parametres */
 	size_t parse_size_of_array();
-	declar parse_dir_declare(sym_table *sym_tbl);
+	declar parse_dir_declare(sym_table *sym_tbl, bool tdef);
+	declar parse_declare(sym_table *sym_tbl, bool tdef);
 	declar parse_declare(sym_table *sym_tbl);
 	symbol *try_parse_struct(string &struct_tag, sym_table *sym_tbl);
 	void check_struct_member(symbol *member, string struct_tag, position pos);

@@ -101,7 +101,7 @@ void sym_array::print(ostream &os, int level){
 
 void sym_alias::print(ostream &os, int level){
 	print_level(os, level);
-	os << name << "alias for" << endl;
+	os << name << ": alias for" << endl;
 	type->print(os, level + 1);
 }
 
@@ -162,4 +162,20 @@ void sym_table::print(ostream &os, int level){
 	for (auto it = symbols.begin(); it != symbols.end(); ++it){
 		it->second->print(os, level);
 	}
+}
+
+sym_type *sym_table::get_type_by_synonym(string s){
+	sym_type *t = get_type_specifier(s);
+	string id = typeid(*t).name();
+	if (id == "class sym_alias"){
+		return t->type;
+	}
+	return nullptr;
+}
+
+bool sym_table::type_synonym_exist(string s){
+	if (local_exist(s) || global_exist(s)){
+		return get_type_by_synonym(s) != nullptr;
+	}
+	return false;
 }

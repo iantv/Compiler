@@ -55,7 +55,8 @@ void declar::rebuild(declar &dcl){
 }
 
 void declar::set_name(string s){
-	id->name = s;
+	if (s != "")
+		id->name = s;
 }
 
 const string &declar::get_name(){
@@ -267,11 +268,14 @@ symbol *parser::try_parse_struct(string &struct_tag, sym_table *sym_tbl){
 }
 
 declar parser::parse_declare(sym_table *sym_tbl){
+	return parse_declare(sym_tbl, false);
+}
+
+declar parser::parse_declare(sym_table *sym_tbl, bool tdef){
 	declar info;
 	token tk = lxr->get();
-	bool alias = tk.is_storage_class_specifier();
-	if (alias) tk = lxr->next();
-	if (tk.is_type_specifier()){ // is_users_type(tk)
+	bool alias = tdef;
+	if (tk.is_type_specifier()){
 		if (tk.type == TK_STRUCT){
 			tk = lxr->next();
 			string tag;
@@ -281,7 +285,7 @@ declar parser::parse_declare(sym_table *sym_tbl){
 				if (tk.type == TK_ID){
 					if (sym_tbl->global_exist(tag) || sym_tbl->local_exist(tag)){
 						info.set_type(sym_tbl->get_type_specifier(tag));
-						info.rebuild(parse_dir_declare(sym_tbl));
+						info.rebuild(parse_dir_declare(sym_tbl, alias));
 						info.set_name(tk.get_src());
 						return info;
 					} else {
@@ -301,19 +305,20 @@ declar parser::parse_declare(sym_table *sym_tbl){
 		} else {
 			info.set_type(prelude->get_type_specifier(tk.get_src()));
 		}
+		if (tk.is_storage_class_specifier()){
+			alias = true;
+			tk = lxr->next();
+		}
+	} else if (sym_tbl->type_synonym_exist(tk.get_src())){
+		info.set_type(sym_tbl->get_type_by_synonym(tk.get_src()));
 	}
 	while (lxr->next().type == TK_MUL)
 		info.reset_type(new sym_pointer(info.get_type()));
-	info.rebuild(parse_dir_declare(sym_tbl));
-	if (alias){
-		info.set_name(info.name);
-		info.reset_type(new sym_alias(info.get_type()));
-	}
+	info.rebuild(parse_dir_declare(sym_tbl, alias));
 	return info;
 }
 
-declar parser::parse_dir_declare(sym_table *sym_tbl){
-	string name;
+declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef){
 	declar info = declar();
 	bool dir_dcl= false;
 	if (lxr->get().type == TK_OPEN_BRACKET){
@@ -322,18 +327,21 @@ declar parser::parse_dir_declare(sym_table *sym_tbl){
 			throw syntax_error(C2143, "missing \")\" before \";\"", lxr->pos);
 		dir_dcl = true;
 	} else if (lxr->get().type == TK_ID){
-		name = lxr->get().get_src();
-		info.name = name;
+		info.name = lxr->get().get_src();
 	}
 	token tk = lxr->next();
 	if (tk.type != TK_OPEN_BRACKET && tk.type != TK_OPEN_SQUARE_BRACKET){
-		info.set_id(new sym_var(name));
+		if (tdef){
+			info.set_id(new sym_alias(info.type));
+			info.set_name(info.name);
+		} else
+			info.set_id(new sym_var(info.name));
 	} else {
 		while ((tk.type == TK_OPEN_BRACKET) || (tk.type == TK_OPEN_SQUARE_BRACKET)){
 			if (tk.type == TK_OPEN_SQUARE_BRACKET){
 				if (info.check_id(nullptr)){
 					info.set_id(new sym_array(parse_size_of_array()));
-					info.set_name(name);
+					info.set_name(info.name);
 				} else {
 					if (dir_dcl)
 						info.set_back_type(new sym_array(parse_size_of_array()));
@@ -344,7 +352,7 @@ declar parser::parse_dir_declare(sym_table *sym_tbl){
 				sym_table *st = new sym_table(sym_tbl);
 				parse_fparams(st);
 				if (info.check_id(nullptr)){
-					info.set_id(new sym_function(name, st));
+					info.set_id(new sym_function(info.name, st));
 				} else {
 					string s = (info.get_type() == nullptr) ? typeid(*info.get_id()).name() : typeid(*info.get_type()).name();
 					if (s == "class sym_array"){
@@ -369,7 +377,7 @@ void parser::parse(ostream &os){
 	token tk = lxr->next();
 	sym_type *stype = nullptr;
 	while (tk.type != NOT_TK){
-		if (tk.is_type_specifier() || tk.is_type_qualifier() || tk.is_storage_class_specifier()){
+		if (tk.is_type_specifier() || tk.is_type_qualifier()){
 			symbol *t = make_symbol(parse_declare(table));
 			table->add_sym(t);
 			stype = t->type;
@@ -377,6 +385,13 @@ void parser::parse(ostream &os){
 			tk = lxr->next();
 			stype = nullptr;
 			continue;
+		} else if (tk.is_storage_class_specifier()){
+			lxr->next(); /* skip storage class specifier */
+			declar info = parse_declare(table, true);
+			/*info.set_name(info.name);
+			info.reset_type(new sym_alias(info.get_type()));*/
+			symbol *t = make_symbol(info);
+			table->add_sym(t);
 		} else if (tk.type == TK_COMMA && stype != nullptr){
 			declar dcl = parse_declare(table);
 			dcl.set_type(stype);
