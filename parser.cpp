@@ -311,7 +311,9 @@ declar parser::parse_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 			alias = (!alias) ? tk.is_storage_class_specifier() : alias;
 			constant = (!constant) ? tk.is_type_qualifier() : constant;
 			tk = lxr->next();
-		}		
+		}
+		if (constant)
+			info.reset_type(new sym_const(info.get_type()));
 	} else if (sym_tbl->type_synonym_exist(tk.get_src())){
 		info.set_type(sym_tbl->get_type_by_synonym(tk.get_src()));
 		tk = lxr->next();
@@ -321,6 +323,10 @@ declar parser::parse_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 	while (tk.type == TK_MUL){
 		info.reset_type(new sym_pointer(info.get_type()));
 		tk = lxr->next();
+		if (tk.type == TK_CONST){
+			info.reset_type(new sym_const(info.get_type()));
+			tk = lxr->next();
+		}
 	}
 	info.rebuild(parse_dir_declare(sym_tbl, alias, constant));
 	return info;
@@ -339,9 +345,6 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 	}
 	token tk = lxr->next();
 	if (tk.type != TK_OPEN_BRACKET && tk.type != TK_OPEN_SQUARE_BRACKET){
-		if (tconst){
-			info.set_type(new sym_const(info.type));
-		}
 		if (tdef){
 			info.set_id(new sym_alias(info.type));
 			info.set_name(info.name);

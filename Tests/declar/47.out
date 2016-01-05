@@ -1,0 +1,4 @@
+pcint: alias for
+	pointer(s) to
+		constant
+			int

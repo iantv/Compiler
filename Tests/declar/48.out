@@ -1,0 +1,4 @@
+cpint: alias for
+	constant
+		pointer(s) to
+			int

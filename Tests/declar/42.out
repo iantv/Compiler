@@ -1,0 +1,4 @@
+cptr: alias for
+	constant
+		pointer(s) to
+			int

@@ -1,0 +1,3 @@
+a: constant
+	pointer(s) to
+		int
