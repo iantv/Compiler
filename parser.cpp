@@ -305,15 +305,21 @@ declar parser::parse_declare(sym_table *sym_tbl, bool tdef){
 		} else {
 			info.set_type(prelude->get_type_specifier(tk.get_src()));
 		}
+		tk = lxr->next();
 		if (tk.is_storage_class_specifier()){
 			alias = true;
 			tk = lxr->next();
 		}
 	} else if (sym_tbl->type_synonym_exist(tk.get_src())){
 		info.set_type(sym_tbl->get_type_by_synonym(tk.get_src()));
+		tk = lxr->next();
+	} else {
+		tk = lxr->next();
 	}
-	while (lxr->next().type == TK_MUL)
+	while (tk.type == TK_MUL){
 		info.reset_type(new sym_pointer(info.get_type()));
+		tk = lxr->next();
+	}
 	info.rebuild(parse_dir_declare(sym_tbl, alias));
 	return info;
 }
