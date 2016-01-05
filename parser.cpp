@@ -394,8 +394,6 @@ void parser::parse(ostream &os){
 		} else if (tk.is_storage_class_specifier()){
 			lxr->next(); /* skip storage class specifier */
 			declar info = parse_declare(table, true);
-			/*info.set_name(info.name);
-			info.reset_type(new sym_alias(info.get_type()));*/
 			symbol *t = make_symbol(info);
 			table->add_sym(t);
 		} else if (tk.type == TK_COMMA && stype != nullptr){
