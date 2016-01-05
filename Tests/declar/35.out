@@ -1,6 +1,6 @@
 b: alias for
-	const
+	constant
 		int
 cint: alias for
-	const
+	constant
 		int

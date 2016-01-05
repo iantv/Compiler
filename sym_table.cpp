@@ -111,7 +111,7 @@ void sym_alias::print(ostream &os, int level){
 
 void sym_const::print(ostream &os, int level){
 	print_level(os, level);
-	os << "const" << endl;
+	os << "constant" << endl;
 	type->print(os, level + 1);
 }
 
