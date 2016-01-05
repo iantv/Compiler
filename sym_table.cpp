@@ -85,7 +85,11 @@ void sym_var_param::print(ostream &os, int level){
 
 void sym_struct::print(ostream &os, int level){
 	print_level(os, level);
-	os << "struct " << name << endl;
+	os << "struct";
+	if (name != "")
+		os << " " << name << endl;
+	else
+		os << endl;
 	table->print(os, level + 1);
 }
 
