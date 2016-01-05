@@ -15,6 +15,7 @@
 #define C2144 "C2144"
 #define C2146 "C2146"
 #define C2153 "C2153"
+#define C2159 "C2159"
 
 #define C3769 "C3769"
 static const string pos_to_string(const position pos){

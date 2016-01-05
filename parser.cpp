@@ -308,6 +308,7 @@ declar parser::parse_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 		}
 		tk = lxr->next();
 		while (tk.is_storage_class_specifier() || tk.is_type_qualifier()){
+			if (alias && tk.is_storage_class_specifier()) throw error(C2159, "more than one storage class specified", tk.pos);
 			alias = (!alias) ? tk.is_storage_class_specifier() : alias;
 			constant = (!constant) ? tk.is_type_qualifier() : constant;
 			tk = lxr->next();
@@ -320,6 +321,7 @@ declar parser::parse_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 	} else {
 		tk = lxr->next();
 	}
+	if (alias && tk.is_storage_class_specifier()) throw error(C2159, "more than one storage class specified", tk.pos);
 	while (tk.type == TK_MUL){
 		info.reset_type(new sym_pointer(info.get_type()));
 		tk = lxr->next();
@@ -327,23 +329,27 @@ declar parser::parse_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 			info.reset_type(new sym_const(info.get_type()));
 			tk = lxr->next();
 		}
+		if (alias && tk.is_storage_class_specifier()) throw error(C2159, "more than one storage class specified", tk.pos);
 	}
 	info.rebuild(parse_dir_declare(sym_tbl, alias, constant));
 	return info;
 }
+typedef;
 
 declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 	declar info = declar();
 	bool dir_dcl= false;
-	if (lxr->get().type == TK_OPEN_BRACKET){
-		info.rebuild(parse_declare(sym_tbl));
-		if (lxr->get().type != TK_CLOSE_BRACKET)
+	token tk = lxr->get();
+	if (tk.type == TK_OPEN_BRACKET){
+		info.rebuild(parse_declare(sym_tbl, tdef, false));
+		tk = lxr->get();
+		if (tk.type != TK_CLOSE_BRACKET)
 			throw syntax_error(C2143, "missing \")\" before \";\"", lxr->pos);
 		dir_dcl = true;
 	} else if (lxr->get().type == TK_ID){
 		info.name = lxr->get().get_src();
 	}
-	token tk = lxr->next();
+	tk = lxr->next();
 	if (tk.type != TK_OPEN_BRACKET && tk.type != TK_OPEN_SQUARE_BRACKET){
 		if (tdef){
 			info.set_id(new sym_alias(info.type));
@@ -404,11 +410,13 @@ void parser::parse(ostream &os){
 			bool tconst = false;
 			bool tdef = false;
 			while (tk.is_type_qualifier() || tk.is_storage_class_specifier()){
+				if (tdef && tk.is_storage_class_specifier()) throw error(C2159, "more than one storage class specified", tk.pos);
 				tdef = (!tdef) ? tk.is_storage_class_specifier() : tdef;
 				tconst = (!tconst) ? tk.is_type_qualifier() : tconst;
 				tk = lxr->next();
 			}
 			table->add_sym(make_symbol(parse_declare(table, tdef, tconst)));
+			if (tdef && lxr->get().is_storage_class_specifier()) throw error(C2159, "more than one storage class specified", lxr->get().pos);
 		} else if (tk.type == TK_COMMA && stype != nullptr){
 			declar dcl = parse_declare(table);
 			dcl.set_type(stype);
