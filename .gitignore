@@ -1,0 +1,7 @@
+Tests/declar/0.in
+Compiler.vcxproj*
+Debug/
+Release/
+input.txt
+*.out
+temp
