@@ -28,16 +28,12 @@ public:
 
 symbol *make_symbol(declar &);
 
-/* SYM FUNCTON */
-
 class sym_function: public symbol{
 	sym_table *table;
 public:
 	void print(ostream &os, int level) override;
 	sym_function(const string &sym_name, sym_table *lst); /* lst is pointer to Local Symbol Table */
 };
-
-/* SYM TYPE */
 
 class sym_type: public symbol{
 public:
@@ -86,7 +82,6 @@ public:
 	void print(ostream &os, int level) override;
 	sym_const(sym_type *stype){ type = stype; }
 };
-/* SYM VARIABLE */
 
 class sym_var: public symbol{
 protected:
@@ -121,8 +116,6 @@ public:
 	void print(ostream &os, int level) override;
 	sym_var_global(){}
 };
-
-/* SYM TABLE */
 
 class sym_table{
 	map<string, symbol *> symbols;

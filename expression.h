@@ -2,11 +2,11 @@
 #include <iostream>
 #include <vector>
 #include "lexer.h"
-#include "sym_table.h"
 
 #define MAX_PRIORITY 16
 #define MIN_PRIORITY 1
 
+class sym_type;
 int get_priority(token tk, bool unar = 0);
 
 class expr{

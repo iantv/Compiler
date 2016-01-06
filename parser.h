@@ -51,6 +51,7 @@ public:
 	expr *parse_expr();
 	void parse(ostream &os);
 	void print_sym_table(ostream &os);
+	bool type_ñhk;
 };
 
 #endif

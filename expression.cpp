@@ -1,4 +1,4 @@
-#include "expression.h"
+#include "sym_table.h"
 
 expr_bin_op::expr_bin_op(expr *l, expr *r, token t): left(l), right(r){ tk = t; }
 expr_bin_op::expr_bin_op(expr *l, expr *r, string s): left(l), right(r){ op = s; }

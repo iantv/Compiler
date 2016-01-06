@@ -20,11 +20,7 @@ ostream &operator<<(ostream &os, const token tk){
 
 void lexer::scan_new_line(){
 	string new_s;
-	if (fin.eof()){
-	//	return;
-	}
 	getline(fin, new_s);
-	//if (new_s.length() == 0) return;
 	s.assign(new_s);
 	it = s.begin();
 	++pos.row; pos.col = 1;

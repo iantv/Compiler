@@ -68,7 +68,7 @@ bool declar::check_id(symbol *sym){
 }
 
 /*---class parser ----*/
-parser::parser(lexer *l): lxr(l), table(new sym_table()) { }
+parser::parser(lexer *l): lxr(l), table(new sym_table()) { type_ñhk = true; }
 
 vector<expr *> parser::parse_fargs(){
 	vector<expr *> args;
@@ -165,6 +165,7 @@ expr *parser::factor(){
 }
 
 expr *parser::parse_expr(){
+	lxr->next();
 	return expression(MIN_PRIORITY);
 }
 
@@ -427,9 +428,6 @@ void parser::parse(ostream &os){
 			declar dcl = parse_declare(table);
 			dcl.set_type(stype);
 			table->add_sym(make_symbol(dcl));
-		} else {
-			expr *e = parse_expr();
-			e->print(os, 0);
 		}
 		tk = lxr->get();
 	}
