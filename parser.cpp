@@ -237,7 +237,7 @@ void parser::check_struct_member(symbol *member, string struct_tag, position pos
 			}
 		}
 	}
-};
+}
 
 symbol *parser::try_parse_struct(string &struct_tag, sym_table *sym_tbl){
 	declar info;
@@ -335,9 +335,12 @@ declar parser::parse_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 		if (alias && tk.is_storage_class_specifier()) throw error(C2159, "more than one storage class specified", tk.pos);
 	}
 	info.rebuild(parse_dir_declare(sym_tbl, alias, constant));
+	tk = lxr->get();
+	if (tk.type == TK_TYPEDEF || tk.type == TK_CONST){
+		throw error(C2143, "missing \";\" before \"" + tk.get_src() + "\"", tk.pos);
+	}
 	return info;
 }
-typedef;
 
 declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 	declar info = declar();
@@ -349,8 +352,8 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 		if (tk.type != TK_CLOSE_BRACKET)
 			throw syntax_error(C2143, "missing \")\" before \";\"", lxr->pos);
 		dir_dcl = true;
-	} else if (lxr->get().type == TK_ID){
-		info.name = lxr->get().get_src();
+	} else if (tk.type == TK_ID){
+		info.name = tk.get_src();
 	}
 	tk = lxr->next();
 	if (tk.type != TK_OPEN_BRACKET && tk.type != TK_OPEN_SQUARE_BRACKET){
