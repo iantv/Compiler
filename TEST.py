@@ -19,4 +19,4 @@ def testproc(testname, cmd, N, output, ansdir):
 testproc('Lexer','-l', LTESTCNT, 'lexer.out', 'Tests/lexer/')
 testproc('Parser of expression', '-p', PTESTCNT, 'parser.out', 'Tests/parser/')
 testproc('Parser of declarations', '-p -decl', PDTESTCNT, 'parser.out', 'Tests/declar/')
-testproc('Errors of declarrations parsing', '-p -decl', ERRPRSDCL, 'parser.out', 'Tests/errors/declar/')
+testproc('Errors of declarations parsing', '-p -decl', ERRPRSDCL, 'parser.out', 'Tests/errors/declar/')

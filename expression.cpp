@@ -133,3 +133,5 @@ int get_priority(token tk, bool unar){
 		default:			return -1;
 	}
 }
+
+/*------------------Types checker--------------------*/
