@@ -1,6 +1,4 @@
-#ifndef SYMTABLE
-#define SYMTABLE
-
+#pragma once
 #include "lexer.h"
 #include "expression.h"
 #include <string>
@@ -147,5 +145,3 @@ public:
 	sym_type *get_type_by_synonym(string s);
 	int count_symbols(){ return symbols.size(); }
 };
-
-#endif

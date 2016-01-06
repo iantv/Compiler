@@ -1,9 +1,8 @@
-#ifndef EXPRESSION
-#define EXPRESSION
-
+#pragma once
 #include <iostream>
 #include <vector>
 #include "lexer.h"
+#include "sym_table.h"
 
 #define MAX_PRIORITY 16
 #define MIN_PRIORITY 1
@@ -79,5 +78,3 @@ public:
 	struct_access(expr *l, expr *r, token t);
 	void print(ostream &os, int level);
 };
-
-#endif
