@@ -27,9 +27,7 @@ void declar::set_back_type(sym_type *decl_type){
 		type = decl_type;
 }
 
-void declar::reset_type(sym_type *decl_type){
-	type = decl_type;	
-}
+void declar::reset_type(sym_type *decl_type){ type = decl_type;	}
 
 symbol *declar::get_id(){ return id; }
 sym_type *declar::get_type(){ return type; }
@@ -54,21 +52,16 @@ void declar::rebuild(declar &dcl){
 	} 
 }
 
-void declar::set_name(string s){
-	if (s != "")
-		id->name = s;
-}
+void declar::set_name(string s){ if (s != "") id->name = s; }
 
 const string &declar::get_name(){
 	return id->name; 
 }
 
-bool declar::check_id(symbol *sym){
-	return id == sym;
-}
+bool declar::check_id(symbol *sym){ return id == sym; }
 
 /*---class parser ----*/
-parser::parser(lexer *l): lxr(l), table(new sym_table()) { type_ñhk = true; }
+parser::parser(lexer *l): lxr(l), table(new sym_table()) { 	init_prelude(); tcast = true; }
 
 vector<expr *> parser::parse_fargs(){
 	vector<expr *> args;
@@ -107,6 +100,7 @@ expr *parser::expression(int priority){
 			lxr->next();
 			ex = new expr_tern_op(ex, second, expression(3), string("?:"));
 		} else if (priority == 2){
+			
 			ex = new expr_bin_op(ex, expression(priority), tk);
 		} else if (tk.type == TK_INC || tk.type == TK_DEC){
 			ex = new expr_postfix_unar_op(ex, tk);			
@@ -114,7 +108,6 @@ expr *parser::expression(int priority){
 			ex = new expr_bin_op(ex, expression(priority + 1), tk);
 		tk = lxr->get();
 	}
-	
 	return ex;
 }
 
@@ -142,17 +135,32 @@ expr *parser::factor(){
 		return ex;
 	}
 	if (tk.type == TK_OPEN_BRACKET){
-		expr *ex = expression(MIN_PRIORITY);
+		expr *ex;
+		bool tc = false;
+		if (tk_next.type == TK_DOUBLE || tk_next.type == TK_CHAR || tk_next.type == TK_INT){
+			tc = true; lxr->next();
+		} else{
+			ex = expression(MIN_PRIORITY);
+		}
 		if (lxr->get().type != TK_CLOSE_BRACKET){
 			throw syntax_error(C2143, "missing \")\" before \";\"", lxr->pos);
 		}
 		lxr->next();
+		if (tc){
+			ex = new expr_cast2double(factor());
+		}
 		while (lxr->get().type == TK_OPEN_BRACKET){
 			ex = new function(ex, parse_fargs());
 		}
 		return ex;
 	}
-	if (tk.type == TK_INT_VAL || tk.type == TK_DOUBLE_VAL || tk.type == TK_CHAR_VAL){
+	if (tk.is_number()){
+		string tname;
+		switch (tk.type){
+			case TK_INT_VAL: { tname = token_names[TK_INT]; break; }
+			case TK_DOUBLE_VAL: { tname = token_names[TK_DOUBLE]; break; }
+			case TK_CHAR_VAL: { tname = token_names[TK_CHAR]; break; }
+		};
 		return new expr_literal(tk);
 	}
 	if (tk.type == TK_PLUS || tk.type == TK_MINUS || tk.type == TK_MUL || tk.type == TK_AND_BIT || tk.type == TK_NOT_BIT || tk.type == TK_INC || tk.type == TK_DEC){
@@ -401,7 +409,6 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 }
 
 void parser::parse(ostream &os){
-	init_prelude(); 	
 	token tk = lxr->next();
 	sym_type *stype = nullptr;
 	while (tk.type != NOT_TK){

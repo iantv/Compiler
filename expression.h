@@ -11,9 +11,11 @@ int get_priority(token tk, bool unar = 0);
 
 class expr{
 protected:
+	sym_type *type; /* return value type */
 	token tk;
 	string op;
 public:
+	expr();
 	virtual void print(ostream &os, int level) = 0;
 	void print_level(ostream &os, int level);
 	int operator<<(int);
@@ -23,7 +25,9 @@ class expr_bin_op: public expr{
 protected:
 	expr *left, *right;
 public:
+	expr_bin_op(expr *l, expr *r, token t, sym_type *st);
 	expr_bin_op(expr *l, expr *r, token t);
+	expr_bin_op(expr *l, expr *r, string op, sym_type *st);
 	expr_bin_op(expr *l, expr *r, string op);
 	void print(ostream &os, int level) override;
 };
@@ -44,8 +48,10 @@ public:
 
 class expr_literal: public expr{
 public:
+	expr_literal(token t, sym_type *);
 	expr_literal(token t);
 	void print(ostream &os, int level) override;
+
 };
 
 class expr_var: public expr{
@@ -76,5 +82,12 @@ class struct_access:public expr{
 	expr *field;
 public:
 	struct_access(expr *l, expr *r, token t);
+	void print(ostream &os, int level);
+};
+
+class expr_cast2double: public expr{
+	expr *ex;
+public:
+	expr_cast2double(expr *);
 	void print(ostream &os, int level);
 };

@@ -1,6 +1,9 @@
 #include "sym_table.h"
-
-expr_bin_op::expr_bin_op(expr *l, expr *r, token t): left(l), right(r){ tk = t; }
+expr::expr(){ type = nullptr; }
+expr_bin_op::expr_bin_op(expr *l, expr *r, token t): left(l), right(r){
+	//type->try_casting(l->type, r->type);
+	tk = t; 
+}
 expr_bin_op::expr_bin_op(expr *l, expr *r, string s): left(l), right(r){ op = s; }
 expr_prefix_unar_op::expr_prefix_unar_op(expr *e, token t): ex(e){ tk = t; }
 expr_postfix_unar_op::expr_postfix_unar_op(expr *e, token t): ex(e){ tk = t; }
@@ -134,4 +137,16 @@ int get_priority(token tk, bool unar){
 	}
 }
 
-/*------------------Types checker--------------------*/
+/*-------------------------------------------------Type casting-------------------------------------------------*/
+
+expr_literal::expr_literal(token t, sym_type *st){
+	tk = t, type = st;
+};
+
+expr_cast2double::expr_cast2double(expr *e): ex(e) {}
+
+void expr_cast2double::print(ostream &os, int level){
+	print_level(os, level);
+	os << "double" << endl;
+	ex->print(os, level + 1);
+}

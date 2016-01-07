@@ -78,6 +78,7 @@ public:
 	bool is_type_specifier();
 	bool is_type_qualifier();
 	bool is_storage_class_specifier();
+	bool is_number();
 };
 
 class lexer{

@@ -38,7 +38,12 @@ int main(int argc, const char *argv[]){
 				} else if (strcmp(argv[2], "-expr") == 0){
 					parser P(&L);
 					fout.open("expression.out");
-					P.type_ñhk = false; /* Disable type checking */
+					P.tcast = false; /* Disable type checking */
+					P.parse_expr()->print(fout, 0);
+					fout.close();
+				} else if (strcmp(argv[2], "-tcast") == 0){
+					parser P(&L);
+					fout.open("typecast.out");
 					P.parse_expr()->print(fout, 0);
 					fout.close();
 				}

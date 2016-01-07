@@ -322,3 +322,7 @@ bool token::is_type_qualifier(){
 bool token::is_storage_class_specifier(){
 	return type == TK_TYPEDEF;
 }
+
+bool token::is_number(){
+	return type == TK_INT_VAL || type == TK_DOUBLE_VAL || type == TK_CHAR_VAL;
+}
