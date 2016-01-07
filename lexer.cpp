@@ -59,14 +59,14 @@ token lexer::get_number(){
 	if (*it == '0' && look_forward(2, 'x', 'X')){
 			return try_parse_hex_number();
 	}
-	
+	bool octal = *it == '0';
 	while (!s.empty() && (it != s.end() && ((*it >= '0' && *it <= '9') || (*it == '.' && t.type != TK_DOUBLE_VAL)))){
 		t.src += *it;
 		if (*it == '.'){
 			t.type = TK_DOUBLE_VAL;
 			illegal_digit = 0;
 		}
-		if (t.type != TK_DOUBLE_VAL && (*it == '8' || *it == '9')){
+		if (octal && (*it == '8' || *it == '9')){
 			illegal_digit = *it;
 		}
 		skip_symbol();
