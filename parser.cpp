@@ -86,6 +86,23 @@ expr *parser::parse_index(){
 	return ex;
 }
 
+void parser::try_type_cast(expr **ex1, expr **ex2){
+	expr *e1 = *ex1, *e2 = *ex2;
+	if (tcast == false) return;
+
+	if (e1->type->name == e2->type->name)
+		return;
+	if (e1->type->name == token_names[TK_DOUBLE] && e2->type->name == token_names[TK_INT]){
+		e2->type = prelude->get_type_specifier(token_names[TK_DOUBLE]);
+		e2 = new expr_cast2type(token_names[TK_DOUBLE], e2);
+	} else if (e1->type->name == token_names[TK_INT] && e2->type->name == token_names[TK_DOUBLE]){
+		e1->type = prelude->get_type_specifier(token_names[TK_DOUBLE]);
+		e1 = new expr_cast2type(token_names[TK_DOUBLE], e1);
+	}
+
+	*ex1 = e1; *ex2 = e2;
+}
+
 expr *parser::expression(int priority){
 	if (priority > MAX_PRIORITY) return factor();		
 	expr *ex = expression(priority + 1);
@@ -99,13 +116,15 @@ expr *parser::expression(int priority){
 			}
 			lxr->next();
 			ex = new expr_tern_op(ex, second, expression(3), string("?:"));
-		} else if (priority == 2){
-			
+		} else if (priority == 2){			
 			ex = new expr_bin_op(ex, expression(priority), tk);
 		} else if (tk.type == TK_INC || tk.type == TK_DEC){
 			ex = new expr_postfix_unar_op(ex, tk);			
-		} else 
-			ex = new expr_bin_op(ex, expression(priority + 1), tk);
+		} else {
+			expr *ex2 = expression(priority + 1);
+			try_type_cast(&ex, &ex2);
+			ex = new expr_bin_op(ex, ex2, tk);
+		}
 		tk = lxr->get();
 	}
 	return ex;
@@ -136,7 +155,7 @@ expr *parser::factor(){
 	}
 	if (tk.type == TK_OPEN_BRACKET){
 		expr *ex;
-		bool tc = false;
+		bool tc = false; 
 		if (tk_next.type == TK_DOUBLE || tk_next.type == TK_CHAR || tk_next.type == TK_INT){
 			tc = true; lxr->next();
 		} else{
@@ -147,7 +166,7 @@ expr *parser::factor(){
 		}
 		lxr->next();
 		if (tc){
-			ex = new expr_cast2double(factor());
+			ex = new expr_cast2double(tk_next.get_src(), factor());
 		}
 		while (lxr->get().type == TK_OPEN_BRACKET){
 			ex = new function(ex, parse_fargs());
@@ -155,13 +174,9 @@ expr *parser::factor(){
 		return ex;
 	}
 	if (tk.is_number()){
-		string tname;
-		switch (tk.type){
-			case TK_INT_VAL: { tname = token_names[TK_INT]; break; }
-			case TK_DOUBLE_VAL: { tname = token_names[TK_DOUBLE]; break; }
-			case TK_CHAR_VAL: { tname = token_names[TK_CHAR]; break; }
-		};
-		return new expr_literal(tk);
+		string tname = tk.get_type_name();
+		if (tname == "") throw 1;
+		return tcast ? new expr_literal(tk, prelude->get_type_specifier(tname)) : new expr_literal(tk);
 	}
 	if (tk.type == TK_PLUS || tk.type == TK_MINUS || tk.type == TK_MUL || tk.type == TK_AND_BIT || tk.type == TK_NOT_BIT || tk.type == TK_INC || tk.type == TK_DEC){
 		return new expr_prefix_unar_op(factor() , tk);

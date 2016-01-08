@@ -143,10 +143,10 @@ expr_literal::expr_literal(token t, sym_type *st){
 	tk = t, type = st;
 };
 
-expr_cast2double::expr_cast2double(expr *e): ex(e) {}
+expr_cast2type::expr_cast2type(string s, expr *e): ex(e) { op = s; }
 
-void expr_cast2double::print(ostream &os, int level){
-	print_level(os, level);
-	os << "double" << endl;
+void expr_cast2type::print(ostream &os, int level){
 	ex->print(os, level + 1);
+	print_level(os, level);
+	os << op << endl;
 }

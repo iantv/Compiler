@@ -16,6 +16,7 @@ protected:
 	string op;
 public:
 	expr();
+	friend class parser;
 	virtual void print(ostream &os, int level) = 0;
 	void print_level(ostream &os, int level);
 	int operator<<(int);
@@ -85,9 +86,9 @@ public:
 	void print(ostream &os, int level);
 };
 
-class expr_cast2double: public expr{
+class expr_cast2type: public expr{
 	expr *ex;
 public:
-	expr_cast2double(expr *);
+	expr_cast2type(string, expr *);
 	void print(ostream &os, int level);
 };

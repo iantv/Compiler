@@ -6,7 +6,7 @@ PDTESTCNT = 49
 
 ERRPRSDCL = 25 #Error Parser Declare
 TCAST = 2
-
+IMPTCAST = 1
 def testproc(testname, cmd, N, output, ansdir):
 	print testname
 	for i in range(1, N + 1):
@@ -21,5 +21,6 @@ def testproc(testname, cmd, N, output, ansdir):
 testproc('Lexical analysis','-l', LTESTCNT, 'lexer.out', 'Tests/lexer/')
 testproc('Expression parsing', '-p -expr', PTESTCNT, 'expression.out', 'Tests/expr/')
 testproc('Declarations parsing', '-p -decl', PDTESTCNT, 'declar.out', 'Tests/declar/')
-testproc('Errors: declarations parsing', '-p -decl', ERRPRSDCL, 'declar.out', 'Tests/errors/declar/')
-testproc('Type casting', '-p -tcast', TCAST, 'typecast.out', 'Tests/typecast/')
+testproc('\terrors:', '-p -decl', ERRPRSDCL, 'declar.out', 'Tests/errors/declar/')
+#testproc('Type casting', '-p -tcast', TCAST, 'typecast.out', 'Tests/typecast/')
+testproc('Type casting', '-p -tcast', IMPTCAST, 'typecast.out', 'Tests/implicit_typecast/')

@@ -46,6 +46,7 @@ class parser{
 	symbol *try_parse_struct(string &struct_tag, sym_table *sym_tbl);
 	void check_struct_member(symbol *member, string struct_tag, position pos);
 	void init_prelude(); /* init global symtable prelude */
+	void try_type_cast(expr **, expr **);
 public:
 	parser(lexer *l);
 	expr *parse_expr();

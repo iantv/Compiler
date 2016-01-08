@@ -326,3 +326,12 @@ bool token::is_storage_class_specifier(){
 bool token::is_number(){
 	return type == TK_INT_VAL || type == TK_DOUBLE_VAL || type == TK_CHAR_VAL;
 }
+
+string token::get_type_name(){
+	switch (type){
+		case TK_CHAR_VAL:	return token_names[TK_CHAR];
+		case TK_INT_VAL:	return token_names[TK_INT];
+		case TK_DOUBLE_VAL:	return token_names[TK_DOUBLE];
+		default:			return "";
+	}
+}
