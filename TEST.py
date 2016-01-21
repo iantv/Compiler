@@ -21,6 +21,6 @@ def testproc(testname, cmd, N, output, ansdir):
 testproc('Lexical analysis','-l', LTESTCNT, 'lexer.out', 'Tests/lexer/')
 testproc('Expression parsing', '-p -expr', PTESTCNT, 'expression.out', 'Tests/expr/')
 testproc('Declarations parsing', '-p -decl', PDTESTCNT, 'declar.out', 'Tests/declar/')
-testproc('\terrors:', '-p -decl', ERRPRSDCL, 'declar.out', 'Tests/errors/declar/')
+testproc('', '-p -decl', ERRPRSDCL, 'declar.out', 'Tests/errors/declar/')
 #testproc('Type casting', '-p -tcast', TCAST, 'typecast.out', 'Tests/typecast/')
-testproc('Type casting', '-p -tcast', IMPTCAST, 'typecast.out', 'Tests/implicit_typecast/')
+#testproc('Type casting', '-p -tcast', IMPTCAST, 'typecast.out', 'Tests/implicit_typecast/')

@@ -1,1 +1,1 @@
-int myfunc(int a, int b)
+int myfunc(int a, int b);

@@ -166,7 +166,7 @@ expr *parser::factor(){
 		}
 		lxr->next();
 		if (tc){
-			ex = new expr_cast2double(tk_next.get_src(), factor());
+			ex = new expr_cast2type(tk_next.get_src(), factor());
 		}
 		while (lxr->get().type == TK_OPEN_BRACKET){
 			ex = new function(ex, parse_fargs());
@@ -323,6 +323,7 @@ declar parser::parse_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 			}
 			symbol *t = try_parse_struct(tag, sym_tbl);
 			string::iterator it = lxr->it;
+			// FIXME!!!!!!!!!!!!!!!!!
 			if (it != lxr->s.end() && (*it) == ';'){
 				lxr->next();
 				info.set_id(t);
@@ -440,12 +441,11 @@ void parser::parse(ostream &os){
 			bool tdef = false;
 			while (tk.is_type_qualifier() || tk.is_storage_class_specifier()){
 				if (tdef && tk.is_storage_class_specifier()) throw error(C2159, "more than one storage class specified", tk.pos);
-				tdef = (!tdef) ? tk.is_storage_class_specifier() : tdef;
-				tconst = (!tconst) ? tk.is_type_qualifier() : tconst;
+				tdef = tdef || tk.is_storage_class_specifier();
+				tconst = tconst || tk.is_type_qualifier();
 				tk = lxr->next();
 			}
 			table->add_sym(make_symbol(parse_declare(table, tdef, tconst)));
-			if (tdef && lxr->get().is_storage_class_specifier()) throw error(C2159, "more than one storage class specified", lxr->get().pos);
 		} else if (tk.type == TK_COMMA && stype != nullptr){
 			declar dcl = parse_declare(table);
 			dcl.set_type(stype);

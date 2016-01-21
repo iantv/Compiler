@@ -1,1 +1,1 @@
-int (*parr)[10]
+int (*parr)[10];

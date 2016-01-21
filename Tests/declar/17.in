@@ -1,1 +1,1 @@
-double (*func(int a, double b))(char c)
+double (*func(int a, double b))(char c);

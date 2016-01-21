@@ -1,1 +1,1 @@
-int typedef (* const cptr)
+int typedef (* const cptr);

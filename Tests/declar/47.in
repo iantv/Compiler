@@ -1,1 +1,1 @@
-typedef int const * pcint
+typedef int const * pcint;
