@@ -298,11 +298,9 @@ declar parser::parse_declare(sym_table *sym_tbl){
 	return parse_declare(sym_tbl, false, false);
 }
 
-declar parser::parse_declare(sym_table *sym_tbl, bool tdef, bool tconst){
+declar parser::parse_declare(sym_table *sym_tbl, bool alias, bool constant){
 	declar info;
 	token tk = lxr->get();
-	bool alias = tdef;
-	bool constant = tconst;
 	if (tk.is_type_specifier()){
 		if (tk.type == TK_STRUCT){
 			tk = lxr->next();
