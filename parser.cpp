@@ -109,7 +109,7 @@ expr *parser::expression(int priority){
 		if (tk.type == TK_QUESTION){
 			expr *second = expression(3);
 			if (lxr->get().type != TK_COLON){
-				throw syntax_error(C2143, "missing \":\" before \";\"", lxr->pos);;
+				throw syntax_error(C2143, "missing \":\" before \";\"", lxr->pos);
 			}
 			lxr->next();
 			ex = new expr_tern_op(ex, second, expression(3), string("?:"));
