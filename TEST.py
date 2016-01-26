@@ -6,7 +6,7 @@ PDTESTCNT = 49
 
 ERRPRSDCL = 25 #Error Parser Declare
 TCAST = 2
-IMPTCAST = 1
+IMPTCAST = 2
 def testproc(testname, cmd, N, output, ansdir):
 	print testname
 	for i in range(1, N + 1):
@@ -23,4 +23,4 @@ testproc('Expression parsing', '-p -expr', PTESTCNT, 'expression.out', 'Tests/ex
 testproc('Declarations parsing', '-p -decl', PDTESTCNT, 'declar.out', 'Tests/declar/')
 testproc('', '-p -decl', ERRPRSDCL, 'declar.out', 'Tests/errors/declar/')
 #testproc('Type casting', '-p -tcast', TCAST, 'typecast.out', 'Tests/typecast/')
-#testproc('Type casting', '-p -tcast', IMPTCAST, 'typecast.out', 'Tests/implicit_typecast/')
+testproc('Type casting', '-p -tcast', IMPTCAST, 'typecast.out', 'Tests/implicit_typecast/')

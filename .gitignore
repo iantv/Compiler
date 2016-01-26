@@ -3,5 +3,9 @@ Compiler.vcxproj*
 Debug/
 Release/
 input.txt
-*.out
+parser.out
+lexer.out
+declar.out
+expression.out
+typecast.out
 temp

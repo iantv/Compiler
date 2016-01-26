@@ -43,10 +43,11 @@ class parser{
 	declar parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst);
 	declar parse_declare(sym_table *sym_tbl, bool tdef, bool tconst);
 	declar parse_declare(sym_table *sym_tbl);
-	symbol *try_parse_struct(string &struct_tag, sym_table *sym_tbl);
+	symbol *try_parse_struct_member_list(string &struct_tag, sym_table *sym_tbl);
 	void check_struct_member(symbol *member, string struct_tag, position pos);
 	void init_prelude(); /* init global symtable prelude */
 	void try_type_cast(expr **, expr **);
+	expr *parser::new_expr_bin_op(expr *ex1, expr *ex2, token tk);
 public:
 	parser(lexer *l);
 	expr *parse_expr();

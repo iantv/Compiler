@@ -1,7 +1,7 @@
 #include "parser.h"
 #include "error.h"
 #include <typeinfo.h>
-/*---class declar---*/
+/*--------------------------------------class declar--------------------------------------*/
 declar::declar(): id(nullptr), type(nullptr){ }
 
 void declar::set_id(symbol *decl_id){ id = decl_id; }
@@ -60,7 +60,7 @@ const string &declar::get_name(){
 
 bool declar::check_id(symbol *sym){ return id == sym; }
 
-/*---class parser ----*/
+/*---------------------------------------class parser --------------------------------------*/
 parser::parser(lexer *l): lxr(l), table(new sym_table()) { 	init_prelude(); tcast = true; }
 
 vector<expr *> parser::parse_fargs(){
@@ -86,21 +86,18 @@ expr *parser::parse_index(){
 	return ex;
 }
 
-void parser::try_type_cast(expr **ex1, expr **ex2){
-	expr *e1 = *ex1, *e2 = *ex2;
-	if (tcast == false) return;
-
-	if (e1->type->name == e2->type->name)
-		return;
-	if (e1->type->name == token_names[TK_DOUBLE] && e2->type->name == token_names[TK_INT]){
-		e2->type = prelude->get_type_specifier(token_names[TK_DOUBLE]);
-		e2 = new expr_cast2type(token_names[TK_DOUBLE], e2);
-	} else if (e1->type->name == token_names[TK_INT] && e2->type->name == token_names[TK_DOUBLE]){
-		e1->type = prelude->get_type_specifier(token_names[TK_DOUBLE]);
-		e1 = new expr_cast2type(token_names[TK_DOUBLE], e1);
+expr *parser::new_expr_bin_op(expr *ex1, expr *ex2, token tk){
+	if (tcast == false || (ex1->type->name == ex2->type->name)) /* if type casting is disabled or operands has the same type */
+		return new expr_bin_op(ex1, ex2, tk);		  /* create pointer to expr_bin_op without type checking and type casting*/
+	if (ex1->type->name == token_names[TK_DOUBLE] && ex2->type->name == token_names[TK_INT]){
+		ex2->type = prelude->get_type_specifier(token_names[TK_DOUBLE]);
+		ex2 = new expr_cast2type(token_names[TK_DOUBLE], ex2);
+	} else if (ex1->type->name == token_names[TK_INT] && ex2->type->name == token_names[TK_DOUBLE]){
+		ex1->type = prelude->get_type_specifier(token_names[TK_DOUBLE]);
+		ex1 = new expr_cast2type(token_names[TK_DOUBLE], ex1);
 	}
 
-	*ex1 = e1; *ex2 = e2;
+	return new expr_bin_op(ex1, ex2, tk);
 }
 
 expr *parser::expression(int priority){
@@ -121,9 +118,7 @@ expr *parser::expression(int priority){
 		} else if (tk.type == TK_INC || tk.type == TK_DEC){
 			ex = new expr_postfix_unar_op(ex, tk);			
 		} else {
-			expr *ex2 = expression(priority + 1);
-			try_type_cast(&ex, &ex2);
-			ex = new expr_bin_op(ex, ex2, tk);
+			ex = new_expr_bin_op(ex, expression(priority + 1), tk);
 		}
 		tk = lxr->get();
 	}
@@ -263,7 +258,7 @@ void parser::check_struct_member(symbol *member, string struct_tag, position pos
 	}
 }
 
-symbol *parser::try_parse_struct(string &struct_tag, sym_table *sym_tbl){
+symbol *parser::try_parse_struct_member_list(string &struct_tag, sym_table *sym_tbl){
 	declar info;
 	token tk = lxr->get();
 	sym_table *slt = new sym_table(sym_tbl); /* struct local table */
@@ -309,17 +304,15 @@ declar parser::parse_declare(sym_table *sym_tbl, bool alias, bool constant){
 				tag = tk.get_src();
 				tk = lxr->next();
 				if (tk.type == TK_ID){
-					if (sym_tbl->global_exist(tag) || sym_tbl->local_exist(tag)){
-						info.set_type(sym_tbl->get_type_specifier(tag));
-						info.rebuild(parse_dir_declare(sym_tbl, alias, false));
-						info.set_name(tk.get_src());
-						return info;
-					} else {
+					if (!sym_tbl->global_exist(tag) && !sym_tbl->local_exist(tag))
 						throw error(C2079, "\"" + tk.get_src() + "\" uses undefined struct \"" + tag + "\"", tk.pos);
-					}		
+					info.set_type(sym_tbl->get_type_specifier(tag));
+					info.rebuild(parse_dir_declare(sym_tbl, alias, false));
+					info.set_name(tk.get_src());
+					return info;
 				}
 			}
-			symbol *t = try_parse_struct(tag, sym_tbl);
+			symbol *t = try_parse_struct_member_list(tag, sym_tbl);
 			string::iterator it = lxr->it;
 			// FIXME!!!!!!!!!!!!!!!!!
 			if (it != lxr->s.end() && (*it) == ';'){
