@@ -189,24 +189,3 @@ bool sym_table::type_synonym_exist(string s){
 	}
 	return false;
 }
-
-void sym_type::try_casting(sym_type *first, sym_type *second){
-	if (first->name == second->name){
-		type = first;
-	} else if (first->name == "double" && second->name == "int"){
-		
-	} else if (first->name == "double" && second->name == "char"){
-	
-	} else if (first->name == "int" && second->name == "double"){
-	
-	} else if (first->name == "int" && second->name == "char"){
-	
-	} else if (first->name == "char" && second->name == "double"){
-		
-	} else if (first->name == "char" && second->name == "int"){
-	
-	} else {
-		
-	}
-
-}

@@ -41,7 +41,6 @@ public:
 	void print(ostream &os, int level);
 	sym_type(){}
 	sym_type(const string &sym_name) { name = sym_name; type = nullptr; }
-	void try_casting(sym_type *, sym_type *);
 };
 
 class sym_array: public sym_type{
