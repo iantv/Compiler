@@ -89,15 +89,17 @@ expr *parser::parse_index(){
 expr *parser::new_expr_bin_op(expr *ex1, expr *ex2, token tk){
 	if (tcast == false || (ex1->type->name == ex2->type->name)) /* if type casting is disabled or operands has the same type */
 		return new expr_bin_op(ex1, ex2, tk);		  /* create pointer to expr_bin_op without type checking and type casting*/
-	if (ex1->type->name == token_names[TK_DOUBLE] && ex2->type->name == token_names[TK_INT]){
-		ex2->type = prelude->get_type_specifier(token_names[TK_DOUBLE]);
-		ex2 = new expr_cast2type(token_names[TK_DOUBLE], ex2);
-	} else if (ex1->type->name == token_names[TK_INT] && ex2->type->name == token_names[TK_DOUBLE]){
-		ex1->type = prelude->get_type_specifier(token_names[TK_DOUBLE]);
+	if (ex1->type->name == token_names[TK_DOUBLE] && (
+		ex2->type->name == token_names[TK_INT] || ex2->type->name == token_names[TK_CHAR])){
+			ex2 = new expr_cast2type(token_names[TK_DOUBLE], ex2);
+			ex2->type = prelude->get_type_specifier(token_names[TK_DOUBLE]);
+	} else if ((ex1->type->name == token_names[TK_INT] ||ex1->type->name == token_names[TK_CHAR]) &&
+				ex2->type->name == token_names[TK_DOUBLE]){
 		ex1 = new expr_cast2type(token_names[TK_DOUBLE], ex1);
+		ex1->type = prelude->get_type_specifier(token_names[TK_DOUBLE]);
 	}
-
-	return new expr_bin_op(ex1, ex2, tk);
+	expr *ex = new expr_bin_op(ex1, ex2, tk);
+	return ex;
 }
 
 expr *parser::expression(int priority){
@@ -114,7 +116,7 @@ expr *parser::expression(int priority){
 			lxr->next();
 			ex = new expr_tern_op(ex, second, expression(3), string("?:"));
 		} else if (priority == 2){			
-			ex = new expr_bin_op(ex, expression(priority), tk);
+			ex = new_expr_bin_op(ex, expression(priority), tk);
 		} else if (tk.type == TK_INC || tk.type == TK_DEC){
 			ex = new expr_postfix_unar_op(ex, tk);			
 		} else {

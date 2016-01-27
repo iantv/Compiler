@@ -1,7 +1,7 @@
 #include "sym_table.h"
 expr::expr(){ type = nullptr; }
 expr_bin_op::expr_bin_op(expr *l, expr *r, token t): left(l), right(r){
-	//type->try_casting(l->type, r->type);
+	type = l->type; /* Assign type of one of two operand, because type casting happens in the function which call this */
 	tk = t; 
 }
 expr_bin_op::expr_bin_op(expr *l, expr *r, string s): left(l), right(r){ op = s; }

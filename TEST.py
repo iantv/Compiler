@@ -6,7 +6,7 @@ PDTESTCNT = 49
 
 ERRPRSDCL = 25 #Error Parser Declare
 TCAST = 2
-IMPTCAST = 2
+IMPTCAST = 3
 def testproc(testname, cmd, N, output, ansdir):
 	print testname
 	for i in range(1, N + 1):

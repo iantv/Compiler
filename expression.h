@@ -7,6 +7,7 @@
 #define MIN_PRIORITY 1
 
 class sym_type;
+class expr_bin_op;
 int get_priority(token tk, bool unar = 0);
 
 class expr{
@@ -17,6 +18,7 @@ protected:
 public:
 	expr();
 	friend class parser;
+	friend class expr_bin_op;
 	virtual void print(ostream &os, int level) = 0;
 	void print_level(ostream &os, int level);
 	int operator<<(int);
