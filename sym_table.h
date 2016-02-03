@@ -19,6 +19,7 @@ public:
 	friend class sym_table;
 	friend class declar;
 	friend class sym_var;
+	friend class expr;
 	friend symbol *make_symbol(declar &dcl);
 	virtual void print(ostream &os, int level) = 0;
 	friend symbol *add_elem_to_list(symbol *sym_list, symbol *sym2);

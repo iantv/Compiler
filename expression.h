@@ -7,6 +7,7 @@
 #define MIN_PRIORITY 1
 
 class sym_type;
+class sym_table;
 class expr_bin_op;
 int get_priority(token tk, bool unar = 0);
 
@@ -22,6 +23,7 @@ public:
 	virtual void print(ostream &os, int level) = 0;
 	void print_level(ostream &os, int level);
 	int operator<<(int);
+	bool of_ctype(string s) { return type->name == s; }
 };
 
 class expr_bin_op: public expr{
@@ -91,6 +93,6 @@ public:
 class expr_cast2type: public expr{
 	expr *ex;
 public:
-	expr_cast2type(string, expr *);
+	expr_cast2type(string, expr *, sym_table *);
 	void print(ostream &os, int level);
 };

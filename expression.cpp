@@ -143,7 +143,7 @@ expr_literal::expr_literal(token t, sym_type *st){
 	tk = t, type = st;
 };
 
-expr_cast2type::expr_cast2type(string s, expr *e): ex(e) { op = s; }
+expr_cast2type::expr_cast2type(string s, expr *e, sym_table *st): ex(e) { op = s; type = st->get_type_specifier(s); }
 
 void expr_cast2type::print(ostream &os, int level){
 	ex->print(os, level + 1);
