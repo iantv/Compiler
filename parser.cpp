@@ -93,10 +93,16 @@ expr *parser::new_expr_bin_op(expr *ex1, expr *ex2, token tk){
 		ex2->type->name == token_names[TK_INT] || ex2->type->name == token_names[TK_CHAR])){
 			ex2 = new expr_cast2type(token_names[TK_DOUBLE], ex2);
 			ex2->type = prelude->get_type_specifier(token_names[TK_DOUBLE]);
-	} else if ((ex1->type->name == token_names[TK_INT] ||ex1->type->name == token_names[TK_CHAR]) &&
+	} else if ((ex1->type->name == token_names[TK_INT] || ex1->type->name == token_names[TK_CHAR]) &&
 				ex2->type->name == token_names[TK_DOUBLE]){
 		ex1 = new expr_cast2type(token_names[TK_DOUBLE], ex1);
 		ex1->type = prelude->get_type_specifier(token_names[TK_DOUBLE]);
+	} else if (ex1->type->name == token_names[TK_INT] && ex2->type->name == token_names[TK_CHAR]){
+		ex2 = new expr_cast2type(token_names[TK_INT], ex2);
+		ex2->type = prelude->get_type_specifier(token_names[TK_INT]);
+	} else if (ex1->type->name == token_names[TK_CHAR] && ex2->type->name == token_names[TK_INT]){
+		ex1 = new expr_cast2type(token_names[TK_INT], ex1);
+		ex1->type = prelude->get_type_specifier(token_names[TK_INT]);
 	}
 	expr *ex = new expr_bin_op(ex1, ex2, tk);
 	return ex;
