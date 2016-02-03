@@ -23,7 +23,7 @@ public:
 	virtual void print(ostream &os, int level) = 0;
 	void print_level(ostream &os, int level);
 	int operator<<(int);
-	bool of_ctype(string s) { return type->name == s; }
+	bool of_ctype(string s);
 };
 
 class expr_bin_op: public expr{

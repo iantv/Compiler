@@ -138,6 +138,9 @@ int get_priority(token tk, bool unar){
 }
 
 /*-------------------------------------------------Type casting-------------------------------------------------*/
+bool expr::of_ctype(string s){
+	return type->name == s;
+}
 
 expr_literal::expr_literal(token t, sym_type *st){
 	tk = t, type = st;
