@@ -98,8 +98,8 @@ expr *parser::new_expr_bin_op(expr *ex1, expr *ex2, token tk){
 	} else if (ex1->of_ctype(token_names[TK_CHAR]) && ex2->of_ctype(token_names[TK_INT])){
 		ex1 = new expr_cast2type(token_names[TK_INT], ex1, prelude);
 	}
-	expr *ex = new expr_bin_op(ex1, ex2, tk);
-	return ex;
+	
+	return new expr_bin_op(ex1, ex2, tk);;
 }
 
 expr *parser::expression(int priority){
