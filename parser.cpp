@@ -172,9 +172,6 @@ expr *parser::factor(){
 		return ex;
 	}
 	if (tk.is_literal()){
-		/*string tname = tk.get_type_name();
-		if (tname == "") throw 1;
-		return tcast ? new expr_literal(tk, prelude->get_type_specifier(tname)) : new expr_literal(tk);*/
 		if (tk.type == TK_STRING_LITERAL){
 			return tcast ? new expr_literal(tk, new sym_const(new sym_pointer(prelude->get_type_specifier(token_names[TK_CHAR])))) : new expr_literal(tk);
 		}
