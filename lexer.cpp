@@ -323,8 +323,8 @@ bool token::is_storage_class_specifier(){
 	return type == TK_TYPEDEF;
 }
 
-bool token::is_number(){
-	return type == TK_INT_VAL || type == TK_DOUBLE_VAL || type == TK_CHAR_VAL;
+bool token::is_literal(){
+	return type == TK_INT_VAL || type == TK_DOUBLE_VAL || type == TK_CHAR_VAL || type == TK_STRING_LITERAL;
 }
 
 string token::get_type_name(){
@@ -332,6 +332,7 @@ string token::get_type_name(){
 		case TK_CHAR_VAL:	return token_names[TK_CHAR];
 		case TK_INT_VAL:	return token_names[TK_INT];
 		case TK_DOUBLE_VAL:	return token_names[TK_DOUBLE];
+		case TK_STRING_LITERAL: return "const char *";
 		default:			return "";
 	}
 }
