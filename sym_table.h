@@ -135,7 +135,7 @@ public:
 	bool local_exist(string &name);
 	bool global_exist(string &name);
 	sym_type *get_type_specifier(string);
-	bool type_synonym_exist(string);
+	bool type_alias_exist(string);
 	sym_type *get_type_by_synonym(string s);
 	bool symbol_not_alias_exist(string s);
 	int count_symbols(){ return symbols.size(); }

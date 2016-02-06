@@ -307,13 +307,13 @@ void parser::try_parse_statements_list(sym_table *sym_tbl){
 			sym_tbl->add_sym(t);
 		} else if (is_expr_start(tk, sym_tbl)){
 			expr *e = expression(MIN_PRIORITY);
-			tk = lxr->next();
 		}
 
+		tk = lxr->next();
 		if (tk.type == TK_SEMICOLON){
 			lxr->next(); 
 		}
-		tk = lxr->get();
+		
 	}
 }
 
@@ -384,7 +384,7 @@ declar parser::parse_declare(sym_table *sym_tbl, bool alias, bool constant){
 		}
 		if (constant)
 			info.reset_type(new sym_const(info.get_type()));
-	} else if (sym_tbl->type_synonym_exist(tk.get_src())){
+	} else if (sym_tbl->type_alias_exist(tk.get_src())){
 		info.set_type(sym_tbl->get_type_by_synonym(tk.get_src()));
 		tk = lxr->next();
 	} else {

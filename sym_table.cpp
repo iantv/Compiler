@@ -183,7 +183,7 @@ sym_type *sym_table::get_type_by_synonym(string s){
 	return nullptr;
 }
 
-bool sym_table::type_synonym_exist(string s){
+bool sym_table::type_alias_exist(string s){
 	if (local_exist(s) || global_exist(s)){
 		return get_type_by_synonym(s) != nullptr;
 	}
