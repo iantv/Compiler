@@ -358,8 +358,7 @@ declar parser::parse_declare(sym_table *sym_tbl, bool alias, bool constant){
 			}
 			symbol *t = try_parse_struct_member_list(tag, sym_tbl);
 			string::iterator it = lxr->it;
-			// FIXME!!!!!!!!!!!!!!!!!
-			if (it != lxr->s.end() && (*it) == ';'){
+			if (lxr->look_next_token(TK_SEMICOLON)){
 				lxr->next();
 				info.set_id(t);
 				return info;
