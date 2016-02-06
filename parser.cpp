@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "error.h"
+#include "statements.h"
 #include <typeinfo.h>
 /*--------------------------------------class declar--------------------------------------*/
 declar::declar(): id(nullptr), type(nullptr){ }
@@ -299,14 +300,15 @@ bool parser::is_expr_start(token tk, sym_table *sym_tbl){
 	return tk.is_literal() || tk.is_operator() || sym_tbl->symbol_not_alias_exist(tk.get_src());
 }
 
-void parser::try_parse_statements_list(sym_table *sym_tbl){
+void parser::try_parse_statements_list(sym_table *sym_tbl, stmt_block *stmt_blck){
 	token tk = lxr->get();
 	while (tk.type != TK_CLOSE_BRACE){
 		if (tk.is_type_specifier()){
 			symbol *t = make_symbol(parse_declare(sym_tbl));
 			sym_tbl->add_sym(t);
 		} else if (is_expr_start(tk, sym_tbl)){
-			expr *e = expression(MIN_PRIORITY);
+			stmt_expr *ex = new stmt_expr(expression(MIN_PRIORITY));
+			stmt_blck->push_back(ex);
 		}
 
 		tk = lxr->next();
@@ -317,7 +319,7 @@ void parser::try_parse_statements_list(sym_table *sym_tbl){
 	}
 }
 
-void parser::try_parse_body(sym_table *sym_tbl){
+void parser::try_parse_body(sym_table *sym_tbl, stmt_block *stmt_blck){
 	if (!lxr->look_next_token(TK_OPEN_BRACE))
 		return;
 	token tk = lxr->next();
@@ -325,7 +327,7 @@ void parser::try_parse_body(sym_table *sym_tbl){
 		return;
 	tk = lxr->next(); /* skip open brace '{' */
 	while (tk.type != TK_CLOSE_BRACE){
-		try_parse_statements_list(sym_tbl);
+		try_parse_statements_list(sym_tbl, stmt_blck);
 		try_parse_declarators_list(sym_tbl);
 		tk = lxr->get();
 	}
@@ -335,9 +337,9 @@ void parser::try_parse_declarators_list(sym_table *sym_tbl){
 	//
 }
 
-void parser::try_parse_block(sym_table *sym_tbl){
+void parser::try_parse_block(sym_table *sym_tbl, stmt_block *stmt_blck){
 	sym_table *st = new sym_table(sym_tbl);
-	try_parse_body(st);
+	try_parse_body(st, stmt_blck);
 }
 
 declar parser::parse_declare(sym_table *sym_tbl){
@@ -444,9 +446,10 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 			} else if (tk.type == TK_OPEN_BRACKET){
 				sym_table *st = new sym_table(sym_tbl);
 				parse_fparams(st);
-				try_parse_body(st);
 				if (info.check_id(nullptr)){
-					info.set_id(new sym_function(info.name, st));
+					stmt_block *body = new stmt_block();
+					try_parse_body(st, body);
+					info.set_id(new sym_function(info.name, st, body));
 				} else {
 					string s = (info.get_type() == nullptr) ? typeid(*info.get_id()).name() : typeid(*info.get_type()).name();
 					if (s == "class sym_array"){

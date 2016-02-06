@@ -1,4 +1,5 @@
 #include "sym_table.h"
+#include "statements.h"
 #include "parser.h"
 
 symbol *make_symbol(declar &dcl){
@@ -7,9 +8,10 @@ symbol *make_symbol(declar &dcl){
 	return t;
 }
 
-sym_function::sym_function(const string &sym_name, sym_table *lst){
+sym_function::sym_function(const string &sym_name, sym_table *lst, stmt_block *stmt_blck){
 	name = sym_name;
 	table = lst;
+	block = stmt_blck;
 }
 
 sym_struct::sym_struct(const string &sym_name, sym_table *lst){
@@ -58,6 +60,7 @@ void sym_function::print(ostream &os, int level){
 	print_level(os, level);
 	os << name << ": function" << endl;
 	table->print(os, level + 1);
+	block->print(os, level + 1);
 	print_level(os, level);
 	os << "returns" << endl;
 	type->print(os, level  + 1);

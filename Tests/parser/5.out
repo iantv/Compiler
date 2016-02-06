@@ -1,0 +1,7 @@
+main: function
+	expression:
+			2
+		+
+			1
+returns
+	int

@@ -29,11 +29,13 @@ public:
 
 symbol *make_symbol(declar &);
 
+class stmt_block;
 class sym_function: public symbol{
 	sym_table *table;
+	stmt_block *block;
 public:
 	void print(ostream &os, int level) override;
-	sym_function(const string &sym_name, sym_table *lst); /* lst is pointer to Local Symbol Table */
+	sym_function(const string &sym_name, sym_table *lst, stmt_block *blck); /* lst is pointer to Local Symbol Table */
 };
 
 class sym_type: public symbol{
