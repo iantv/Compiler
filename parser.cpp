@@ -295,12 +295,19 @@ symbol *parser::try_parse_struct_member_list(string &struct_tag, sym_table *sym_
 	return make_symbol(info);
 }
 
+bool parser::is_expr_start(token tk, sym_table *sym_tbl){
+	return tk.is_literal() || tk.is_operator() || sym_tbl->symbol_not_alias_exist(tk.get_src());
+}
+
 void parser::try_parse_statements_list(sym_table *sym_tbl){
 	token tk = lxr->get();
 	while (tk.type != TK_CLOSE_BRACE){
 		if (tk.is_type_specifier()){
 			symbol *t = make_symbol(parse_declare(sym_tbl));
 			sym_tbl->add_sym(t);
+		} else if (is_expr_start(tk, sym_tbl)){
+			expr *e = expression(MIN_PRIORITY);
+			tk = lxr->next();
 		}
 
 		if (tk.type == TK_SEMICOLON){

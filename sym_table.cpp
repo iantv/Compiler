@@ -189,3 +189,10 @@ bool sym_table::type_synonym_exist(string s){
 	}
 	return false;
 }
+
+bool sym_table::symbol_not_alias_exist(string s){
+	if (local_exist(s) || global_exist(s)){
+		return get_type_by_synonym(s) == nullptr;
+	}
+	return false;
+}

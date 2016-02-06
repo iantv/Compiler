@@ -54,6 +54,7 @@ class parser{
 	
 	void try_parse_statements_list(sym_table *);
 	void try_parse_declarators_list(sym_table *);
+	bool is_expr_start(token, sym_table *);
 public:
 	parser(lexer *l);
 	expr *parse_expr();
