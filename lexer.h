@@ -89,7 +89,7 @@ class lexer{
 	position pos;
 	token tk;
 	void scan_new_line();
-	bool look_forward(int n, const char c, ...);
+	bool look_forward(int n, const char c, ...); /* look next symbol after (*it) */
 	token get_number();
 	token try_parse_hex_number();
 	token get_kwd_or_id();
@@ -100,6 +100,7 @@ public:
 	lexer(const char *filename);
 	token next();
 	token get();
+	bool look_next_token(token_t); 
 	bool token_can_exist();
 	void skip_symbol();
 };

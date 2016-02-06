@@ -28,6 +28,7 @@ public:
 	friend class parser;
 };
 
+
 class parser{
 	lexer *lxr;
 	sym_table *table;
@@ -47,7 +48,12 @@ class parser{
 	void check_struct_member(symbol *member, string struct_tag, position pos);
 	void init_prelude(); /* init global symtable prelude */
 	void try_type_cast(expr **, expr **);
-	expr *parser::new_expr_bin_op(expr *ex1, expr *ex2, token tk);
+	expr *new_expr_bin_op(expr *ex1, expr *ex2, token tk);
+	void try_parse_block(sym_table *);
+	void try_parse_body(sym_table *); /* parse function's or block's body */
+	
+	void try_parse_statements_list(sym_table *);
+	void try_parse_declarators_list(sym_table *);
 public:
 	parser(lexer *l);
 	expr *parse_expr();

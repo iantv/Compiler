@@ -1,7 +1,7 @@
 import subprocess
 LTESTCNT = 40
 EXPR = 53
-
+PRS = 3
 PDTESTCNT = 49
 
 ERRPRSDCL = 25 #Error Parser Declare
@@ -24,3 +24,4 @@ testproc('Declarations parsing', '-p -decl', PDTESTCNT, 'declar.out', 'Tests/dec
 testproc('', '-p -decl', ERRPRSDCL, 'declar.out', 'Tests/errors/declar/')
 #testproc('Type casting', '-p -tcast', TCAST, 'typecast.out', 'Tests/typecast/')
 testproc('Type casting', '-p -tcast', IMPTCAST, 'typecast.out', 'Tests/implicit_typecast/')
+testproc('Parser global + definitions', '-p', PRS, 'parser.out', 'Tests/parser/')

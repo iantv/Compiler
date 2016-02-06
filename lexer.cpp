@@ -156,7 +156,7 @@ inline void lexer::skip_symbol(){
 }
 
 token lexer::next(){
-	while (it == s.end() || *it == ' ' || *it == '\t'){
+	while (it == s.end() || (*it) == ' ' || (*it) == '\t'){
 		if (it == s.end()){
 			scan_new_line();
 		} else
@@ -335,4 +335,15 @@ string token::get_type_name(){
 		case TK_STRING_LITERAL: return "const char *";
 		default:			return "";
 	}
+}
+
+bool lexer::look_next_token(token_t tk_t){
+	string s1 = s;
+	string::iterator it1 = it;
+	position pos1 = pos;
+	token tk1 = tk;
+
+	bool r = next().type == tk_t;
+	s = s1; it = it1; pos = pos1; tk = tk1;
+	return r;
 }

@@ -17,6 +17,7 @@ int main(int argc, const char *argv[]){
 				parser P(&L);
 				fout.open("parser.out");
 				P.parse(fout);
+				P.print_sym_table(fout);
 				fout.close();
 			} else if (strcmp(argv[1], "-l") == 0){
 				fout.open("lexer.out");

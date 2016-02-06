@@ -295,6 +295,44 @@ symbol *parser::try_parse_struct_member_list(string &struct_tag, sym_table *sym_
 	return make_symbol(info);
 }
 
+void parser::try_parse_statements_list(sym_table *sym_tbl){
+	token tk = lxr->get();
+	while (tk.type != TK_CLOSE_BRACE){
+		if (tk.is_type_specifier()){
+			symbol *t = make_symbol(parse_declare(sym_tbl));
+			sym_tbl->add_sym(t);
+		}
+
+		if (tk.type == TK_SEMICOLON){
+			lxr->next(); 
+		}
+		tk = lxr->get();
+	}
+}
+
+void parser::try_parse_body(sym_table *sym_tbl){
+	if (!lxr->look_next_token(TK_OPEN_BRACE))
+		return;
+	token tk = lxr->next();
+	if (tk.type != TK_OPEN_BRACE)
+		return;
+	tk = lxr->next(); /* skip open brace '{' */
+	while (tk.type != TK_CLOSE_BRACE){
+		try_parse_statements_list(sym_tbl);
+		try_parse_declarators_list(sym_tbl);
+		tk = lxr->get();
+	}
+}
+
+void parser::try_parse_declarators_list(sym_table *sym_tbl){
+	//
+}
+
+void parser::try_parse_block(sym_table *sym_tbl){
+	sym_table *st = new sym_table(sym_tbl);
+	try_parse_body(st);
+}
+
 declar parser::parse_declare(sym_table *sym_tbl){
 	return parse_declare(sym_tbl, false, false);
 }
@@ -400,6 +438,7 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 			} else if (tk.type == TK_OPEN_BRACKET){
 				sym_table *st = new sym_table(sym_tbl);
 				parse_fparams(st);
+				try_parse_body(st);
 				if (info.check_id(nullptr)){
 					info.set_id(new sym_function(info.name, st));
 				} else {
