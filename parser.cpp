@@ -307,8 +307,7 @@ void parser::try_parse_statements_list(sym_table *sym_tbl, stmt_block *stmt_blck
 			symbol *t = make_symbol(parse_declare(sym_tbl));
 			sym_tbl->add_sym(t);
 		} else if (is_expr_start(tk, sym_tbl)){
-			stmt_expr *ex = new stmt_expr(expression(MIN_PRIORITY));
-			stmt_blck->push_back(ex);
+			stmt_blck->push_back(new stmt_expr(expression(MIN_PRIORITY)));
 		}
 
 		tk = lxr->next();
