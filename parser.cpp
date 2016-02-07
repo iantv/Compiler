@@ -3,7 +3,7 @@
 #include "statements.h"
 #include <typeinfo.h>
 /*--------------------------------------class declar--------------------------------------*/
-declar::declar(): id(nullptr), type(nullptr){ }
+declar::declar(): id(nullptr), type(nullptr), def(false){ }
 
 void declar::set_id(symbol *decl_id){ id = decl_id; }
 void declar::set_type(sym_type *decl_type){ 
@@ -37,11 +37,13 @@ declar::declar(const declar &dcl){
 	id = dcl.id;
 	name = dcl.name;
 	type = dcl.type;
+	def = dcl.def;
 }
 
 void declar::rebuild(declar &dcl){
 	name = dcl.name;
 	id = dcl.id;
+	def = dcl.def;
 	sym_type *t = type;
 	if (dcl.type){
 		sym_type *last = dcl.type;
@@ -55,6 +57,7 @@ void declar::rebuild(declar &dcl){
 
 void declar::set_name(string s){ if (s != "") id->name = s; }
 
+bool declar::is_def(){ return def; }
 const string &declar::get_name(){
 	return id->name; 
 }
@@ -328,20 +331,42 @@ void parser::try_parse_body(sym_table *sym_tbl, stmt_block *stmt_blck){
 	tk = lxr->next(); /* skip open brace '{' */
 	while (tk.type != TK_CLOSE_BRACE){
 		try_parse_statement(sym_tbl, stmt_blck);
-		try_parse_declarator(sym_tbl);
-		if (lxr->get().type == TK_SEMICOLON){
+		bool func_def = try_parse_declarator(sym_tbl);
+		tk = lxr->get();
+		if (func_def) continue;
+		if (tk.type == TK_SEMICOLON){
 			tk = lxr->next(); 
 		} else
 			throw syntax_error(C2143, "missing \";\" before \"" + tk.get_src() + "\"", tk.pos);
 	}
 }
 
-void parser::try_parse_declarator(sym_table *sym_tbl){
+bool parser::try_parse_declarator(sym_table *sym_tbl){
 	token tk = lxr->get();
+	sym_type *stype = nullptr;
+	bool func_def = false;
 	if (tk.is_type_specifier()){
-		symbol *t = make_symbol(parse_declare(sym_tbl));
+		declar dcl = parse_declare(sym_tbl);
+		func_def = dcl.is_def();
+		symbol *t = make_symbol(dcl);
 		sym_tbl->add_sym(t);
-	} // else if
+		stype = t->type;
+	} else if (tk.is_storage_class_specifier() || tk.is_type_qualifier()){
+		bool tconst = false, tdef = false;
+		while (tk.is_type_qualifier() || tk.is_storage_class_specifier()){
+			if (tdef && tk.is_storage_class_specifier()) throw error(C2159, "more than one storage class specified", tk.pos);
+			tdef = tdef || tk.is_storage_class_specifier();
+			tconst = tconst || tk.is_type_qualifier();
+			tk = lxr->next();
+		}
+		table->add_sym(make_symbol(parse_declare(table, tdef, tconst)));
+	}
+	while (lxr->get().type == TK_COMMA && stype != nullptr){
+		declar dcl = parse_declare(table);
+		dcl.set_type(stype);
+		table->add_sym(make_symbol(dcl));
+	}
+	return func_def;
 }
 
 void parser::try_parse_block(sym_table *sym_tbl, stmt_block *stmt_blck){
@@ -457,6 +482,7 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 					stmt_block *body = new stmt_block();
 					try_parse_body(st, body);
 					info.set_id(new sym_function(info.name, st, body));
+					info.def = true;
 				} else {
 					string s = (info.get_type() == nullptr) ? typeid(*info.get_id()).name() : typeid(*info.get_type()).name();
 					if (s == "class sym_array"){
@@ -480,30 +506,8 @@ void parser::parse(ostream &os){
 	token tk = lxr->next();
 	sym_type *stype = nullptr;
 	while (tk.type != NOT_TK){
-		if (tk.is_type_specifier()){
-			symbol *t = make_symbol(parse_declare(table));
-			table->add_sym(t);
-			stype = t->type;
-		} else if (tk.type == TK_SEMICOLON){
-			tk = lxr->next();
-			stype = nullptr;
-			continue;
-		} else if (tk.is_storage_class_specifier() || tk.is_type_qualifier()){
-			bool tconst = false;
-			bool tdef = false;
-			while (tk.is_type_qualifier() || tk.is_storage_class_specifier()){
-				if (tdef && tk.is_storage_class_specifier()) throw error(C2159, "more than one storage class specified", tk.pos);
-				tdef = tdef || tk.is_storage_class_specifier();
-				tconst = tconst || tk.is_type_qualifier();
-				tk = lxr->next();
-			}
-			table->add_sym(make_symbol(parse_declare(table, tdef, tconst)));
-		} else if (tk.type == TK_COMMA && stype != nullptr){
-			declar dcl = parse_declare(table);
-			dcl.set_type(stype);
-			table->add_sym(make_symbol(dcl));
-		}
-		tk = lxr->get();
+		try_parse_declarator(table);
+		tk = lxr->next();
 	}
 }
 

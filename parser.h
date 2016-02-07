@@ -12,6 +12,7 @@ class declar{
 	symbol *id;
 	sym_type *type;
 	string name;
+	bool def; // + definition for functions and blocks
 public:
 	declar();
 	declar(const declar &);
@@ -25,6 +26,7 @@ public:
 	void rebuild(declar &);
 	void reset_type(sym_type *);
 	bool check_id(symbol *);
+	bool is_def();
 	friend symbol *make_symbol(declar &dcl);
 	friend class parser;
 };
@@ -54,7 +56,7 @@ class parser{
 	void try_parse_body(sym_table *, stmt_block *); /* parse function's or block's body */
 	
 	void try_parse_statement(sym_table *, stmt_block *stmt_blck);
-	void try_parse_declarator(sym_table *);
+	bool try_parse_declarator(sym_table *);
 	bool is_expr_start(token, sym_table *);
 public:
 	parser(lexer *l);
