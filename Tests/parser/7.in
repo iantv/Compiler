@@ -1,0 +1,6 @@
+int func(){
+	int a, b;
+	{
+		double c;
+	}
+}

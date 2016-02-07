@@ -1,0 +1,10 @@
+b: variable
+	int
+func: function
+	a: variable
+		int
+	block:
+		c: variable
+			double
+returns
+	int

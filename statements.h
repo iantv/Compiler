@@ -10,9 +10,10 @@ protected:
 public:
 	stmt(){};
 	virtual void print(ostream &os, int level) = 0;
+	void print_level(ostream &os, int level);
 };
 
-class stmt_expr: stmt{
+class stmt_expr: public stmt{
 	expr *e;
 public:
 	friend class parser;
@@ -20,11 +21,13 @@ public:
 	void print(ostream &os, int level) override;
 };
 
-class stmt_block: stmt{
+class stmt_block: public stmt{
+	sym_table *table;
 	vector<stmt *> stmt_list;
 public:
 	stmt_block(vector<stmt *>);
 	stmt_block();
+	stmt_block(sym_table *);
 	void push_back(stmt *);
 	void print(ostream &os, int level) override;
 };

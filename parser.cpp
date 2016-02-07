@@ -322,23 +322,39 @@ void parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck){
 	} // else if
 }
 
-void parser::try_parse_body(sym_table *sym_tbl, stmt_block *stmt_blck){
-	if (!lxr->look_next_token(TK_OPEN_BRACE))
-		return;
-	token tk = lxr->next();
-	if (tk.type != TK_OPEN_BRACE)
-		return;
-	tk = lxr->next(); /* skip open brace '{' */
+void parser::try_parse_statements_list(sym_table *sym_tbl, stmt_block *stmt_blck){
+	token tk = lxr->next(); /* skip open brace '{' */
 	while (tk.type != TK_CLOSE_BRACE){
+		bool block = try_parse_block(sym_tbl, stmt_blck);
 		try_parse_statement(sym_tbl, stmt_blck);
 		bool func_def = try_parse_declarator(sym_tbl);
 		tk = lxr->get();
-		if (func_def) continue;
+		if (func_def || block) continue;
 		if (tk.type == TK_SEMICOLON){
 			tk = lxr->next(); 
 		} else
 			throw syntax_error(C2143, "missing \";\" before \"" + tk.get_src() + "\"", tk.pos);
 	}
+	
+	if (tk.type == TK_CLOSE_BRACE)
+		lxr->next(); /* skip close brace '}' */
+}
+
+bool parser::try_parse_block(sym_table *sym_tbl_prev, stmt_block * stmt_prev_block){
+	if (lxr->get().type != TK_OPEN_BRACE)
+		return false;
+	sym_table *sym_tbl = new sym_table(sym_tbl_prev);
+	stmt_block *stmt_blck = new stmt_block(sym_tbl);
+	try_parse_statements_list(sym_tbl, stmt_blck);
+	stmt_prev_block->push_back(dynamic_cast<stmt *>(stmt_blck));
+	return true;
+}
+
+void parser::try_parse_body(sym_table *sym_tbl, stmt_block *stmt_blck){
+	if (!lxr->look_next_token(TK_OPEN_BRACE))
+		return;
+	lxr->next(); /* Current token is TK_OPEN_BRACE */
+	try_parse_statements_list(sym_tbl, stmt_blck);
 }
 
 bool parser::try_parse_declarator(sym_table *sym_tbl){
@@ -367,11 +383,6 @@ bool parser::try_parse_declarator(sym_table *sym_tbl){
 		table->add_sym(make_symbol(dcl));
 	}
 	return func_def;
-}
-
-void parser::try_parse_block(sym_table *sym_tbl, stmt_block *stmt_blck){
-	sym_table *st = new sym_table(sym_tbl);
-	try_parse_body(st, stmt_blck);
 }
 
 declar parser::parse_declare(sym_table *sym_tbl){

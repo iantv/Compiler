@@ -148,7 +148,8 @@ symbol *sym_table::get_symbol(string s){
 }
 
 sym_type* sym_table::get_type_specifier(string s){
-	// DO check
+	/*symbol *t = get_symbol(s);
+	string id = typeid(*t).name();*/ //DO correct!!!
 	return dynamic_cast<sym_type *>(get_symbol(s));
 };
 
@@ -188,6 +189,7 @@ void sym_table::print(ostream &os, int level){
 
 sym_type *sym_table::get_type_by_synonym(string s){
 	sym_type *t = get_type_specifier(s);
+	if (t == nullptr) return nullptr;
 	string id = typeid(*t).name();
 	if (id == "class sym_alias"){
 		return t->type;
