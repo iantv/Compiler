@@ -25,6 +25,7 @@ public:
 	friend symbol *add_elem_to_list(symbol *sym_list, symbol *sym2);
 	symbol(){ name = ""; type = nullptr; }
 	symbol(const string &sym_name) { name = sym_name; }
+	bool type_eq(string type_name);
 };
 
 symbol *make_symbol(declar &);
@@ -136,6 +137,7 @@ public:
 	void del_sym(symbol *sym);
 	bool local_exist(string &name);
 	bool global_exist(string &name);
+	symbol *get_symbol(string);
 	sym_type *get_type_specifier(string);
 	bool type_alias_exist(string);
 	sym_type *get_type_by_synonym(string s);

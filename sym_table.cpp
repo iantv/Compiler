@@ -2,6 +2,10 @@
 #include "statements.h"
 #include "parser.h"
 
+bool symbol::type_eq(string type_name){
+	return type->name == type_name;
+}
+
 symbol *make_symbol(declar &dcl){
 	symbol *t = dcl.get_id();
 	t->type = dcl.get_type();
@@ -124,23 +128,28 @@ bool sym_table::local_exist(string &name){
 	return symbols.find(name) != symbols.end();
 }
 
-sym_type* sym_table::get_type_specifier(string s){
+symbol *sym_table::get_symbol(string s){
 	map<string, symbol *>::iterator it;
-	sym_type *t = nullptr;
+	symbol *t = nullptr;
 	sym_table *st = prev;
 
 	it = symbols.find(s.c_str());
 	if (it == symbols.end()){
 		while (st){
-			t = st->get_type_specifier(s);
+			t = st->get_symbol(s);
 			if (t == nullptr)
 				st = st->prev;
 			else 
 				return t;
 		}
 	} else
-		return dynamic_cast<sym_type *>(it->second);
+		return it->second;
 	return nullptr;
+}
+
+sym_type* sym_table::get_type_specifier(string s){
+	// DO check
+	return dynamic_cast<sym_type *>(get_symbol(s));
 };
 
 bool sym_table::global_exist(string &name){

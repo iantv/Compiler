@@ -301,10 +301,20 @@ bool parser::is_expr_start(token tk, sym_table *sym_tbl){
 }
 
 void parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck){
-	// DO check to global parsing
 	token tk = lxr->get();
 	if (is_expr_start(tk, sym_tbl)){
-		// DO error handling
+		//DO tests and corresponding call, but while it's comment
+		/*if (sym_tbl->prev == nullptr){
+			if (tk.is_literal())
+				throw syntax_error(C2059, "\'constant\'", tk.pos);
+			else if (tk.is_operator())
+				throw syntax_error(C2059, tk.get_src(), tk.pos);
+			else if (sym_tbl->symbol_not_alias_exist(tk.get_src())){
+				//symbol *sym = sym_tbl->get_symbol(tk.get_src());
+				//if (sym->type_eq("int") == false) DO throw only in case type_eq("int") == false and else it's OK..it's simplify declaration with type 'int'
+				throw syntax_error(C2371, "\'" + tk.get_src() + "\': redefinition; different basic types", tk.pos);
+			}
+		}*/
 		stmt_blck->push_back(new stmt_expr(expression(MIN_PRIORITY)));
 	} // else if
 }
