@@ -300,21 +300,17 @@ bool parser::is_expr_start(token tk, sym_table *sym_tbl){
 	return tk.is_literal() || tk.is_operator() || sym_tbl->symbol_not_alias_exist(tk.get_src());
 }
 
-void parser::try_parse_statements_list(sym_table *sym_tbl, stmt_block *stmt_blck){
+void parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck){
+	// DO check to global parsing
 	token tk = lxr->get();
-	while (tk.type != TK_CLOSE_BRACE){
-		if (tk.is_type_specifier()){
-			symbol *t = make_symbol(parse_declare(sym_tbl));
-			sym_tbl->add_sym(t);
-		} else if (is_expr_start(tk, sym_tbl)){
-			stmt_blck->push_back(new stmt_expr(expression(MIN_PRIORITY)));
-		}
+	if (is_expr_start(tk, sym_tbl)){
+		// DO error handling
+		stmt_blck->push_back(new stmt_expr(expression(MIN_PRIORITY)));
+	} else return;
 
-		tk = lxr->next();
-		if (tk.type == TK_SEMICOLON){
-			lxr->next(); 
-		}
-		
+	tk = lxr->next();
+	if (tk.type == TK_SEMICOLON){
+		lxr->next(); 
 	}
 }
 
@@ -326,14 +322,22 @@ void parser::try_parse_body(sym_table *sym_tbl, stmt_block *stmt_blck){
 		return;
 	tk = lxr->next(); /* skip open brace '{' */
 	while (tk.type != TK_CLOSE_BRACE){
-		try_parse_statements_list(sym_tbl, stmt_blck);
-		try_parse_declarators_list(sym_tbl);
+		try_parse_statement(sym_tbl, stmt_blck);
+		try_parse_declarator(sym_tbl);
 		tk = lxr->get();
 	}
 }
 
-void parser::try_parse_declarators_list(sym_table *sym_tbl){
-	//
+void parser::try_parse_declarator(sym_table *sym_tbl){
+	token tk = lxr->get();
+	if (tk.is_type_specifier()){
+		symbol *t = make_symbol(parse_declare(sym_tbl));
+		sym_tbl->add_sym(t);
+	} else return;
+	tk = lxr->next();
+	if (tk.type == TK_SEMICOLON){
+		lxr->next(); 
+	}
 }
 
 void parser::try_parse_block(sym_table *sym_tbl, stmt_block *stmt_blck){
