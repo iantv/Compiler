@@ -306,12 +306,7 @@ void parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck){
 	if (is_expr_start(tk, sym_tbl)){
 		// DO error handling
 		stmt_blck->push_back(new stmt_expr(expression(MIN_PRIORITY)));
-	} else return;
-
-	tk = lxr->next();
-	if (tk.type == TK_SEMICOLON){
-		lxr->next(); 
-	}
+	} // else if
 }
 
 void parser::try_parse_body(sym_table *sym_tbl, stmt_block *stmt_blck){
@@ -324,7 +319,10 @@ void parser::try_parse_body(sym_table *sym_tbl, stmt_block *stmt_blck){
 	while (tk.type != TK_CLOSE_BRACE){
 		try_parse_statement(sym_tbl, stmt_blck);
 		try_parse_declarator(sym_tbl);
-		tk = lxr->get();
+		if (lxr->get().type == TK_SEMICOLON){
+			tk = lxr->next(); 
+		} else
+			throw syntax_error(C2143, "missing \";\" before \"" + tk.get_src() + "\"", tk.pos);
 	}
 }
 
@@ -333,11 +331,7 @@ void parser::try_parse_declarator(sym_table *sym_tbl){
 	if (tk.is_type_specifier()){
 		symbol *t = make_symbol(parse_declare(sym_tbl));
 		sym_tbl->add_sym(t);
-	} else return;
-	tk = lxr->next();
-	if (tk.type == TK_SEMICOLON){
-		lxr->next(); 
-	}
+	} // else if
 }
 
 void parser::try_parse_block(sym_table *sym_tbl, stmt_block *stmt_blck){
