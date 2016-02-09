@@ -210,7 +210,7 @@ size_t parser::parse_size_of_array(){ /* Size is only const integer value */
 	return t;
 }
 
-void parser::parse_fparams(sym_table *lst){
+void parser::parse_fparams(sym_table *lst, vector<string> *params){
 	declar param;
 	token tk = lxr->next(); /* skip open bracket '(' */
 	while (tk.type != TK_CLOSE_BRACKET){
@@ -236,6 +236,7 @@ void parser::parse_fparams(sym_table *lst){
 				}
 			} else
 				tk = lxr->next();
+			params->push_back(param.get_name());
 			lst->add_sym(new sym_var_param(param.get_name(), param.get_type()));
 		} else {
 			if (tk.type == TK_ID){
@@ -488,11 +489,12 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 				}
 			} else if (tk.type == TK_OPEN_BRACKET){
 				sym_table *st = new sym_table(sym_tbl);
-				parse_fparams(st);
+				vector<string> params;
+				parse_fparams(st, &params);
 				if (info.check_id(nullptr)){
 					stmt_block *body = new stmt_block();
 					try_parse_body(st, body);
-					info.set_id(new sym_function(info.name, st, body));
+					info.set_id(new sym_function(info.name, st, body, params));
 					info.def = true;
 				} else {
 					string s = (info.get_type() == nullptr) ? typeid(*info.get_id()).name() : typeid(*info.get_type()).name();
@@ -502,9 +504,9 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 						throw error(C2091, "function returns function", lxr->pos);
 					}
 					if (dir_dcl)
-						info.set_back_type(new sym_func_type(nullptr, st));
+						info.set_back_type(new sym_func_type(nullptr, st, params));
 					else
-						info.set_type(new sym_func_type(nullptr, st));
+						info.set_type(new sym_func_type(nullptr, st, params));
 				}
 			}
 			tk = lxr->next();

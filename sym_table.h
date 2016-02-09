@@ -34,9 +34,10 @@ class stmt_block;
 class sym_function: public symbol{
 	sym_table *table;
 	stmt_block *block;
+	vector<string> params;
 public:
 	void print(ostream &os, int level) override;
-	sym_function(const string &sym_name, sym_table *lst, stmt_block *blck); /* lst is pointer to Local Symbol Table */
+	sym_function(const string &sym_name, sym_table *lst, stmt_block *blck, vector<string> &param_list); /* lst is pointer to Local Symbol Table */
 };
 
 class sym_type: public symbol{
@@ -76,9 +77,10 @@ public:
 
 class sym_func_type: public sym_type{
 	sym_table *table;
+	vector<string> params;
 public:
 	void print(ostream &os, int level) override;
-	sym_func_type(sym_type *stype, sym_table *lst){ name = ""; type = stype; table = lst; }
+	sym_func_type(sym_type *stype, sym_table *lst, vector<string> &param_list);
 };
 
 class sym_const: public sym_type{

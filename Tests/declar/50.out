@@ -1,0 +1,9 @@
+func: function
+	c: parameter
+		int
+	b: parameter
+		int
+	a: parameter
+		int
+returns
+	int

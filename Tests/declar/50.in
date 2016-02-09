@@ -1,0 +1,1 @@
+int func(int c, int b, int a);

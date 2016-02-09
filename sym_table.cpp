@@ -12,10 +12,18 @@ symbol *make_symbol(declar &dcl){
 	return t;
 }
 
-sym_function::sym_function(const string &sym_name, sym_table *lst, stmt_block *stmt_blck){
+sym_function::sym_function(const string &sym_name, sym_table *lst, stmt_block *stmt_blck, vector<string> &param_list){
 	name = sym_name;
 	table = lst;
 	block = stmt_blck;
+	params = param_list;
+}
+
+sym_func_type::sym_func_type(sym_type *stype, sym_table *lst, vector<string> &param_list){
+	name = "";
+	type = stype;
+	table = lst;
+	params = param_list; 
 }
 
 sym_struct::sym_struct(const string &sym_name, sym_table *lst){
@@ -49,6 +57,8 @@ void sym_pointer::print(ostream &os, int level){
 void sym_func_type::print(ostream &os, int level){
 	print_level(os, level);
 	os << name << "function" << endl;
+	for (int i = 0; i < (int)params.size(); i++)
+		table->get_symbol(params[i])->print(os, level + 1);
 	table->print(os, level + 1);
 	print_level(os, level);
 	os << "returns" << endl;
@@ -63,6 +73,8 @@ void sym_type::print(ostream &os, int level){
 void sym_function::print(ostream &os, int level){
 	print_level(os, level);
 	os << name << ": function" << endl;
+	for (int i = 0; i < (int)params.size(); i++)
+		table->get_symbol(params[i])->print(os, level + 1);
 	table->print(os, level + 1);
 	block->print(os, level + 1);
 	print_level(os, level);
@@ -183,7 +195,11 @@ ostream &operator<<(ostream &os, const sym_table st){
 
 void sym_table::print(ostream &os, int level){
 	for (auto it = symbols.begin(); it != symbols.end(); ++it){
-		it->second->print(os, level);
+		symbol *t = it->second;
+		string s = typeid(*t).name();
+		if (s == "class sym_var_param")
+			continue;
+		t->print(os, level);
 	}
 }
 
