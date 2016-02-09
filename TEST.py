@@ -1,7 +1,7 @@
 import subprocess
 LTESTCNT = 40
 EXPR = 53
-PRS =  7
+PRS =  8
 PRSERR = 1
 PDTESTCNT = 50
 
@@ -11,7 +11,7 @@ IMPTCAST = 8
 def testproc(testname, cmd, N, output, ansdir):
 	print testname
 	for i in range(1, N + 1):
-		if ansdir == 'Tests/declar/' and N == 27:
+		if ansdir == 'Tests/declar/' and i == 27:
 			continue
 		subprocess.call('../Debug/Compiler.exe ' + cmd + ' ' + ansdir + '{}.in'.format(i))
 		f1 = open(output, 'r')
