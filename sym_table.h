@@ -103,24 +103,6 @@ public:
 	sym_var_param(const string &sym_name, sym_type *sym_param_type = nullptr, expr *sym_init_val = nullptr);
 };
 
-class sym_var_const: public sym_var{
-public:
-	void print(ostream &os, int level) override;
-	sym_var_const(){}
-};
-
-class sym_var_local: public sym_var{
-public:
-	void print(ostream &os, int level) override;
-	sym_var_local(){}
-};
-
-class sym_var_global: public sym_var{
-public:
-	void print(ostream &os, int level) override;
-	sym_var_global(){}
-};
-
 class sym_table{
 	map<string, symbol *> symbols;
 	sym_table *prev;
