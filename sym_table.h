@@ -35,7 +35,9 @@ class sym_function: public symbol{
 	sym_table *table;
 	stmt_block *block;
 	vector<string> params;
+	sym_function *next;
 public:
+	friend class parser;
 	void print(ostream &os, int level) override;
 	sym_function(const string &sym_name, sym_table *lst, stmt_block *blck, vector<string> &param_list); /* lst is pointer to Local Symbol Table */
 };
@@ -43,6 +45,7 @@ public:
 class sym_type: public symbol{
 public:
 	friend class declar;
+	friend bool equal(sym_type *, sym_type *);
 	void print(ostream &os, int level);
 	sym_type(){}
 	sym_type(const string &sym_name) { name = sym_name; type = nullptr; }

@@ -54,7 +54,7 @@ class parser{
 	void try_type_cast(expr **, expr **);
 	expr *new_expr_bin_op(expr *ex1, expr *ex2, token tk);
 	bool try_parse_block(sym_table *, stmt_block *);
-	void try_parse_body(sym_table *, stmt_block *); /* parse function's or block's body */
+	stmt_block *try_parse_body(sym_table *); /* parse function's or block's body */
 	
 	void try_parse_statements_list(sym_table *, stmt_block *stmt_blck);
 	void try_parse_statement(sym_table *, stmt_block *stmt_blck);

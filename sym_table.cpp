@@ -76,7 +76,8 @@ void sym_function::print(ostream &os, int level){
 	for (int i = 0; i < (int)params.size(); i++)
 		table->get_symbol(params[i])->print(os, level + 1);
 	table->print(os, level + 1);
-	block->print(os, level + 1);
+	if (block != nullptr)
+		block->print(os, level + 1);
 	print_level(os, level);
 	os << "returns" << endl;
 	type->print(os, level  + 1);
@@ -224,5 +225,16 @@ bool sym_table::symbol_not_alias_exist(string s){
 	if (local_exist(s) || global_exist(s)){
 		return get_type_by_synonym(s) == nullptr;
 	}
+	return false;
+}
+
+bool equal(sym_type *sym1, sym_type *sym2){
+	sym_type *t1 = sym1, *t2 = sym2;
+	while (t1 != nullptr && t2 != nullptr && t1->type && t2->type && (t1->name == t2->name)){
+		t1 = t1->type;
+		t2 = t2->type;
+	}
+	if (t1 == t2)
+		return true;
 	return false;
 }
