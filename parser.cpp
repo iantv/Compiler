@@ -528,7 +528,9 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 					sym_function * f = new sym_function(info.name, st, try_parse_body(st), params);
 					info.set_id(f);
 					info.def = f->block != nullptr;
-					return info;
+					tk = lxr->get();
+					continue;
+					///return info;
 				} else {
 					string s = (info.get_type() == nullptr) ? typeid(*info.get_id()).name() : typeid(*info.get_type()).name();
 					if (s == "class sym_array"){
