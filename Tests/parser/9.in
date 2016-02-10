@@ -1,0 +1,5 @@
+void a();
+void a();
+
+void a(){ 1; };
+void a();

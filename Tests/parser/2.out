@@ -1,7 +1,7 @@
-a: variable
-	int
 main: function
 	a: parameter
 		int
 returns
+	int
+a: variable
 	int

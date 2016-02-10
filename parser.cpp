@@ -389,11 +389,8 @@ bool parser::try_parse_declarator(sym_table *sym_tbl){
 								delete t; t = nullptr;
 								break;
 							}
-						}
-					} else {
-						if (equal((*it)->type, cur_func->type)){
+						} else 
 							throw error(C2556, cur_func->name + ": overloaded functions only differ by return type", tk.pos);
-						}
 					}
 				}
 			}
@@ -530,7 +527,6 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 					info.def = f->block != nullptr;
 					tk = lxr->get();
 					continue;
-					///return info;
 				} else {
 					string s = (info.get_type() == nullptr) ? typeid(*info.get_id()).name() : typeid(*info.get_type()).name();
 					if (s == "class sym_array"){

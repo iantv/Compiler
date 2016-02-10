@@ -1,5 +1,3 @@
-b: variable
-	int
 func: function
 	a: variable
 		int
@@ -7,4 +5,6 @@ func: function
 		c: variable
 			double
 returns
+	int
+b: variable
 	int
