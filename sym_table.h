@@ -110,6 +110,7 @@ public:
 
 class sym_table{
 	map<string, symbol *> symbols;
+	vector<sym_function *> functions;
 	sym_table *prev;
 	int level;
 public:

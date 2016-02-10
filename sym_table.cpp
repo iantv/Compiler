@@ -177,6 +177,11 @@ bool sym_table::global_exist(string &name){
 }
 
 void sym_table::add_sym(symbol *sym){
+	string s = typeid(*sym).name();
+	if (s == "class sym_function"){
+		functions.push_back(dynamic_cast<sym_function *>(sym));
+		return;
+	}
 	if (local_exist(sym->name))
 		throw 1;
 	symbols.insert(pair<string, symbol *>(sym->name, sym));
@@ -188,6 +193,9 @@ void sym_table::del_sym(symbol *sym){
 }
 
 ostream &operator<<(ostream &os, const sym_table st){
+	for (int i = 0; i < (int)st.functions.size(); i++){
+		st.functions[i]->print(os, st.level);
+	}
 	for (auto it = st.symbols.begin(); it != st.symbols.end(); ++it){
 		it->second->print(os, st.level);
 	}
@@ -195,6 +203,9 @@ ostream &operator<<(ostream &os, const sym_table st){
 }
 
 void sym_table::print(ostream &os, int level){
+	for (int i = 0; i < (int)functions.size(); i++){
+		functions[i]->print(os, level);
+	}
 	for (auto it = symbols.begin(); it != symbols.end(); ++it){
 		symbol *t = it->second;
 		string s = typeid(*t).name();
@@ -238,3 +249,11 @@ bool equal(sym_type *sym1, sym_type *sym2){
 		return true;
 	return false;
 }
+/*
+sym_function *sym_table::get_function(string name){
+	for (int i = 0; i < (int)functions.size(); i++){
+		if (functions[i]->name == name)
+			return functions[i];
+	}
+	return nullptr;
+}*/
