@@ -13,6 +13,9 @@ def testproc(testname, cmd, N, output, ansdir):
 	for i in range(1, N + 1):
 		if ansdir == 'Tests/declar/' and i == 27:
 			continue
+		if (i - 1) % 5 == 0:
+			print '|',
+			
 		subprocess.call('../Debug/Compiler.exe ' + cmd + ' ' + ansdir + '{}.in'.format(i))
 		f1 = open(output, 'r')
 		f2 = open(ansdir + '{}.out'.format(i))
