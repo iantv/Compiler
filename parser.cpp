@@ -350,8 +350,12 @@ bool parser::try_parse_block(sym_table *sym_tbl_prev, stmt_block * stmt_prev_blo
 }
 
 stmt_block *parser::try_parse_body(sym_table *sym_tbl){
-	if (!lxr->look_next_token(TK_OPEN_BRACE))
+	if (!lxr->look_next_token(TK_OPEN_BRACE)){
+		lxr->next();
 		return nullptr;
+	}
+	/*if (lxr->get().type == TK_OPEN_BRACE)
+		return nullptr;*/
 	lxr->next(); /* Current token is TK_OPEN_BRACE */
 	stmt_block *stmt_blck = new stmt_block();
 	try_parse_statements_list(sym_tbl, stmt_blck);
@@ -366,47 +370,36 @@ bool parser::try_parse_declarator(sym_table *sym_tbl){
 		declar dcl = parse_declare(sym_tbl);
 		func_def = dcl.is_def();
 		symbol *t = make_symbol(dcl);
-		bool func_exist = false;
 		string cur_type = typeid(*t).name();
 		if (cur_type == "class sym_var"){
 			if (sym_tbl->local_exist(t->name))
 				throw error(C2086, t->type->name + " " + t->name + ": redefinition", tk.pos);
-			sym_tbl->add_sym(t);
 		} else if (cur_type == "class sym_function"){
 			sym_function *cur_func = dynamic_cast<sym_function *>(t);
-			if (table->local_exist(cur_func->name)){
-				symbol *sym_from_table = table->get_symbol(cur_func->name);
-				string s = typeid(* sym_from_table).name();
-				if (s == "class sym_function"){
-					sym_function *func = dynamic_cast<sym_function *>(sym_from_table);
-					
-					while (func != nullptr){
-						if (equal(cur_func->type, func->type)){
-							if (cur_func->params == func->params){
-								if (cur_func->block != nullptr && func->block != nullptr)
-									/* Necessary release print of all errors to test this error */
-									throw error(C2084, "function \"" + cur_func->name + "\" already has a body", tk.pos);
-								else if (cur_func->block != nullptr && func->block == nullptr){
-									func->block = cur_func->block;
-									func_exist = true;	
-								} else 
-									cur_func = cur_func->next;
-							} else
-								cur_func = cur_func->next;
-						} else {
-							if (cur_func->params == func->params)
-								throw error(C2556, cur_func->name + ": overloaded functions only differ by return type", tk.pos);
-							else
-								cur_func = cur_func->next;							
+			vector<sym_function *>::iterator it = table->functions.begin();
+			for (vector<sym_function *>::iterator it = table->functions.begin(); it != table->functions.end(); it++){
+				if ((*it)->name == cur_func->name){
+					if ((*it)->params == cur_func->params){
+						if (equal((*it)->type, cur_func->type)){
+							if ((*it)->block != nullptr && cur_func != nullptr){
+								/* Necessary release print of all errors to test this error */
+								throw error(C2084, "function \"" + cur_func->name + "\" already has a body", tk.pos);
+							} else if ((*it)->block == nullptr && cur_func->block != nullptr){
+								(*it)->block = cur_func->block;
+								delete t; t = nullptr;
+								break;
+							}
+						}
+					} else {
+						if (equal((*it)->type, cur_func->type)){
+							throw error(C2556, cur_func->name + ": overloaded functions only differ by return type", tk.pos);
 						}
 					}
-
 				}
 			}
-			if (func_exist == false)
-				table->add_sym(t);
-		} else 
-			sym_tbl->add_sym(t);
+		}
+		if (t != nullptr)
+				sym_tbl->add_sym(t);
 		stype = t->type;
 	} else if (tk.is_storage_class_specifier() || tk.is_type_qualifier()){
 		bool tconst = false, tdef = false;
@@ -532,8 +525,10 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 				vector<string> params;
 				parse_fparams(st, &params);
 				if (info.check_id(nullptr)){
-					info.set_id(new sym_function(info.name, st, try_parse_body(st), params));
-					info.def = true;
+					sym_function * f = new sym_function(info.name, st, try_parse_body(st), params);
+					info.set_id(f);
+					info.def = f->block != nullptr;
+					return info;
 				} else {
 					string s = (info.get_type() == nullptr) ? typeid(*info.get_id()).name() : typeid(*info.get_type()).name();
 					if (s == "class sym_array"){
@@ -568,8 +563,9 @@ void parser::parse(ostream &os){
 	while (tk.type != NOT_TK){
 		try_parse_statement(table, nullptr); 
 		bool func_def = try_parse_declarator(table);
+		tk = lxr->get();
 		if (func_def){
-			tk = lxr->next();
+			//tk = lxr->next();
 			continue;
 		}
 		check_semicolon();
