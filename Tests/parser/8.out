@@ -1,0 +1,7 @@
+a: variable
+	int
+main: function
+	a: variable
+		int
+returns
+	void

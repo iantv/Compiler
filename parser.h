@@ -36,6 +36,7 @@ class parser{
 	lexer *lxr;
 	sym_table *table;
 	sym_table *prelude;
+
 	expr *expression(int priority);
 	expr *factor();
 	expr *parse_function();
@@ -59,12 +60,14 @@ class parser{
 	void try_parse_statement(sym_table *, stmt_block *stmt_blck);
 	bool try_parse_declarator(sym_table *);
 	bool is_expr_start(token, sym_table *);
+	void check_semicolon();
 public:
 	parser(lexer *l);
 	expr *parse_expr();
 	void parse(ostream &os);
 	void print_sym_table(ostream &os);
 	bool tcast;
+	bool prs_expr;
 };
 
 #endif

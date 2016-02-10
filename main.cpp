@@ -40,6 +40,7 @@ int main(int argc, const char *argv[]){
 					parser P(&L);
 					fout.open("expression.out");
 					P.tcast = false; /* Disable type checking */
+					//P.prs_expr = true;
 					P.parse_expr()->print(fout, 0);
 					fout.close();
 				} else if (strcmp(argv[2], "-tcast") == 0){

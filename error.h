@@ -10,6 +10,7 @@
 #define C2065 "C2065"
 #define C2079 "C2079"
 #define C2085 "C2085"
+#define C2086 "C2086"
 #define C2091 "C2091"
 #define C2092 "C2092"
 

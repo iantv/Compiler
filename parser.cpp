@@ -308,7 +308,7 @@ void parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck){
 	token tk = lxr->get();
 	if (is_expr_start(tk, sym_tbl)){
 		//DO tests and corresponding call, but while it's comment
-		/*if (sym_tbl->prev == nullptr){
+		if (sym_tbl->prev == nullptr){
 			if (tk.is_literal())
 				throw syntax_error(C2059, "\'constant\'", tk.pos);
 			else if (tk.is_operator())
@@ -318,7 +318,7 @@ void parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck){
 				//if (sym->type_eq("int") == false) DO throw only in case type_eq("int") == false and else it's OK..it's simplify declaration with type 'int'
 				throw syntax_error(C2371, "\'" + tk.get_src() + "\': redefinition; different basic types", tk.pos);
 			}
-		}*/
+		}
 		stmt_blck->push_back(new stmt_expr(expression(MIN_PRIORITY)));
 	} // else if
 }
@@ -331,10 +331,8 @@ void parser::try_parse_statements_list(sym_table *sym_tbl, stmt_block *stmt_blck
 		bool func_def = try_parse_declarator(sym_tbl);
 		tk = lxr->get();
 		if (func_def || block) continue;
-		if (tk.type == TK_SEMICOLON){
-			tk = lxr->next(); 
-		} else
-			throw syntax_error(C2143, "missing \";\" before \"" + tk.get_src() + "\"", tk.pos);
+		check_semicolon();
+		tk = lxr->get();
 	}
 	
 	if (tk.type == TK_CLOSE_BRACE)
@@ -366,6 +364,13 @@ bool parser::try_parse_declarator(sym_table *sym_tbl){
 		declar dcl = parse_declare(sym_tbl);
 		func_def = dcl.is_def();
 		symbol *t = make_symbol(dcl);
+		
+		string cur_type = typeid(*t).name();
+		if (cur_type == "class sym_var"){
+			if (sym_tbl->local_exist(t->name))
+				throw error(C2086, t->type->name + " " + t->name + ": redefinition", tk.pos);
+		}
+
 		sym_tbl->add_sym(t);
 		stype = t->type;
 	} else if (tk.is_storage_class_specifier() || tk.is_type_qualifier()){
@@ -515,12 +520,27 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 	return info;
 }
 
+void parser::check_semicolon(){
+	token tk = lxr->get();
+	if (tk.type == TK_SEMICOLON){
+		tk = lxr->next(); 
+	} else
+		throw syntax_error(C2143, "missing \";\" before \"" + tk.get_src() + "\"", tk.pos);
+}
+
 void parser::parse(ostream &os){
 	token tk = lxr->next();
 	sym_type *stype = nullptr;
+	table->prev = nullptr;
 	while (tk.type != NOT_TK){
-		try_parse_declarator(table);
-		tk = lxr->next();
+		try_parse_statement(table, nullptr); 
+		bool func_def = try_parse_declarator(table);
+		if (func_def){
+			tk = lxr->next();
+			continue;
+		}
+		check_semicolon();
+		tk = lxr->get();
 	}
 }
 
