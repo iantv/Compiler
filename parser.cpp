@@ -366,13 +366,15 @@ void parser::check_func_decl2errors(symbol **t, token tk){
 		if ((*it)->name == cur_func->name){
 			if ((*it)->params == cur_func->params){
 				if (equal((*it)->type, cur_func->type)){
-					if ((*it)->block != nullptr && cur_func != nullptr){
+					if ((*it)->block != nullptr && cur_func->block != nullptr){
 						/* Necessary release print of all errors to test this error */
 						throw error(C2084, "function \"" + cur_func->name + "\" already has a body", tk.pos);
 					} else if ((*it)->block == nullptr && cur_func->block != nullptr){
 						(*it)->block = cur_func->block;
 						delete *t; *t = nullptr;
 						break;
+					} else {
+						delete *t; *t = nullptr;
 					}
 				} else 
 					throw error(C2556, cur_func->name + ": overloaded functions only differ by return type", tk.pos);
@@ -399,8 +401,10 @@ bool parser::try_parse_declarator(sym_table *sym_tbl){
 		func_def = dcl.is_def();
 		symbol *t = make_symbol(dcl);
 		check_decl2errors(sym_tbl, &t, tk);
-		if (t != nullptr) sym_tbl->add_sym(t);
-		stype = t->type;
+		if (t != nullptr){ 
+			sym_tbl->add_sym(t);
+			stype = t->type;
+		}
 	} else if (tk.is_storage_class_specifier() || tk.is_type_qualifier()){
 		bool tconst = false, tdef = false;
 		while (tk.is_type_qualifier() || tk.is_storage_class_specifier()){
@@ -566,7 +570,6 @@ void parser::parse(ostream &os){
 		bool func_def = try_parse_declarator(table);
 		tk = lxr->get();
 		if (func_def){
-			//tk = lxr->next();
 			continue;
 		}
 		check_semicolon();

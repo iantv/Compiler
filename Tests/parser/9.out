@@ -1,5 +1,5 @@
 a: function
 	expression:
 		1
-return
+returns
 	void
