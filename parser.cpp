@@ -354,8 +354,6 @@ stmt_block *parser::try_parse_body(sym_table *sym_tbl){
 		lxr->next();
 		return nullptr;
 	}
-	/*if (lxr->get().type == TK_OPEN_BRACE)
-		return nullptr;*/
 	lxr->next(); /* Current token is TK_OPEN_BRACE */
 	stmt_block *stmt_blck = new stmt_block();
 	try_parse_statements_list(sym_tbl, stmt_blck);
@@ -364,7 +362,6 @@ stmt_block *parser::try_parse_body(sym_table *sym_tbl){
 
 void parser::check_func_decl2errors(symbol **t, token tk){
 	sym_function *cur_func = dynamic_cast<sym_function *>(*t);
-	vector<sym_function *>::iterator it = table->functions.begin();
 	for (vector<sym_function *>::iterator it = table->functions.begin(); it != table->functions.end(); it++){
 		if ((*it)->name == cur_func->name){
 			if ((*it)->params == cur_func->params){
@@ -393,14 +390,12 @@ bool parser::try_parse_declarator(sym_table *sym_tbl){
 		func_def = dcl.is_def();
 		symbol *t = make_symbol(dcl);
 		string cur_type = typeid(*t).name();
-		if (cur_type == "class sym_var"){
-			if (sym_tbl->local_exist(t->name))
-				throw error(C2086, t->type->name + " " + t->name + ": redefinition", tk.pos);
+		if (cur_type == "class sym_var" && sym_tbl->local_exist(t->name)){
+			throw error(C2086, t->type->name + " " + t->name + ": redefinition", tk.pos);
 		} else if (cur_type == "class sym_function"){
 			check_func_decl2errors(&t, tk);
 		}
-		if (t != nullptr)
-			sym_tbl->add_sym(t);
+		if (t != nullptr) sym_tbl->add_sym(t);
 		stype = t->type;
 	} else if (tk.is_storage_class_specifier() || tk.is_type_qualifier()){
 		bool tconst = false, tdef = false;
