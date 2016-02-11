@@ -1,10 +1,11 @@
-func: function
-	struct a
-		c: variable
+struct
+	x: variable
+		int
+	y: variable
+		int
+point: alias for
+	struct
+		x: variable
 			int
-	b: parameter
-		struct a
-			c: variable
-				int
-returns
-	void
+		y: variable
+			int

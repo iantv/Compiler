@@ -1,1 +1,4 @@
-void func(struct a{int c}b);
+typedef struct{
+	int x;
+	int y;
+}point;
