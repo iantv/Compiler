@@ -362,6 +362,28 @@ stmt_block *parser::try_parse_body(sym_table *sym_tbl){
 	return stmt_blck;
 }
 
+void parser::check_func_decl2errors(symbol **t, token tk){
+	sym_function *cur_func = dynamic_cast<sym_function *>(*t);
+	vector<sym_function *>::iterator it = table->functions.begin();
+	for (vector<sym_function *>::iterator it = table->functions.begin(); it != table->functions.end(); it++){
+		if ((*it)->name == cur_func->name){
+			if ((*it)->params == cur_func->params){
+				if (equal((*it)->type, cur_func->type)){
+					if ((*it)->block != nullptr && cur_func != nullptr){
+						/* Necessary release print of all errors to test this error */
+						throw error(C2084, "function \"" + cur_func->name + "\" already has a body", tk.pos);
+					} else if ((*it)->block == nullptr && cur_func->block != nullptr){
+						(*it)->block = cur_func->block;
+						delete *t; *t = nullptr;
+						break;
+					}
+				} else 
+					throw error(C2556, cur_func->name + ": overloaded functions only differ by return type", tk.pos);
+			}
+		}
+	}
+}
+
 bool parser::try_parse_declarator(sym_table *sym_tbl){
 	token tk = lxr->get();
 	sym_type *stype = nullptr;
@@ -375,28 +397,10 @@ bool parser::try_parse_declarator(sym_table *sym_tbl){
 			if (sym_tbl->local_exist(t->name))
 				throw error(C2086, t->type->name + " " + t->name + ": redefinition", tk.pos);
 		} else if (cur_type == "class sym_function"){
-			sym_function *cur_func = dynamic_cast<sym_function *>(t);
-			vector<sym_function *>::iterator it = table->functions.begin();
-			for (vector<sym_function *>::iterator it = table->functions.begin(); it != table->functions.end(); it++){
-				if ((*it)->name == cur_func->name){
-					if ((*it)->params == cur_func->params){
-						if (equal((*it)->type, cur_func->type)){
-							if ((*it)->block != nullptr && cur_func != nullptr){
-								/* Necessary release print of all errors to test this error */
-								throw error(C2084, "function \"" + cur_func->name + "\" already has a body", tk.pos);
-							} else if ((*it)->block == nullptr && cur_func->block != nullptr){
-								(*it)->block = cur_func->block;
-								delete t; t = nullptr;
-								break;
-							}
-						} else 
-							throw error(C2556, cur_func->name + ": overloaded functions only differ by return type", tk.pos);
-					}
-				}
-			}
+			check_func_decl2errors(&t, tk);
 		}
 		if (t != nullptr)
-				sym_tbl->add_sym(t);
+			sym_tbl->add_sym(t);
 		stype = t->type;
 	} else if (tk.is_storage_class_specifier() || tk.is_type_qualifier()){
 		bool tconst = false, tdef = false;

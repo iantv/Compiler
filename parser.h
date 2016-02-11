@@ -61,6 +61,8 @@ class parser{
 	bool try_parse_declarator(sym_table *);
 	bool is_expr_start(token, sym_table *);
 	void check_semicolon();
+
+	void check_func_decl2errors(symbol **, token);
 public:
 	parser(lexer *l);
 	expr *parse_expr();
