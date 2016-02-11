@@ -381,6 +381,15 @@ void parser::check_func_decl2errors(symbol **t, token tk){
 	}
 }
 
+void parser::check_decl2errors(sym_table *sym_tbl, symbol **t, token tk){
+	string cur_type = typeid(**t).name();
+	if (cur_type == "class sym_var" && sym_tbl->local_exist((*t)->name)){
+		throw error(C2086, (*t)->type->name + " " + (*t)->name + ": redefinition", tk.pos);
+	} else if (cur_type == "class sym_function"){
+		check_func_decl2errors(t, tk);
+	}
+}
+
 bool parser::try_parse_declarator(sym_table *sym_tbl){
 	token tk = lxr->get();
 	sym_type *stype = nullptr;
@@ -389,12 +398,7 @@ bool parser::try_parse_declarator(sym_table *sym_tbl){
 		declar dcl = parse_declare(sym_tbl);
 		func_def = dcl.is_def();
 		symbol *t = make_symbol(dcl);
-		string cur_type = typeid(*t).name();
-		if (cur_type == "class sym_var" && sym_tbl->local_exist(t->name)){
-			throw error(C2086, t->type->name + " " + t->name + ": redefinition", tk.pos);
-		} else if (cur_type == "class sym_function"){
-			check_func_decl2errors(&t, tk);
-		}
+		check_decl2errors(sym_tbl, &t, tk);
 		if (t != nullptr) sym_tbl->add_sym(t);
 		stype = t->type;
 	} else if (tk.is_storage_class_specifier() || tk.is_type_qualifier()){
