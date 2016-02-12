@@ -1,7 +1,7 @@
 import subprocess
 LTESTCNT = 40
 EXPR = 53
-PRS =  9
+PRS =  10
 PRSERR = 4
 PDTESTCNT = 50
 

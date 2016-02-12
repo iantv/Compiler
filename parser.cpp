@@ -570,6 +570,8 @@ void parser::parse(ostream &os){
 		bool func_def = try_parse_declarator(table);
 		tk = lxr->get();
 		if (func_def){
+			if (tk.type == TK_SEMICOLON)
+				tk = lxr->next();
 			continue;
 		}
 		check_semicolon();
