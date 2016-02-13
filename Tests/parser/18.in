@@ -1,0 +1,6 @@
+void a(){
+	int b;
+	b += 'z';
+	int c;
+	c = 10;
+}

@@ -1,0 +1,16 @@
+a: function
+	b: variable
+		int
+	c: variable
+		int
+	expression:
+				z
+			int
+		+=
+			b
+	expression:
+			10
+		=
+			c
+returns
+	void

@@ -1,0 +1,6 @@
+void a(){
+	char b;
+	int c;
+	double d;
+	'a' + 1 + 2.0;
+}
