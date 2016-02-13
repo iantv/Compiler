@@ -36,7 +36,6 @@ class parser{
 	lexer *lxr;
 	sym_table *table;
 	sym_table *prelude;
-	bool point_of_entry;
 	vector<stmt *> init_list;
 	expr *expression(sym_table *, int priority);
 	expr *factor(sym_table *);
@@ -73,6 +72,7 @@ public:
 	void print_sym_table(ostream &os);
 	bool tcast;
 	bool prs_expr;
+	bool point_of_entry;
 };
 
 #endif

@@ -32,20 +32,23 @@ int main(int argc, const char *argv[]){
 			if (strcmp(argv[1], "-p") == 0)
 				if (strcmp(argv[2], "-decl") == 0){
 					parser P(&L);
+					P.point_of_entry = true;
 					fout.open("declar.out");
 					P.parse(fout);
 					P.print_sym_table(fout);
 					fout.close();
 				} else if (strcmp(argv[2], "-expr") == 0){
 					parser P(&L);
+					P.point_of_entry = true;
 					fout.open("expression.out");
 					P.tcast = false; /* Disable type checking */
 					P.parse_expr(nullptr)->print(fout, 0);
 					fout.close();
 				} if (strcmp(argv[2], "-tcast") == 0){
 					parser P(&L);
+					P.point_of_entry = false;
 					fout.open("typecast.out");
-					P.tcast = false; /* Disable type checking */
+					P.tcast = true; /* Disable type checking */
 					P.parse(fout);
 					P.print_sym_table(fout);
 					fout.close();

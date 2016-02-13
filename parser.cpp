@@ -65,7 +65,7 @@ const string &declar::get_name(){
 bool declar::check_id(symbol *sym){ return id == sym; }
 
 /*---------------------------------------class parser --------------------------------------*/
-parser::parser(lexer *l): lxr(l), table(new sym_table()) { 	init_prelude(); tcast = true; }
+parser::parser(lexer *l): lxr(l), table(new sym_table()) { 	init_prelude(); tcast = true; point_of_entry = false; }
 
 vector<expr *> parser::parse_fargs(sym_table *sym_tbl){
 	vector<expr *> args;
@@ -612,6 +612,8 @@ void parser::parse(ostream &os){
 		check_semicolon();
 		tk = lxr->get();
 	}
+	if (!point_of_entry)
+		throw error("entry point must be defined", position(0, 0));
 }
 
 void parser::init_prelude(){
