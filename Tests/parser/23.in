@@ -1,0 +1,6 @@
+int a = 1;
+char c = 'z';
+void main(int b){
+	double d = 1 + c;
+	b = a;
+}

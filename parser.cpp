@@ -373,6 +373,7 @@ stmt_block *parser::try_parse_body(sym_table *sym_tbl){
 	}
 	lxr->next(); /* Current token is TK_OPEN_BRACE */
 	stmt_block *stmt_blck = new stmt_block();
+	stmt_blck->stmt_list = init_list;
 	try_parse_statements_list(sym_tbl, stmt_blck);
 	return stmt_blck;
 }
@@ -414,7 +415,11 @@ void parser::try_parse_init(symbol *sym, sym_table *sym_tbl, stmt_block *stmt_bl
 	if (lxr->get().type != TK_ASSIGN || sym_name != "class sym_var") return;
 	sym_var *t = dynamic_cast<sym_var *>(sym);
 	token tk = lxr->get(); lxr->next();
-	stmt_blck->push_back(new stmt_expr(new_expr_bin_op(new_expr_var(sym_tbl, t->var_token), expression(sym_tbl, 2), tk)));
+	stmt * statement = new stmt_expr(new_expr_bin_op(new_expr_var(sym_tbl, t->var_token), expression(sym_tbl, 2), tk));
+	if (sym_tbl->prev == nullptr)
+		init_list.push_back(statement);
+	else
+		stmt_blck->push_back(statement);
 }
 
 bool parser::try_parse_declarator(sym_table *sym_tbl, stmt_block *stmt_blck = nullptr){
@@ -558,6 +563,7 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 				vector<string> params;
 				parse_fparams(st, &params);
 				if (info.check_id(nullptr)){
+					if (info.name == "main") point_of_entry = true;
 					sym_function * f = new sym_function(info.name, st, try_parse_body(st), params);
 					info.set_id(f);
 					info.def = f->block != nullptr;

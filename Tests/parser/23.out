@@ -1,0 +1,31 @@
+main: function
+	b: parameter
+		int
+	d: variable
+		double
+	expression:
+			1
+		=
+			a
+	expression:
+			z
+		=
+			c
+	expression:
+						c
+					int
+				+
+					1
+			double
+		=
+			d
+	expression:
+			a
+		=
+			b
+returns
+	void
+a: variable
+	int
+c: variable
+	char

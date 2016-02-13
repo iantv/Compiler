@@ -1,5 +1,4 @@
 #pragma once
-#include "parser.h"
 #include "expression.h"
 
 enum stmt_t{ STMT_EXPR, STMT_BLOCK };
@@ -25,6 +24,7 @@ class stmt_block: public stmt{
 	sym_table *table;
 	vector<stmt *> stmt_list;
 public:
+	friend class parser;
 	stmt_block(vector<stmt *>);
 	stmt_block();
 	stmt_block(sym_table *);
