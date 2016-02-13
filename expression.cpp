@@ -1,17 +1,17 @@
 #include "sym_table.h"
 expr::expr(){ type = nullptr; }
-expr_bin_op::expr_bin_op(expr *l, expr *r, token t): left(l), right(r){
+expr_bin_op::expr_bin_op(expr *l, expr *r, token t): left(l), right(r), expr_bin_op::expr() {
 	type = l->type; /* Assign type of one of two operand, because type casting happens in the function which call this */
 	tk = t; 
 }
-expr_bin_op::expr_bin_op(expr *l, expr *r, string s): left(l), right(r){ op = s; }
-expr_prefix_unar_op::expr_prefix_unar_op(expr *e, token t): ex(e){ tk = t; }
-expr_postfix_unar_op::expr_postfix_unar_op(expr *e, token t): ex(e){ tk = t; }
-expr_literal::expr_literal(token t){ tk = t; }
-expr_var::expr_var(token t){ tk = t; }
-expr_tern_op::expr_tern_op(expr *l, expr *m, expr *r, string s): left(l), middle(m), right(r){ op = s; };
-function::function(expr *id, const vector<expr *> &args): fid(id) { fargs = args; };
-struct_access::struct_access(expr *l, expr *struct_field, token t): field(struct_field), left(l) { tk = t; };
+expr_bin_op::expr_bin_op(expr *l, expr *r, string s): left(l), right(r), expr_bin_op::expr(){ op = s; }
+expr_prefix_unar_op::expr_prefix_unar_op(expr *e, token t): ex(e), expr_bin_op::expr(){ tk = t; }
+expr_postfix_unar_op::expr_postfix_unar_op(expr *e, token t): ex(e), expr_bin_op::expr(){ tk = t; }
+expr_literal::expr_literal(token t): expr_bin_op::expr(){ tk = t; }
+expr_var::expr_var(token t, sym_type *var_type): expr_bin_op::expr(){ tk = t; type = var_type; }
+expr_tern_op::expr_tern_op(expr *l, expr *m, expr *r, string s): left(l), middle(m), right(r), expr_bin_op::expr(){ op = s; };
+function::function(expr *id, const vector<expr *> &args): fid(id), expr_bin_op::expr(){ fargs = args; };
+struct_access::struct_access(expr *l, expr *struct_field, token t): field(struct_field), left(l), expr_bin_op::expr(){ tk = t; };
 
 void expr::print_level(ostream &os, int level){
 	while (level){

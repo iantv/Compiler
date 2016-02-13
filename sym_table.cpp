@@ -142,22 +142,16 @@ bool sym_table::local_exist(string &name){
 }
 
 symbol *sym_table::get_symbol(string s){
-	map<string, symbol *>::iterator it;
-	symbol *t = nullptr;
-	sym_table *st = prev;
-
-	it = symbols.find(s.c_str());
-	if (it == symbols.end()){
-		while (st){
-			t = st->get_symbol(s);
-			if (t == nullptr)
-				st = st->prev;
-			else 
-				return t;
-		}
-	} else
+	map<string, symbol *>::iterator it = symbols.find(s.c_str());
+	vector<sym_function *>::iterator fit = functions.begin();
+	if (it != symbols.end())
 		return it->second;
-	return nullptr;
+	for (;fit != functions.end(); fit++)
+		if ((*fit)->name == s)
+			return (*fit);
+	if (prev == nullptr)
+		return nullptr;
+	return prev->get_symbol(s);
 }
 
 sym_type* sym_table::get_type_specifier(string s){

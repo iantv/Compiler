@@ -37,12 +37,12 @@ class parser{
 	sym_table *table;
 	sym_table *prelude;
 
-	expr *expression(int priority);
-	expr *factor();
+	expr *expression(sym_table *, int priority);
+	expr *factor(sym_table *);
 	expr *parse_function();
-	expr *parse_index();
+	expr *parse_index(sym_table *);
 	expr *try_parse_tern_op();
-	vector<expr *> parse_fargs(); /* parse function's arguments */
+	vector<expr *> parse_fargs(sym_table *); /* parse function's arguments */
 	void parse_fparams(sym_table *lst, vector<string> *); /* parse function's parametres */
 	size_t parse_size_of_array();
 	declar parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst);
@@ -53,6 +53,7 @@ class parser{
 	void init_prelude(); /* init global symtable prelude */
 	void try_type_cast(expr **, expr **);
 	expr *new_expr_bin_op(expr *ex1, expr *ex2, token tk);
+	expr *new_expr_var(sym_table *, token);
 	bool try_parse_block(sym_table *, stmt_block *);
 	stmt_block *try_parse_body(sym_table *); /* parse function's or block's body */
 	
@@ -66,7 +67,7 @@ class parser{
 	void check_func_decl2errors(symbol **, token);
 public:
 	parser(lexer *l);
-	expr *parse_expr();
+	expr *parse_expr(sym_table *);
 	void parse(ostream &os);
 	void print_sym_table(ostream &os);
 	bool tcast;

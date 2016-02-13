@@ -67,11 +67,11 @@ bool declar::check_id(symbol *sym){ return id == sym; }
 /*---------------------------------------class parser --------------------------------------*/
 parser::parser(lexer *l): lxr(l), table(new sym_table()) { 	init_prelude(); tcast = true; }
 
-vector<expr *> parser::parse_fargs(){
+vector<expr *> parser::parse_fargs(sym_table *sym_tbl){
 	vector<expr *> args;
 	token tk = lxr->next(); /* skip open bracket '(' */
 	while (tk.type != TK_CLOSE_BRACKET){		
-		args.push_back(expression(2)); /* because priority of comma as statement equal 1, but when listing arguments of function comma is separator */
+		args.push_back(expression(sym_tbl, 2)); /* because priority of comma as statement equal 1, but when listing arguments of function comma is separator */
 		if (lxr->get().type == TK_CLOSE_BRACKET)
 			break;
 		tk = lxr->next(); /* skip comma	*/
@@ -82,9 +82,9 @@ vector<expr *> parser::parse_fargs(){
 	return args;
 }
 
-expr *parser::parse_index(){
+expr *parser::parse_index(sym_table *sym_tbl){
 	lxr->next(); /* skip open square bracket '[' */
-	expr *ex = expression(MIN_PRIORITY);
+	expr *ex = expression(sym_tbl, MIN_PRIORITY);
 	if (lxr->next().type == TK_CLOSE_SQUARE_BRACKET)
 		throw syntax_error(C2143, "missing \"]\" before \";\"", lxr->pos);
 	return ex;
@@ -92,7 +92,7 @@ expr *parser::parse_index(){
 
 expr *parser::new_expr_bin_op(expr *ex1, expr *ex2, token tk){
 	if (tcast == false || (ex1->type->name == ex2->type->name)) /* if type casting is disabled or operands has the same type */
-		return new expr_bin_op(ex1, ex2, tk);		  /* create pointer to expr_bin_op without type checking and type casting*/
+		return new expr_bin_op(ex1, ex2, tk);		  /* create pointer to expr_bin_op without type checking and type casting */
 	if (ex1->of_ctype(token_names[TK_DOUBLE]) && (ex2->of_ctype(token_names[TK_INT]) || ex2->of_ctype(token_names[TK_CHAR]))){
 		ex2 = new expr_cast2type(token_names[TK_DOUBLE], ex2, prelude);
 	} else if ((ex1->of_ctype(token_names[TK_INT]) || ex1->of_ctype(token_names[TK_CHAR])) && ex2->of_ctype(token_names[TK_DOUBLE])){
@@ -106,49 +106,58 @@ expr *parser::new_expr_bin_op(expr *ex1, expr *ex2, token tk){
 	return new expr_bin_op(ex1, ex2, tk);;
 }
 
-expr *parser::expression(int priority){
-	if (priority > MAX_PRIORITY) return factor();		
-	expr *ex = expression(priority + 1);
+expr *parser::expression(sym_table *sym_tbl, int priority){
+	if (priority > MAX_PRIORITY) return factor(sym_tbl);		
+	expr *ex = expression(sym_tbl, priority + 1);
 	token tk = lxr->get();
 	while (get_priority(tk) == priority){
 		lxr->next();
 		if (tk.type == TK_QUESTION){
-			expr *second = expression(3);
+			expr *second = expression(sym_tbl, 3);
 			if (lxr->get().type != TK_COLON){
 				throw syntax_error(C2143, "missing \":\" before \";\"", lxr->pos);
 			}
 			lxr->next();
-			ex = new expr_tern_op(ex, second, expression(3), string("?:"));
+			ex = new expr_tern_op(ex, second, expression(sym_tbl, 3), string("?:"));
 		} else if (priority == 2){			
-			ex = new_expr_bin_op(ex, expression(priority), tk);
+			ex = new_expr_bin_op(ex, expression(sym_tbl, priority), tk);
 		} else if (tk.type == TK_INC || tk.type == TK_DEC){
 			ex = new expr_postfix_unar_op(ex, tk);			
 		} else {
-			ex = new_expr_bin_op(ex, expression(priority + 1), tk);
+			ex = new_expr_bin_op(ex, expression(sym_tbl, priority + 1), tk);
 		}
 		tk = lxr->get();
 	}
 	return ex;
 }
 
-expr *parser::factor(){
+expr * parser::new_expr_var(sym_table *sym_tbl, token tk){
+	if (tcast == false) return new expr_var(tk, nullptr);
+	if (sym_tbl == nullptr) throw error("symbol table is nullptr ", tk.pos);
+	symbol * sym = sym_tbl->get_symbol(tk.get_src());
+	if (sym == nullptr)
+		throw error(tk.get_src() + " undefined ", tk.pos);
+	return new expr_var(tk, sym->type);
+}
+
+expr *parser::factor(sym_table *sym_tbl){
 	token tk = lxr->get();
 	token tk_next = lxr->next();
 	if (tk.type == TK_ID){
-		expr *ex = new expr_var(tk);		
+		expr *ex = new_expr_var(sym_tbl, tk);
 		tk = tk_next;
 		while (tk.type == TK_OPEN_BRACKET || tk.type == TK_OPEN_SQUARE_BRACKET || tk.type == TK_POINT || tk.type == TK_PTROP){
 			if (lxr->get().type == TK_POINT || lxr->get().type == TK_PTROP){
 				if (lxr->next().type == TK_ID){
-					ex = new struct_access(ex, new expr_var(lxr->get()), tk);
+					ex = new struct_access(ex, new expr_var(lxr->get(), nullptr), tk);
 					lxr->next();
 				}
 			}
 			if (lxr->get().type == TK_OPEN_SQUARE_BRACKET){
-				ex = new expr_bin_op(ex, parse_index(), string("[]"));
+				ex = new expr_bin_op(ex, parse_index(sym_tbl), string("[]"));
 			}
 			if (lxr->get().type == TK_OPEN_BRACKET){
-				ex = new function(ex, parse_fargs());
+				ex = new function(ex, parse_fargs(sym_tbl));
 			}
 			tk = lxr->get();
 		}
@@ -160,7 +169,7 @@ expr *parser::factor(){
 		if (tk_next.type == TK_DOUBLE || tk_next.type == TK_CHAR || tk_next.type == TK_INT){
 			tc = true; lxr->next();
 		} else {
-			ex = expression(MIN_PRIORITY);
+			ex = expression(sym_tbl, MIN_PRIORITY);
 		}
 		if (lxr->get().type != TK_CLOSE_BRACKET){
 			throw syntax_error(C2143, "missing \")\" before \";\"", lxr->pos);
@@ -171,7 +180,7 @@ expr *parser::factor(){
 			//ex = new expr_cast2type(tk_next.get_src(), factor());
 		}
 		while (lxr->get().type == TK_OPEN_BRACKET){
-			ex = new function(ex, parse_fargs());
+			ex = new function(ex, parse_fargs(sym_tbl));
 		}
 		return ex;
 	}
@@ -184,17 +193,17 @@ expr *parser::factor(){
 		return tcast ? new expr_literal(tk, prelude->get_type_specifier(tname)) : new expr_literal(tk);
 	}
 	if (tk.type == TK_PLUS || tk.type == TK_MINUS || tk.type == TK_MUL || tk.type == TK_AND_BIT || tk.type == TK_NOT_BIT || tk.type == TK_INC || tk.type == TK_DEC){
-		return new expr_prefix_unar_op(factor() , tk);
+		return new expr_prefix_unar_op(factor(sym_tbl) , tk);
 	}
 	if (tk.type == TK_SIZEOF){
-		return new expr_prefix_unar_op(expression(MIN_PRIORITY), tk);
+		return new expr_prefix_unar_op(expression(sym_tbl, MIN_PRIORITY), tk);
 	}
 	return nullptr;
 }
 
-expr *parser::parse_expr(){
+expr *parser::parse_expr(sym_table *sym_tbl){
 	lxr->next();
-	return expression(MIN_PRIORITY);
+	return expression(sym_tbl, MIN_PRIORITY);
 }
 
 size_t parser::parse_size_of_array(){ /* Size is only const integer value */
@@ -319,7 +328,7 @@ void parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck){
 				throw syntax_error(C2371, "\'" + tk.get_src() + "\': redefinition; different basic types", tk.pos);
 			}
 		}
-		stmt_blck->push_back(new stmt_expr(expression(MIN_PRIORITY)));
+		stmt_blck->push_back(new stmt_expr(expression(sym_tbl, MIN_PRIORITY)));
 	} // else if
 }
 

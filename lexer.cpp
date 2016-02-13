@@ -308,7 +308,7 @@ lexer::lexer(const char *filename): pos(position()){
 }
 
 bool token::is_operator(){
-	return type >= TK_PLUS && type <= TK_CLOSE_SQUARE_BRACKET;
+	return (type >= TK_PLUS && type <= TK_CLOSE_SQUARE_BRACKET) && type != TK_SEMICOLON;
 }
 
 bool token::is_type_specifier(){

@@ -1,0 +1,9 @@
+a: function
+	b: variable
+		int
+	expression:
+			1
+		=
+			b
+returns
+	int

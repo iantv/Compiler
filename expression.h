@@ -61,7 +61,7 @@ public:
 
 class expr_var: public expr{
 public:
-	expr_var(token t);
+	expr_var(token t, sym_type *);
 	void print(ostream &os, int level) override;
 };
 

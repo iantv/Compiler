@@ -40,13 +40,14 @@ int main(int argc, const char *argv[]){
 					parser P(&L);
 					fout.open("expression.out");
 					P.tcast = false; /* Disable type checking */
-					//P.prs_expr = true;
-					P.parse_expr()->print(fout, 0);
+					P.parse_expr(nullptr)->print(fout, 0);
 					fout.close();
-				} else if (strcmp(argv[2], "-tcast") == 0){
+				} if (strcmp(argv[2], "-tcast") == 0){
 					parser P(&L);
 					fout.open("typecast.out");
-					P.parse_expr()->print(fout, 0);
+					P.tcast = false; /* Disable type checking */
+					P.parse(fout);
+					P.print_sym_table(fout);
 					fout.close();
 				}
 		}

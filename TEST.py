@@ -1,7 +1,7 @@
 import subprocess
 LTESTCNT = 40
 EXPR = 53
-PRS =  10
+PRS =  12
 PRSERR = 4
 PDTESTCNT = 50
 
@@ -9,7 +9,8 @@ ERRPRSDCL = 25 #Error Parser Declare
 TCAST = 2
 IMPTCAST = 8
 def testproc(testname, cmd, N, output, ansdir):
-	print testname
+	if testname != '' :
+		print testname
 	for i in range(1, N + 1):
 		if (i - 1) % 5 == 0:
 			print '|',
@@ -26,6 +27,6 @@ testproc('Expression parsing', '-p -expr', EXPR, 'expression.out', 'Tests/expr/'
 testproc('Declarations parsing', '-p -decl', PDTESTCNT, 'declar.out', 'Tests/declar/')
 testproc('', '-p -decl', ERRPRSDCL, 'declar.out', 'Tests/errors/declar/')
 #testproc('Type casting', '-p -tcast', TCAST, 'typecast.out', 'Tests/typecast/')
-testproc('Type casting', '-p -tcast', IMPTCAST, 'typecast.out', 'Tests/implicit_typecast/')
+#testproc('Type casting', '-p -tcast', IMPTCAST, 'typecast.out', 'Tests/implicit_typecast/')
 testproc('Parser global + definitions', '-p', PRS, 'parser.out', 'Tests/parser/')
 testproc('Parser global + definitions', '-p', PRSERR, 'parser.out', 'Tests/errors/parser/')
