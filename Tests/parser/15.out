@@ -1,4 +1,4 @@
-a: function
+main: function
 	b: variable
 		char
 	expression:

@@ -3,3 +3,6 @@ a: function
 		1
 returns
 	void
+main: function
+returns
+	void

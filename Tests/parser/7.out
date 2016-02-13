@@ -1,4 +1,4 @@
-func: function
+main: function
 	a: variable
 		int
 	block:

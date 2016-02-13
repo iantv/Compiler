@@ -1,3 +1,3 @@
-void a(){
+void main(){
 	1;
 }
