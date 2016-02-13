@@ -31,13 +31,15 @@ sym_struct::sym_struct(const string &sym_name, sym_table *lst){
 	table = lst;
 }
 
-sym_var::sym_var(const string &sym_name, sym_type *sym_vartype, expr *sym_init_ex):
-	init_expr(sym_init_ex) {
+sym_var::sym_var(const string &sym_name, sym_type *sym_vartype){
 	name = sym_name; type = sym_vartype;
 }
 
-sym_var_param::sym_var_param(const string &sym_name, sym_type *sym_param_type, expr *sym_init_val):
-	init_val(sym_init_val){
+sym_var::sym_var(const string &sym_name, sym_type *sym_vartype, token tk){
+	name = sym_name; type = sym_vartype, var_token = tk;
+}
+
+sym_var_param::sym_var_param(const string &sym_name, sym_type *sym_param_type){
 	name = sym_name; type = sym_param_type; 
 }
 
@@ -92,9 +94,6 @@ void sym_var::print(ostream &os, int level){
 		lvl += 1;
 	}
 	type->print(os, lvl);
-	if (init_expr != nullptr){
-		init_expr->print(os, MIN_PRIORITY);
-	}
 }
 
 void sym_var_param::print(ostream &os, int level){

@@ -43,7 +43,7 @@ void stmt_block::print(ostream &os, int level){
 		os << "block:" << endl;
 		os << (*table);
 	}
-	for (int i = 0; i < stmt_list.size(); i++){
+	for (int i = 0; i < (int)stmt_list.size(); i++){
 		stmt_list[i]->print(os, level);
 	}
 }

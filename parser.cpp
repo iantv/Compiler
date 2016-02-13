@@ -142,7 +142,7 @@ expr *parser::expression(sym_table *sym_tbl, int priority){
 expr * parser::new_expr_var(sym_table *sym_tbl, token tk){
 	if (tcast == false) return new expr_var(tk, nullptr);
 	if (sym_tbl == nullptr) throw error("symbol table is nullptr ", tk.pos);
-	symbol * sym = sym_tbl->get_symbol(tk.get_src());
+	symbol *sym = sym_tbl->get_symbol(tk.get_src());
 	if (sym == nullptr)
 		throw error(tk.get_src() + " undefined ", tk.pos);
 	return new expr_var(tk, sym->type);
@@ -345,7 +345,7 @@ void parser::try_parse_statements_list(sym_table *sym_tbl, stmt_block *stmt_blck
 	while (tk.type != TK_CLOSE_BRACE){
 		bool block = try_parse_block(sym_tbl, stmt_blck);
 		try_parse_statement(sym_tbl, stmt_blck);
-		bool func_def = try_parse_declarator(sym_tbl);
+		bool func_def = try_parse_declarator(sym_tbl, stmt_blck);
 		tk = lxr->get();
 		if (func_def || block) continue;
 		check_semicolon();
@@ -409,7 +409,15 @@ void parser::check_decl2errors(sym_table *sym_tbl, symbol **t, token tk){
 	}
 }
 
-bool parser::try_parse_declarator(sym_table *sym_tbl){
+void parser::try_parse_init(symbol *sym, sym_table *sym_tbl, stmt_block *stmt_blck){
+	string sym_name = typeid(*sym).name();
+	if (lxr->get().type != TK_ASSIGN || sym_name != "class sym_var") return;
+	sym_var *t = dynamic_cast<sym_var *>(sym);
+	token tk = lxr->get(); lxr->next();
+	stmt_blck->push_back(new stmt_expr(new_expr_bin_op(new_expr_var(sym_tbl, t->var_token), expression(sym_tbl, 2), tk)));
+}
+
+bool parser::try_parse_declarator(sym_table *sym_tbl, stmt_block *stmt_blck = nullptr){
 	token tk = lxr->get();
 	sym_type *stype = nullptr;
 	bool func_def = false;
@@ -420,6 +428,7 @@ bool parser::try_parse_declarator(sym_table *sym_tbl){
 		check_decl2errors(sym_tbl, &t, tk);
 		if (t != nullptr){ 
 			sym_tbl->add_sym(t);
+			try_parse_init(t, sym_tbl, stmt_blck);
 			stype = t->type;
 		}
 	} else if (tk.is_storage_class_specifier() || tk.is_type_qualifier()){
@@ -432,6 +441,7 @@ bool parser::try_parse_declarator(sym_table *sym_tbl){
 		}
 		table->add_sym(make_symbol(parse_declare(table, tdef, tconst)));
 	}
+	
 	while (lxr->get().type == TK_COMMA && stype != nullptr){
 		declar dcl = parse_declare(table);
 		dcl.set_type(stype);
@@ -512,6 +522,7 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 	declar info = declar();
 	bool dir_dcl= false;
 	token tk = lxr->get();
+	token tk_id;
 	if (tk.type == TK_OPEN_BRACKET){
 		info.rebuild(parse_declare(sym_tbl, tdef, false));
 		tk = lxr->get();
@@ -520,6 +531,7 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 		dir_dcl = true;
 	} else if (tk.type == TK_ID){
 		info.name = tk.get_src();
+		tk_id = tk;
 	}
 	tk = lxr->next();
 	if (tk.type != TK_OPEN_BRACKET && tk.type != TK_OPEN_SQUARE_BRACKET){
@@ -527,7 +539,7 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 			info.set_id(new sym_alias(info.type));
 			info.set_name(info.name);
 		} else {
-			info.set_id(new sym_var(info.name));
+			info.set_id(new sym_var(info.name, nullptr, tk_id));
 		}
 	} else {
 		while ((tk.type == TK_OPEN_BRACKET) || (tk.type == TK_OPEN_SQUARE_BRACKET)){

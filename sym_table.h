@@ -94,18 +94,19 @@ public:
 
 class sym_var: public symbol{
 protected:
-	expr *init_expr;
+	token var_token;
 public:
+	friend class parser;
 	sym_var(){}
 	void print(ostream &os, int level) override;
-	sym_var(const string &sym_name, sym_type *sym_vartype = nullptr, expr *sym_init_ex = nullptr);
+	sym_var(const string &sym_name, sym_type *sym_vartype = nullptr);
+	sym_var(const string &, sym_type *, token);
 };
 
 class sym_var_param: public sym_var{
-	expr *init_val;
 public:
 	void print(ostream &os, int level) override;
-	sym_var_param(const string &sym_name, sym_type *sym_param_type = nullptr, expr *sym_init_val = nullptr);
+	sym_var_param(const string &sym_name, sym_type *sym_param_type = nullptr);
 };
 
 class sym_table{

@@ -1,0 +1,9 @@
+a: function
+	b: parameter
+		int
+	expression:
+			b
+		+
+			1
+returns
+	void

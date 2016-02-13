@@ -1,0 +1,5 @@
+void a(){
+	double b = 1.5;
+	b += 0.5
+	int c = b;
+}

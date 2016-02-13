@@ -56,10 +56,10 @@ class parser{
 	expr *new_expr_var(sym_table *, token);
 	bool try_parse_block(sym_table *, stmt_block *);
 	stmt_block *try_parse_body(sym_table *); /* parse function's or block's body */
-	
-	void try_parse_statements_list(sym_table *, stmt_block *stmt_blck);
-	void try_parse_statement(sym_table *, stmt_block *stmt_blck);
-	bool try_parse_declarator(sym_table *);
+	void try_parse_init(symbol *, sym_table *, stmt_block *);
+	void try_parse_statements_list(sym_table *, stmt_block *);
+	void try_parse_statement(sym_table *, stmt_block *);
+	bool try_parse_declarator(sym_table *, stmt_block *);
 	bool is_expr_start(token, sym_table *);
 	void check_semicolon();
 
