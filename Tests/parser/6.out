@@ -5,4 +5,4 @@ main: function
 		b: variable
 			int
 returns
-	int
+	void

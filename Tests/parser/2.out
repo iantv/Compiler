@@ -2,6 +2,6 @@ main: function
 	a: parameter
 		int
 returns
-	int
+	void
 a: variable
 	int

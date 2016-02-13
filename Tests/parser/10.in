@@ -1,1 +1,1 @@
-int a(){}; // with semicolon ';'
+void a(){}; // with semicolon ';'

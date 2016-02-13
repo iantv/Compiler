@@ -337,6 +337,10 @@ string token::get_type_name(){
 	}
 }
 
+bool token::is_assign_op(){
+	return type >= TK_ASSIGN && type <= TK_SHR_ASSIGN;
+}
+
 bool lexer::look_next_token(token_t tk_t){
 	string s1 = s;
 	string::iterator it1 = it;

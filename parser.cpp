@@ -93,16 +93,24 @@ expr *parser::parse_index(sym_table *sym_tbl){
 expr *parser::new_expr_bin_op(expr *ex1, expr *ex2, token tk){
 	if (tcast == false || (ex1->type->name == ex2->type->name)) /* if type casting is disabled or operands has the same type */
 		return new expr_bin_op(ex1, ex2, tk);		  /* create pointer to expr_bin_op without type checking and type casting */
-	if (ex1->of_ctype(token_names[TK_DOUBLE]) && (ex2->of_ctype(token_names[TK_INT]) || ex2->of_ctype(token_names[TK_CHAR]))){
-		ex2 = new expr_cast2type(token_names[TK_DOUBLE], ex2, prelude);
-	} else if ((ex1->of_ctype(token_names[TK_INT]) || ex1->of_ctype(token_names[TK_CHAR])) && ex2->of_ctype(token_names[TK_DOUBLE])){
-		ex1 = new expr_cast2type(token_names[TK_DOUBLE], ex1, prelude);
-	} else if (ex1->of_ctype(token_names[TK_INT]) && ex2->of_ctype(token_names[TK_CHAR])){
-		ex2 = new expr_cast2type(token_names[TK_INT], ex2, prelude);
-	} else if (ex1->of_ctype(token_names[TK_CHAR]) && ex2->of_ctype(token_names[TK_INT])){
-		ex1 = new expr_cast2type(token_names[TK_INT], ex1, prelude);
+	if (tk.is_assign_op()){
+		if (ex1->of_ctype(token_names[TK_DOUBLE]))
+			ex2 = new expr_cast2type(token_names[TK_DOUBLE], ex2, prelude);
+		else if (ex1->of_ctype(token_names[TK_INT]))
+			ex2 = new expr_cast2type(token_names[TK_INT], ex2, prelude);
+		else if (ex1->of_ctype(token_names[TK_CHAR]))
+			ex2 = new expr_cast2type(token_names[TK_CHAR], ex2, prelude);
+	} else {
+		if (ex1->of_ctype(token_names[TK_DOUBLE]) && (ex2->of_ctype(token_names[TK_INT]) || ex2->of_ctype(token_names[TK_CHAR]))){
+			ex2 = new expr_cast2type(token_names[TK_DOUBLE], ex2, prelude);
+		} else if ((ex1->of_ctype(token_names[TK_INT]) || ex1->of_ctype(token_names[TK_CHAR])) && ex2->of_ctype(token_names[TK_DOUBLE])){
+			ex1 = new expr_cast2type(token_names[TK_DOUBLE], ex1, prelude);
+		} else if (ex1->of_ctype(token_names[TK_INT]) && ex2->of_ctype(token_names[TK_CHAR])){
+			ex2 = new expr_cast2type(token_names[TK_INT], ex2, prelude);
+		} else if (ex1->of_ctype(token_names[TK_CHAR]) && ex2->of_ctype(token_names[TK_INT])){
+			ex1 = new expr_cast2type(token_names[TK_INT], ex1, prelude);
+		}
 	}
-	
 	return new expr_bin_op(ex1, ex2, tk);;
 }
 

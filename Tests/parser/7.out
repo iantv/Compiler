@@ -5,6 +5,6 @@ func: function
 		c: variable
 			double
 returns
-	int
+	void
 b: variable
 	int

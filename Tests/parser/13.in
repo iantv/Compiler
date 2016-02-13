@@ -1,4 +1,4 @@
 void a(){
-	int b;
+	char b;
 	b = 1;
 }

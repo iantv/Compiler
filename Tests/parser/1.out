@@ -1,5 +1,5 @@
 main: function
 returns
-	int
+	void
 a: variable
 	int

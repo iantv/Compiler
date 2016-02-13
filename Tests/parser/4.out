@@ -2,4 +2,4 @@ a: function
 	expression:
 		1
 returns
-	int
+	void

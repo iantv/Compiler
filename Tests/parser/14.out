@@ -2,7 +2,8 @@ a: function
 	b: variable
 		int
 	expression:
-			1
+				a
+			int
 		=
 			b
 returns

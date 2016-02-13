@@ -1,7 +1,7 @@
 import subprocess
 LTESTCNT = 40
 EXPR = 53
-PRS =  12
+PRS =  15
 PRSERR = 4
 PDTESTCNT = 50
 
@@ -28,5 +28,5 @@ testproc('Declarations parsing', '-p -decl', PDTESTCNT, 'declar.out', 'Tests/dec
 testproc('', '-p -decl', ERRPRSDCL, 'declar.out', 'Tests/errors/declar/')
 #testproc('Type casting', '-p -tcast', TCAST, 'typecast.out', 'Tests/typecast/')
 #testproc('Type casting', '-p -tcast', IMPTCAST, 'typecast.out', 'Tests/implicit_typecast/')
-testproc('Parser global + definitions', '-p', PRS, 'parser.out', 'Tests/parser/')
 testproc('Parser global + definitions', '-p', PRSERR, 'parser.out', 'Tests/errors/parser/')
+testproc('Parser global + definitions', '-p', PRS, 'parser.out', 'Tests/parser/')

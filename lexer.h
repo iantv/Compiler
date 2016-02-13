@@ -80,6 +80,8 @@ public:
 	bool is_storage_class_specifier();
 	bool is_literal();
 	string get_type_name();
+
+	bool is_assign_op();
 };
 
 class lexer{

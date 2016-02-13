@@ -6,6 +6,6 @@ main: function
 	c: variable
 		int
 returns
-	int
+	void
 a: variable
 	int

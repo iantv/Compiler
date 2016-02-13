@@ -4,4 +4,4 @@ main: function
 		+
 			1
 returns
-	int
+	void
