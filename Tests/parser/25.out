@@ -1,0 +1,8 @@
+main: function
+	a: variable
+		int
+	expression:
+		1
+	block:
+returns
+	void

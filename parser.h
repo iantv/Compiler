@@ -65,6 +65,9 @@ class parser{
 	bool try_parse_declarator(sym_table *, stmt_block *);
 	
 	bool is_expr_start(token, sym_table *);
+	bool is_block_start();
+	bool is_stmt_start();
+	bool is_decl_start();
 	void try_parse_if_stmt(sym_table *, stmt_block *);
 	
 	void check_semicolon();
