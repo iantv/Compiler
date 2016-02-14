@@ -321,7 +321,23 @@ bool parser::is_expr_start(token tk, sym_table *sym_tbl){
 	return tk.is_literal() || tk.is_operator() || sym_tbl->symbol_not_alias_exist(tk.get_src());
 }
 
-void parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck){
+void parser::try_parse_if_stmt(sym_table *sym_tbl, stmt_block *stmt_blck){
+	token tk = lxr->get();
+	
+	tk = lxr->next();
+	if (tk.type != TK_OPEN_BRACKET)
+		throw syntax_error(C2059, tk.get_src() + "; it requares openning bracket", tk.pos);
+	tk = lxr->next();
+	stmt_if *new_if = new stmt_if(new stmt_expr(expression(sym_tbl, MIN_PRIORITY), EXECUTION_COND), new sym_table(sym_tbl));
+	tk = lxr->get();
+	if (tk.type != TK_CLOSE_BRACKET)
+		throw syntax_error(C2059, tk.get_src() + "; it requares closing bracket", tk.pos);
+	tk = lxr->next();
+	try_parse_statements_list(new_if->table, new_if->body);
+	stmt_blck->push_back(new_if);
+}
+
+bool parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck){
 	token tk = lxr->get();
 	if (is_expr_start(tk, sym_tbl)){
 		//DO tests and corresponding call, but while it's comment
@@ -336,18 +352,26 @@ void parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck){
 				throw syntax_error(C2371, "\'" + tk.get_src() + "\': redefinition; different basic types", tk.pos);
 			}
 		}
-		stmt_blck->push_back(new stmt_expr(expression(sym_tbl, MIN_PRIORITY)));
-	} // else if
+		stmt_blck->push_back(new stmt_expr(expression(sym_tbl, MIN_PRIORITY), NOT_COND));
+		return false;
+		//check_semicolon();
+	} else if (tk.type == TK_IF) {
+		try_parse_if_stmt(sym_tbl, stmt_blck);
+		return true;
+	}
+	return false;
 }
 
 void parser::try_parse_statements_list(sym_table *sym_tbl, stmt_block *stmt_blck){
 	token tk = lxr->next(); /* skip open brace '{' */
 	while (tk.type != TK_CLOSE_BRACE){
 		bool block = try_parse_block(sym_tbl, stmt_blck);
-		try_parse_statement(sym_tbl, stmt_blck);
+		bool stmt = try_parse_statement(sym_tbl, stmt_blck);
 		bool func_def = try_parse_declarator(sym_tbl, stmt_blck);
 		tk = lxr->get();
-		if (func_def || block) continue;
+		if (func_def || block || stmt){
+			continue;
+		}
 		check_semicolon();
 		tk = lxr->get();
 	}
@@ -415,7 +439,7 @@ void parser::try_parse_init(symbol *sym, sym_table *sym_tbl, stmt_block *stmt_bl
 	if (lxr->get().type != TK_ASSIGN || sym_name != "class sym_var") return;
 	sym_var *t = dynamic_cast<sym_var *>(sym);
 	token tk = lxr->get(); lxr->next();
-	stmt * statement = new stmt_expr(new_expr_bin_op(new_expr_var(sym_tbl, t->var_token), expression(sym_tbl, 2), tk));
+	stmt * statement = new stmt_expr(new_expr_bin_op(new_expr_var(sym_tbl, t->var_token), expression(sym_tbl, 2), tk), NOT_COND);
 	if (sym_tbl->prev == nullptr)
 		init_list.push_back(statement);
 	else
@@ -453,6 +477,8 @@ bool parser::try_parse_declarator(sym_table *sym_tbl, stmt_block *stmt_blck = nu
 		table->add_sym(make_symbol(dcl));
 	}
 	return func_def;
+	/*if (func_def == false && !(lxr->get() == tk))
+		check_semicolon();*/
 }
 
 declar parser::parse_declare(sym_table *sym_tbl){

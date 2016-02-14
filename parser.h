@@ -44,6 +44,7 @@ class parser{
 	expr *try_parse_tern_op();
 	vector<expr *> parse_fargs(sym_table *); /* parse function's arguments */
 	void parse_fparams(sym_table *lst, vector<string> *); /* parse function's parametres */
+	
 	size_t parse_size_of_array();
 	declar parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst);
 	declar parse_declare(sym_table *sym_tbl, bool tdef, bool tconst);
@@ -52,15 +53,20 @@ class parser{
 	void check_struct_member(symbol *member, string struct_tag, position pos);
 	void init_prelude(); /* init global symtable prelude */
 	void try_type_cast(expr **, expr **);
+	
 	expr *new_expr_bin_op(expr *ex1, expr *ex2, token tk);
 	expr *new_expr_var(sym_table *, token);
+	
 	bool try_parse_block(sym_table *, stmt_block *);
 	stmt_block *try_parse_body(sym_table *); /* parse function's or block's body */
 	void try_parse_init(symbol *, sym_table *, stmt_block *);
 	void try_parse_statements_list(sym_table *, stmt_block *);
-	void try_parse_statement(sym_table *, stmt_block *);
+	bool try_parse_statement(sym_table *, stmt_block *);
 	bool try_parse_declarator(sym_table *, stmt_block *);
+	
 	bool is_expr_start(token, sym_table *);
+	void try_parse_if_stmt(sym_table *, stmt_block *);
+	
 	void check_semicolon();
 
 	void check_decl2errors(sym_table *, symbol **, token);

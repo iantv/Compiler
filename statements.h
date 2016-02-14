@@ -1,7 +1,7 @@
 #pragma once
 #include "expression.h"
 
-enum stmt_t{ STMT_EXPR, STMT_BLOCK };
+enum stmt_t{ STMT_EXPR, STMT_BLOCK, STMT_IF };
 
 class stmt{
 protected:
@@ -12,11 +12,13 @@ public:
 	void print_level(ostream &os, int level);
 };
 
+enum cond_t{ EXECUTION_COND, END_COND, CONTINUED_COND, NOT_COND };
 class stmt_expr: public stmt{
 	expr *e;
+	cond_t cond_type;
 public:
 	friend class parser;
-	stmt_expr(expr *);
+	stmt_expr(expr *, cond_t);
 	void print(ostream &os, int level) override;
 };
 
@@ -28,6 +30,18 @@ public:
 	stmt_block(vector<stmt *>);
 	stmt_block();
 	stmt_block(sym_table *);
+	void push_back(stmt *);
+	void print(ostream &os, int level) override;
+};
+
+class stmt_if: public stmt{
+	sym_table *table;
+	stmt_expr *cond;
+	stmt_block *body;
+public:
+	friend class parser;
+	stmt_if();
+	stmt_if(stmt_expr *, sym_table *);
 	void push_back(stmt *);
 	void print(ostream &os, int level) override;
 };

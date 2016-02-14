@@ -1,7 +1,7 @@
 import subprocess
 LTESTCNT = 40
 EXPR = 53
-PRS =  23
+PRS =  24
 PRSERR = 4
 PDTESTCNT = 50
 
@@ -17,7 +17,12 @@ def testproc(testname, cmd, N, output, ansdir):
 		subprocess.call('../Debug/Compiler.exe ' + cmd + ' ' + ansdir + '{}.in'.format(i))
 		f1 = open(output, 'r')
 		f2 = open(ansdir + '{}.out'.format(i))
-		print '.' if (f1.read() == f2.read()) else 'E',
+		if (f1.read() == f2.read()):
+			print '.',
+		else:
+			print 'E',
+			exit();
+#		print '.' if (f1.read() == f2.read()) else 'E',
 		f1.close()
 		f2.close()
 	print
