@@ -380,11 +380,12 @@ void parser::try_parse_statements_list(sym_table *sym_tbl, stmt_block *stmt_blck
 	bool was_block = false;
 	while (tk.type != TK_CLOSE_BRACE){
 		was_block = false;
-		if (tk.type == TK_SEMICOLON){
+		while (tk.type == TK_SEMICOLON){
 			tk = lxr->next();
-		} else if (is_block_start()){
+		} 
+		if (is_block_start()){
 			was_block = try_parse_block(sym_tbl, stmt_blck);
-		}  else if (is_decl_start()){
+		} else if (is_decl_start()){
 			was_block = try_parse_declarator(sym_tbl, stmt_blck);
 		} else {
 			was_block = try_parse_statement(sym_tbl, stmt_blck);
@@ -647,13 +648,21 @@ void parser::parse(ostream &os){
 	token tk = lxr->next();
 	sym_type *stype = nullptr;
 	table->prev = nullptr;
+	bool was_block = false;
 	while (tk.type != NOT_TK){
-		try_parse_statement(table, nullptr); 
-		bool func_def = try_parse_declarator(table);
+		was_block = false;
+		while (tk.type == TK_SEMICOLON){
+			tk = lxr->next();
+		} 
+		if (is_block_start()){
+			was_block = try_parse_block(table, nullptr);
+		} else if (is_decl_start()){
+			was_block = try_parse_declarator(table);
+		} else {
+			was_block = try_parse_statement(table, nullptr);
+		}
 		tk = lxr->get();
-		if (func_def){
-			if (tk.type == TK_SEMICOLON)
-				tk = lxr->next();
+		if (was_block){
 			continue;
 		}
 		check_semicolon();
