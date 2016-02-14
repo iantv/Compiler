@@ -333,7 +333,12 @@ void parser::try_parse_if_stmt(sym_table *sym_tbl, stmt_block *stmt_blck){
 	if (tk.type != TK_CLOSE_BRACKET)
 		throw syntax_error(C2059, tk.get_src() + "; it requares closing bracket", tk.pos);
 	tk = lxr->next();
-	try_parse_statements_list(new_if->table, new_if->body);
+	if (tk.type == TK_OPEN_BRACE)
+		try_parse_statements_list(new_if->table, new_if->body);
+	else { 
+		try_parse_statement(new_if->table, new_if->body);
+		check_semicolon();
+	}
 	stmt_blck->push_back(new_if);
 }
 
