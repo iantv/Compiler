@@ -69,7 +69,7 @@ class parser{
 	bool is_stmt_start();
 	bool is_decl_start();
 	void try_parse_if_stmt(sym_table *, stmt_block *);
-	
+	void try_parse_ifelse_body(sym_table *, stmt_block *);
 	void check_semicolon();
 
 	void check_decl2errors(sym_table *, symbol **, token);

@@ -1,0 +1,33 @@
+main: function
+	a: variable
+		int
+	expression:
+			0
+		=
+			a
+	if: cond stmt
+		exec cond:
+				1
+			==
+				a
+		block:
+		expression:
+					z
+				int
+			+=
+				a
+	else:
+		block:
+		if: cond stmt
+			exec cond:
+					0
+				==
+					a
+			block:
+			expression:
+						z
+					int
+				-=
+					a
+returns
+	void

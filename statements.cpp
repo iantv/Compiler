@@ -1,5 +1,6 @@
 #include "statements.h"
 #include "parser.h"
+
 void stmt::print_level(ostream &os, int level){
 	while (level){
 		os << "\t";
@@ -54,25 +55,37 @@ void stmt_block::print(ostream &os, int level){
 
 stmt_if::stmt_if(){
 	type = STMT_IF;
-	table = nullptr;
+	table_if_true = nullptr;
 	cond = nullptr;
-	body = nullptr;
+	body_if_true = nullptr;
+	body_if_false = nullptr;
 }
 
 stmt_if::stmt_if(stmt_expr *ex, sym_table *sym_tbl){
 	type = STMT_IF;
-	table = sym_tbl;
+	table_if_true = sym_tbl;
+	table_if_false = nullptr;
 	cond = ex;
-	body = new stmt_block(sym_tbl);
+	body_if_true = new stmt_block(sym_tbl);
+	body_if_false = nullptr;
 }
 
-void stmt_if::push_back(stmt *new_stmt){
-	body->push_back(new_stmt);
+void stmt_if::push_back_if_true(stmt *new_stmt){
+	body_if_true->push_back(new_stmt);
+}
+
+void stmt_if::push_back_if_false(stmt *new_stmt){
+	body_if_false->push_back(new_stmt);
 }
 
 void stmt_if::print(ostream &os, int level){
 	print_level(os, level);
 	os << "if: cond stmt" << endl;
 	cond->print(os, level + 1);
-	body->print(os, level + 1);
+	body_if_true->print(os, level + 1);
+	if (body_if_false != nullptr){
+		print_level(os, level);
+		os << "else:" << endl;
+		body_if_false->print(os, level + 1);
+	}
 }

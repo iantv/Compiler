@@ -1,0 +1,13 @@
+main: function
+	if: cond stmt
+		exec cond:
+			1
+		block:
+		expression:
+			1
+	else:
+		block:
+		expression:
+			0
+returns
+	void

@@ -1,0 +1,8 @@
+void main(){
+	int a = 0;
+	if (a == 1){
+		a += 'z';
+	} else if (a == 0){
+		a -= 'z';
+	}
+}

@@ -321,23 +321,28 @@ bool parser::is_expr_start(token tk, sym_table *sym_tbl){
 	return tk.is_literal() || tk.is_operator() || sym_tbl->symbol_not_alias_exist(tk.get_src());
 }
 
-void parser::try_parse_if_stmt(sym_table *sym_tbl, stmt_block *stmt_blck){
-	token tk = lxr->get();
-	
-	tk = lxr->next();
-	if (tk.type != TK_OPEN_BRACKET)
-		throw syntax_error(C2059, tk.get_src() + "; it requares openning bracket", tk.pos);
-	tk = lxr->next();
-	stmt_if *new_if = new stmt_if(new stmt_expr(expression(sym_tbl, MIN_PRIORITY), EXECUTION_COND), new sym_table(sym_tbl));
-	tk = lxr->get();
-	if (tk.type != TK_CLOSE_BRACKET)
-		throw syntax_error(C2059, tk.get_src() + "; it requares closing bracket", tk.pos);
-	tk = lxr->next();
-	if (tk.type == TK_OPEN_BRACE)
-		try_parse_statements_list(new_if->table, new_if->body);
+void parser::try_parse_ifelse_body(sym_table *sym_tbl, stmt_block *sym_blck){
+	if (lxr->next().type == TK_OPEN_BRACE)
+		try_parse_statements_list(sym_tbl, sym_blck);
 	else { 
-		try_parse_statement(new_if->table, new_if->body);
-		check_semicolon();
+		if (!try_parse_statement(sym_tbl, sym_blck))
+			check_semicolon();
+	}
+}
+
+void parser::try_parse_if_stmt(sym_table *sym_tbl, stmt_block *stmt_blck){
+	if (lxr->next().type != TK_OPEN_BRACKET)
+		throw syntax_error(C2059, lxr->get().get_src() + "; it requares openning bracket", lxr->get().pos);
+	lxr->next();
+	stmt_if *new_if = new stmt_if(new stmt_expr(expression(sym_tbl, MIN_PRIORITY), EXECUTION_COND), new sym_table(sym_tbl));
+
+	if (lxr->get().type != TK_CLOSE_BRACKET)
+		throw syntax_error(C2059, lxr->get().get_src() + "; it requares closing bracket", lxr->get().pos);
+	try_parse_ifelse_body(new_if->table_if_true, new_if->body_if_true);
+	if (lxr->get().type == TK_ELSE){
+		new_if->table_if_false = new sym_table(sym_tbl);
+		new_if->body_if_false = new stmt_block(new_if->table_if_false);
+		try_parse_ifelse_body(new_if->table_if_false, new_if->body_if_false);
 	}
 	stmt_blck->push_back(new_if);
 }
