@@ -112,3 +112,34 @@ void stmt_while::print(ostream &os, int level){
 	cond->print(os, level + 1);
 	body->print(os, level + 1);
 }
+
+/*--------------------------------------------STMT_FOR--------------------------------------------*/
+stmt_for::stmt_for(stmt_expr *initialization, stmt_expr *condition, stmt_expr *loop_step, sym_table *sym_tbl){
+	init = initialization;
+	cond = condition;
+	step = loop_step;
+	table = sym_tbl;
+	body = new stmt_block(new sym_table(sym_tbl));
+}
+
+void stmt_for::push_back(stmt *new_stmt){
+	body->push_back(new_stmt);
+}
+
+void stmt_for::print(ostream &os, int level){
+	print_level(os, level);
+	os << "for: loop" << endl;
+	if (init != nullptr){
+		print_level(os, level + 1);
+		os << "init:"  << endl;
+		init->print(os, level + 2);
+	}
+	if (cond != nullptr)
+		cond->print(os, level + 1);
+	if (step != nullptr){
+		print_level(os, level + 1);
+		os << "step:" << endl;
+		step->print(os, level + 2);
+	}
+	body->print(os, level + 1);
+}

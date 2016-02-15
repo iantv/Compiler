@@ -56,3 +56,14 @@ public:
 	void push_back(stmt *);
 	void print(ostream &os, int level);
 };
+
+class stmt_for: public stmt{
+	stmt_block *body;
+	sym_table *table;
+	stmt_expr *init, *cond, *step;
+public:
+	friend class parser;
+	stmt_for(stmt_expr *, stmt_expr *, stmt_expr *, sym_table *);
+	void push_back(stmt *);
+	void print(ostream &os, int level);
+};

@@ -72,8 +72,9 @@ class parser{
 	void try_parse_if_stmt(sym_table *, stmt_block *);
 	void try_parse_stmt_body(sym_table *, stmt_block *);
 	void try_parse_while_stmt(sym_table *, stmt_block *);
+	void try_parse_for_stmt(sym_table *, stmt_block *);
+	
 	void check_semicolon();
-
 	void check_decl2errors(sym_table *, symbol **, token);
 	void check_func_decl2errors(symbol **, token);
 public:

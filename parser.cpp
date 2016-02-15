@@ -361,6 +361,29 @@ void parser::try_parse_while_stmt(sym_table *sym_tbl, stmt_block *stmt_blck){
 	stmt_blck->push_back(new_while);
 }
 
+void parser::try_parse_for_stmt(sym_table *sym_tbl, stmt_block *stmt_blck){
+	if (lxr->next().type != TK_OPEN_BRACKET)
+		throw syntax_error(C2059, lxr->get().get_src() + "; it requares openning bracket", lxr->get().pos);
+	lxr->next();
+	sym_table *for_table = new sym_table(sym_tbl);
+	stmt_expr *init = nullptr, *cond = nullptr, *step = nullptr;
+
+	/*if (is_decl_start())
+		try_parse_declarator(for_table, stmt_blck);*/
+	if (is_expr_start(lxr->get(), sym_tbl)) init = new stmt_expr(expression(sym_tbl, MIN_PRIORITY), NOT_COND);
+	check_semicolon();
+	if (is_expr_start(lxr->get(), sym_tbl)) cond = new stmt_expr(expression(sym_tbl, MIN_PRIORITY), END_COND);
+	check_semicolon();
+	if (is_expr_start(lxr->get(), sym_tbl)) step = new stmt_expr(expression(sym_tbl, MIN_PRIORITY), NOT_COND);
+	if (lxr->get().type != TK_CLOSE_BRACKET)
+		throw syntax_error(C2059, lxr->get().get_src() + "; it requares closing bracket", lxr->get().pos);
+	
+	stmt_for *new_for = new stmt_for(init, cond, step, new sym_table(sym_tbl));
+
+	try_parse_stmt_body(new_for->body->table, new_for->body);
+	stmt_blck->push_back(new_for);
+}
+
 bool parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck){
 	token tk = lxr->get();
 	if (is_expr_start(tk, sym_tbl)){
@@ -384,6 +407,9 @@ bool parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck){
 	} else if (tk.type == TK_WHILE){
 		try_parse_while_stmt(sym_tbl, stmt_blck);
 		return true;
+	} else if (tk.type == TK_FOR){
+		try_parse_for_stmt(sym_tbl, stmt_blck);
+		return true;
 	} else if (is_decl_start()){
 		return try_parse_declarator(sym_tbl, stmt_blck);
 	}
@@ -396,7 +422,7 @@ bool parser::is_block_start(){
 
 bool parser::is_stmt_start(){
 	token tk = lxr->get();
-	return is_expr_start(tk, nullptr) || tk.type ==  TK_IF || tk.type == TK_WHILE; // DO!!! FILL!!! CONTINUED!!!
+	return is_expr_start(tk, nullptr) || tk.type ==  TK_IF || tk.type == TK_WHILE || tk.type == TK_FOR; // DO!!! FILL!!! CONTINUED!!!
 }
 
 bool parser::is_decl_start(){

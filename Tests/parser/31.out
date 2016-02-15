@@ -1,0 +1,25 @@
+main: function
+	{
+		i: variable
+			int
+		for: loop
+			init:
+				expression:
+						0
+					=
+						i
+			end cond:
+					10
+				<
+					i
+			step:
+				expression:
+					++
+						i
+			{
+				expression:
+					1
+			}
+	}
+returns
+	void

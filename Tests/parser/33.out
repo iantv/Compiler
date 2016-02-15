@@ -1,0 +1,14 @@
+main: function
+	{
+		i: variable
+			int
+		for: loop
+			{
+				expression:
+						1
+					=
+						i
+			}
+	}
+returns
+	void
