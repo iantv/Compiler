@@ -1,10 +1,12 @@
 main: function
-	b: variable
-		char
-	expression:
-				1.
+	{
+		b: variable
 			char
-		=
-			b
+		expression:
+					1.
+				char
+			=
+				b
+	}
 returns
 	void

@@ -265,6 +265,10 @@ void parser::parse_fparams(sym_table *lst, vector<string> *params){
 			}
 		}
 	}
+	if (lxr->get().type == TK_CLOSE_BRACKET)
+		lxr->next();
+	else
+		throw syntax_error(C2143, "missing ')' before '" + lxr->get().get_src() + "'", lxr->get().pos);
 }
 
 void parser::check_struct_member(symbol *member, string struct_tag, position pos){
@@ -321,7 +325,7 @@ bool parser::is_expr_start(token tk, sym_table *sym_tbl){
 	return tk.is_literal() || tk.is_operator() || sym_tbl->symbol_not_alias_exist(tk.get_src());
 }
 
-void parser::try_parse_ifelse_body(sym_table *sym_tbl, stmt_block *sym_blck){
+void parser::try_parse_stmt_body(sym_table *sym_tbl, stmt_block *sym_blck){
 	if (lxr->next().type == TK_OPEN_BRACE)
 		try_parse_statements_list(sym_tbl, sym_blck);
 	else { 
@@ -338,13 +342,23 @@ void parser::try_parse_if_stmt(sym_table *sym_tbl, stmt_block *stmt_blck){
 
 	if (lxr->get().type != TK_CLOSE_BRACKET)
 		throw syntax_error(C2059, lxr->get().get_src() + "; it requares closing bracket", lxr->get().pos);
-	try_parse_ifelse_body(new_if->table_if_true, new_if->body_if_true);
+	try_parse_stmt_body(new_if->body_if_true->table, new_if->body_if_true);
 	if (lxr->get().type == TK_ELSE){
-		new_if->table_if_false = new sym_table(sym_tbl);
-		new_if->body_if_false = new stmt_block(new_if->table_if_false);
-		try_parse_ifelse_body(new_if->table_if_false, new_if->body_if_false);
+		new_if->body_if_false = new stmt_block(new sym_table(sym_tbl));
+		try_parse_stmt_body(new_if->body_if_false->table, new_if->body_if_false);
 	}
 	stmt_blck->push_back(new_if);
+}
+
+void parser::try_parse_while_stmt(sym_table *sym_tbl, stmt_block *stmt_blck){
+	if (lxr->next().type != TK_OPEN_BRACKET)
+		throw syntax_error(C2059, lxr->get().get_src() + "; it requares openning bracket", lxr->get().pos);
+	lxr->next();
+	stmt_while *new_while = new stmt_while(new stmt_expr(expression(sym_tbl, MIN_PRIORITY), CONTINUED_COND), new sym_table (sym_tbl));
+	if (lxr->get().type != TK_CLOSE_BRACKET)
+		throw syntax_error(C2059, lxr->get().get_src() + "; it requares closing bracket", lxr->get().pos);
+	try_parse_stmt_body(new_while->body->table, new_while->body);
+	stmt_blck->push_back(new_while);
 }
 
 bool parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck){
@@ -367,6 +381,11 @@ bool parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck){
 	} else if (tk.type == TK_IF) {
 		try_parse_if_stmt(sym_tbl, stmt_blck);
 		return true;
+	} else if (tk.type == TK_WHILE){
+		try_parse_while_stmt(sym_tbl, stmt_blck);
+		return true;
+	} else if (is_decl_start()){
+		return try_parse_declarator(sym_tbl, stmt_blck);
 	}
 	return true;
 }
@@ -377,7 +396,7 @@ bool parser::is_block_start(){
 
 bool parser::is_stmt_start(){
 	token tk = lxr->get();
-	return is_expr_start(tk, nullptr) || tk.type ==  TK_IF; // DO!!! FILL!!! CONTINUED!!!
+	return is_expr_start(tk, nullptr) || tk.type ==  TK_IF || tk.type == TK_WHILE; // DO!!! FILL!!! CONTINUED!!!
 }
 
 bool parser::is_decl_start(){
@@ -417,18 +436,16 @@ bool parser::try_parse_block(sym_table *sym_tbl_prev, stmt_block * stmt_prev_blo
 	sym_table *sym_tbl = new sym_table(sym_tbl_prev);
 	stmt_block *stmt_blck = new stmt_block(sym_tbl);
 	try_parse_statements_list(sym_tbl, stmt_blck);
-	stmt_prev_block->push_back(dynamic_cast<stmt *>(stmt_blck));
+	stmt_prev_block->push_back(stmt_blck);
 	return true;
 }
 
 stmt_block *parser::try_parse_body(sym_table *sym_tbl){
-	if (!lxr->look_next_token(TK_OPEN_BRACE)){
-		lxr->next();
+	if (lxr->get().type != TK_OPEN_BRACE)
 		return nullptr;
-	}
-	lxr->next(); /* Current token is TK_OPEN_BRACE */
-	stmt_block *stmt_blck = new stmt_block();
-	stmt_blck->stmt_list = init_list;
+	stmt_block *stmt_blck = new stmt_block(sym_tbl);
+	if (global_init)
+		stmt_blck->stmt_list = init_list;
 	try_parse_statements_list(sym_tbl, stmt_blck);
 	return stmt_blck;
 }
@@ -605,7 +622,7 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 			info.set_id(new sym_var(info.name, nullptr, tk_id));
 		}
 	} else {
-		while ((tk.type == TK_OPEN_BRACKET) || (tk.type == TK_OPEN_SQUARE_BRACKET)){
+		while (((tk.type == TK_OPEN_BRACKET) || (tk.type == TK_OPEN_SQUARE_BRACKET)) && tk.type != NOT_TK){
 			if (tk.type == TK_OPEN_SQUARE_BRACKET){
 				if (info.check_id(nullptr)){
 					info.set_id(new sym_array(parse_size_of_array()));
@@ -616,23 +633,26 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 					else
 						info.set_type(new sym_array(parse_size_of_array()));		
 				}
+				tk = lxr->next();
 			} else if (tk.type == TK_OPEN_BRACKET){
 				sym_table *st = new sym_table(sym_tbl);
 				vector<string> params;
 				parse_fparams(st, &params);
 				if (info.check_id(nullptr)){
-					if (info.name == "main") point_of_entry = true;
-					sym_function * f = new sym_function(info.name, st, try_parse_body(st), params);
+					if (info.name == "main"){
+						point_of_entry = true;
+						global_init = true;
+					}
+					sym_function *f = new sym_function(info.name, st, params, try_parse_body(st));
+					global_init = false;
 					info.set_id(f);
 					info.def = f->block != nullptr;
-					tk = lxr->get();
-					continue;
 				} else {
 					string s = (info.get_type() == nullptr) ? typeid(*info.get_id()).name() : typeid(*info.get_type()).name();
 					if (s == "class sym_array"){
-						throw error(C2092, "element type of array cannot be function", lxr->pos);
+						throw error(C2092, "element type of array cannot be function", tk.pos);
 					} else if (s == "class sym_function" || s == "class sym_func_type"){
-						throw error(C2091, "function returns function", lxr->pos);
+						throw error(C2091, "function returns function", tk.pos);
 					}
 					if (dir_dcl)
 						info.set_back_type(new sym_func_type(nullptr, st, params));
@@ -640,7 +660,7 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 						info.set_type(new sym_func_type(nullptr, st, params));
 				}
 			}
-			tk = lxr->next();
+			tk = lxr->get();
 		}
 	}
 	return info;
@@ -672,6 +692,8 @@ void parser::parse(ostream &os){
 			was_block = try_parse_statement(table, nullptr);
 		}
 		tk = lxr->get();
+		if (tk.type == NOT_TK)
+			break;
 		if (was_block){
 			continue;
 		}

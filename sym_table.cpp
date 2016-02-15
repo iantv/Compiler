@@ -12,11 +12,11 @@ symbol *make_symbol(declar &dcl){
 	return t;
 }
 
-sym_function::sym_function(const string &sym_name, sym_table *lst, stmt_block *stmt_blck, vector<string> &param_list){
+sym_function::sym_function(const string &sym_name, sym_table *lst, vector<string> &param_list, stmt_block *stmt_blck = nullptr){
 	name = sym_name;
 	table = lst;
-	block = stmt_blck;
 	params = param_list;
+	block = stmt_blck;
 }
 
 sym_func_type::sym_func_type(sym_type *stype, sym_table *lst, vector<string> &param_list){
@@ -77,7 +77,7 @@ void sym_function::print(ostream &os, int level){
 	os << name << ": function" << endl;
 	for (int i = 0; i < (int)params.size(); i++)
 		table->get_symbol(params[i])->print(os, level + 1);
-	table->print(os, level + 1);
+	//table->print(os, level + 1);
 	if (block != nullptr)
 		block->print(os, level + 1);
 	print_level(os, level);

@@ -1,6 +1,8 @@
 main: function
 	a: parameter
 		int
+	{
+	}
 returns
 	void
 a: variable

@@ -1,9 +1,12 @@
 main: function
-	if: cond stmt
-		exec cond:
-			1
-		block:
-		expression:
-			2
+	{
+		if: cond stmt
+			exec cond:
+				1
+			{
+				expression:
+					2
+			}
+	}
 returns
 	void

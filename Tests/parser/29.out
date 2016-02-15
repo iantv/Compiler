@@ -1,16 +1,11 @@
 main: function
 	{
-		if: cond stmt
-			exec cond:
+		while: loop
+			continued cond:
 				1
 			{
 				expression:
 					1
-			}
-		else:
-			{
-				expression:
-					0
 			}
 	}
 returns

@@ -1,7 +1,7 @@
 import subprocess
 LTESTCNT = 40
 EXPR = 53
-PRS =  28
+PRS =  30
 PRSERR = 4
 PDTESTCNT = 50
 
@@ -21,7 +21,7 @@ def testproc(testname, cmd, N, output, ansdir):
 			print '.',
 		else:
 			print 'E',
-			exit();
+			#exit();
 #		print '.' if (f1.read() == f2.read()) else 'E',
 		f1.close()
 		f2.close()

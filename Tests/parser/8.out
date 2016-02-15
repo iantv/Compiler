@@ -1,6 +1,8 @@
 main: function
-	a: variable
-		int
+	{
+		a: variable
+			int
+	}
 returns
 	void
 a: variable

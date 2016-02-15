@@ -1,0 +1,17 @@
+main: function
+	{
+		while: loop
+			continued cond:
+				1
+			{
+				a: variable
+					int
+				expression:
+							z
+						int
+					=
+						a
+			}
+	}
+returns
+	void

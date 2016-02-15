@@ -1,9 +1,11 @@
 main: function
 	b: parameter
 		int
-	expression:
-			b
-		+
-			1
+	{
+		expression:
+				b
+			+
+				1
+	}
 returns
 	void

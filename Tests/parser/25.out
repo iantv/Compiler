@@ -1,8 +1,11 @@
 main: function
-	a: variable
-		int
-	expression:
-		1
-	block:
+	{
+		a: variable
+			int
+		expression:
+			1
+		{
+		}
+	}
 returns
 	void

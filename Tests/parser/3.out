@@ -1,10 +1,12 @@
 main: function
 	a: parameter
 		int
-	b: variable
-		int
-	c: variable
-		int
+	{
+		b: variable
+			int
+		c: variable
+			int
+	}
 returns
 	void
 a: variable

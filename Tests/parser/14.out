@@ -1,10 +1,12 @@
 main: function
-	b: variable
-		int
-	expression:
-				a
+	{
+		b: variable
 			int
-		=
-			b
+		expression:
+					a
+				int
+			=
+				b
+	}
 returns
 	void

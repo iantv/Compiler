@@ -1,17 +1,19 @@
 main: function
-	b: variable
-		char
-	c: variable
-		int
-	d: variable
-		double
-	expression:
-			2.0
-		+
-					1
-				+
-						a
-					int
+	{
+		b: variable
+			char
+		c: variable
+			int
+		d: variable
 			double
+		expression:
+				2.0
+			+
+						1
+					+
+							a
+						int
+				double
+	}
 returns
 	void

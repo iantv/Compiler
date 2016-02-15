@@ -39,7 +39,7 @@ class sym_function: public symbol{
 public:
 	friend class parser;
 	void print(ostream &os, int level) override;
-	sym_function(const string &sym_name, sym_table *lst, stmt_block *blck, vector<string> &param_list); /* lst is pointer to Local Symbol Table */
+	sym_function(const string &sym_name, sym_table *lst, vector<string> &param_list, stmt_block *); /* lst is pointer to Local Symbol Table */
 };
 
 class sym_type: public symbol{

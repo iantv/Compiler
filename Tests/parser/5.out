@@ -1,7 +1,9 @@
 main: function
-	expression:
-			2
-		+
-			1
+	{
+		expression:
+				2
+			+
+				1
+	}
 returns
 	void

@@ -1,20 +1,22 @@
 main: function
-	b: variable
-		double
-	c: variable
-		int
-	expression:
-			1.5
-		=
-			b
-	expression:
-			0.5
-		+=
-			b
-	expression:
-				b
+	{
+		b: variable
+			double
+		c: variable
 			int
-		=
-			c
+		expression:
+				1.5
+			=
+				b
+		expression:
+				0.5
+			+=
+				b
+		expression:
+					b
+				int
+			=
+				c
+	}
 returns
 	void

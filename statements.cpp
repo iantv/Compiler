@@ -8,7 +8,9 @@ void stmt::print_level(ostream &os, int level){
 	}
 }
 
-stmt_expr::stmt_expr(expr * ex, cond_t cond = NOT_COND){
+/*--------------------------------------------STMT_EXPR--------------------------------------------*/
+
+stmt_expr::stmt_expr(expr *ex, cond_t cond = NOT_COND){
 	e = ex;
 	type = STMT_EXPR;
 	cond_type = cond;
@@ -22,6 +24,8 @@ void stmt_expr::print(ostream &os, int level){
 	if (cond_type == NOT_COND)		 { os << "expression:"		<< endl; }
 	e->print(os, level + 1);
 }
+
+/*--------------------------------------------STMT_BLOCK--------------------------------------------*/
 
 stmt_block::stmt_block(){
 	type = STMT_BLOCK;
@@ -45,17 +49,20 @@ void stmt_block::push_back(stmt *new_stmt){
 void stmt_block::print(ostream &os, int level){
 	if (table != nullptr){
 		print_level(os, level);
-		os << "block:" << endl;
+		os << "{" << endl;
 		table->print(os, level + 1);
 	}
 	for (int i = 0; i < (int)stmt_list.size(); i++){
-		stmt_list[i]->print(os, level);
+		stmt_list[i]->print(os, level + 1);
 	}
+	print_level(os, level);
+	os << "}" << endl;
 }
+
+/*--------------------------------------------STMT_IF--------------------------------------------*/
 
 stmt_if::stmt_if(){
 	type = STMT_IF;
-	table_if_true = nullptr;
 	cond = nullptr;
 	body_if_true = nullptr;
 	body_if_false = nullptr;
@@ -63,8 +70,6 @@ stmt_if::stmt_if(){
 
 stmt_if::stmt_if(stmt_expr *ex, sym_table *sym_tbl){
 	type = STMT_IF;
-	table_if_true = sym_tbl;
-	table_if_false = nullptr;
 	cond = ex;
 	body_if_true = new stmt_block(sym_tbl);
 	body_if_false = nullptr;
@@ -88,4 +93,22 @@ void stmt_if::print(ostream &os, int level){
 		os << "else:" << endl;
 		body_if_false->print(os, level + 1);
 	}
+}
+
+/*--------------------------------------------STMT_WHILE--------------------------------------------*/
+
+stmt_while::stmt_while(stmt_expr *ex, sym_table *sym_tbl){
+	cond = ex;
+	body = new stmt_block(sym_tbl);
+}
+
+void stmt_while::push_back(stmt *new_stmt){
+	body->push_back(new_stmt);
+}
+
+void stmt_while::print(ostream &os, int level){
+	print_level(os, level);
+	os << "while: loop" << endl;
+	cond->print(os, level + 1);
+	body->print(os, level + 1);
 }

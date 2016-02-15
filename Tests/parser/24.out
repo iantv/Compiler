@@ -1,17 +1,20 @@
 main: function
-	a: variable
-		int
-	expression:
-			10
-		=
-			a
-	if: cond stmt
-		exec cond:
-			1
-		block:
+	{
+		a: variable
+			int
 		expression:
-				1
+				10
 			=
 				a
+		if: cond stmt
+			exec cond:
+				1
+			{
+				expression:
+						1
+					=
+						a
+			}
+	}
 returns
 	void

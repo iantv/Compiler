@@ -1,14 +1,16 @@
 main: function
-	b: variable
-		int
-	expression:
-			1
-		=
-			a
-	expression:
-			a
-		=
-			b
+	{
+		b: variable
+			int
+		expression:
+				1
+			=
+				a
+		expression:
+				a
+			=
+				b
+	}
 returns
 	void
 a: variable

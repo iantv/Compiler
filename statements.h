@@ -35,8 +35,6 @@ public:
 };
 
 class stmt_if: public stmt{
-	sym_table *table_if_true;
-	sym_table *table_if_false;
 	stmt_expr *cond;
 	stmt_block *body_if_true;
 	stmt_block *body_if_false;
@@ -47,4 +45,14 @@ public:
 	void push_back_if_true(stmt *);
 	void push_back_if_false(stmt *);
 	void print(ostream &os, int level) override;
+};
+
+class stmt_while: public stmt{
+	stmt_block *body;
+	stmt_expr *cond;
+public:
+	friend class parser;
+	stmt_while(stmt_expr *, sym_table *);
+	void push_back(stmt *);
+	void print(ostream &os, int level);
 };

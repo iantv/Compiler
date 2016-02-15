@@ -1,33 +1,38 @@
 main: function
-	a: variable
-		int
-	expression:
-			0
-		=
-			a
-	if: cond stmt
-		exec cond:
-				1
-			==
-				a
-		block:
+	{
+		a: variable
+			int
 		expression:
-					z
-				int
-			+=
+				0
+			=
 				a
-	else:
-		block:
 		if: cond stmt
 			exec cond:
-					0
+					1
 				==
 					a
-			block:
-			expression:
-						z
-					int
-				-=
-					a
+			{
+				expression:
+							z
+						int
+					+=
+						a
+			}
+		else:
+			{
+				if: cond stmt
+					exec cond:
+							0
+						==
+							a
+					{
+						expression:
+									z
+								int
+							-=
+								a
+					}
+			}
+	}
 returns
 	void

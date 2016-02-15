@@ -37,6 +37,7 @@ class parser{
 	sym_table *table;
 	sym_table *prelude;
 	vector<stmt *> init_list;
+	bool global_init;
 	expr *expression(sym_table *, int priority);
 	expr *factor(sym_table *);
 	expr *parse_function();
@@ -69,7 +70,8 @@ class parser{
 	bool is_stmt_start();
 	bool is_decl_start();
 	void try_parse_if_stmt(sym_table *, stmt_block *);
-	void try_parse_ifelse_body(sym_table *, stmt_block *);
+	void try_parse_stmt_body(sym_table *, stmt_block *);
+	void try_parse_while_stmt(sym_table *, stmt_block *);
 	void check_semicolon();
 
 	void check_decl2errors(sym_table *, symbol **, token);

@@ -1,9 +1,12 @@
 main: function
-	a: variable
-		int
-	block:
-		c: variable
-			double
+	{
+		a: variable
+			int
+		{
+			c: variable
+				double
+		}
+	}
 returns
 	void
 b: variable

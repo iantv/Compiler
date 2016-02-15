@@ -1,9 +1,11 @@
 main: function
-	b: variable
-		char
-	expression:
-			z
-		=
-			b
+	{
+		b: variable
+			char
+		expression:
+				z
+			=
+				b
+	}
 returns
 	void
