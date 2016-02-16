@@ -1,0 +1,11 @@
+main: function
+	{
+		while: loop
+			continued cond:
+				1
+			{
+				continue
+			}
+	}
+returns
+	void

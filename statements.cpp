@@ -114,6 +114,7 @@ void stmt_while::print(ostream &os, int level){
 }
 
 /*--------------------------------------------STMT_FOR--------------------------------------------*/
+
 stmt_for::stmt_for(stmt_expr *initialization, stmt_expr *condition, stmt_expr *loop_step, sym_table *sym_tbl){
 	init = initialization;
 	cond = condition;
@@ -142,4 +143,18 @@ void stmt_for::print(ostream &os, int level){
 		step->print(os, level + 2);
 	}
 	body->print(os, level + 1);
+}
+
+/*--------------------------------------------STMT_BREAK--------------------------------------------*/
+
+void stmt_break::print(ostream &os, int level){
+	print_level(os, level);
+	os << "break" << endl;
+}
+
+/*--------------------------------------------STMT_CONTINUE--------------------------------------------*/
+
+void stmt_continue::print(ostream &os, int level){
+	print_level(os, level);
+	os << "continue" << endl;
 }

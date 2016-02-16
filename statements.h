@@ -7,7 +7,7 @@ class stmt{
 protected:
 	stmt_t type;
 public:
-	stmt(){};
+	stmt(){}
 	virtual void print(ostream &os, int level) = 0;
 	void print_level(ostream &os, int level);
 };
@@ -65,5 +65,17 @@ public:
 	friend class parser;
 	stmt_for(stmt_expr *, stmt_expr *, stmt_expr *, sym_table *);
 	void push_back(stmt *);
+	void print(ostream &os, int level);
+};
+
+class stmt_break: public stmt{
+public:
+	stmt_break(){}
+	void print(ostream &os, int level);
+};
+
+class stmt_continue: public stmt{
+public:
+	stmt_continue(){}
 	void print(ostream &os, int level);
 };

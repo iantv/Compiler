@@ -58,19 +58,20 @@ class parser{
 	expr *new_expr_bin_op(expr *ex1, expr *ex2, token tk);
 	expr *new_expr_var(sym_table *, token);
 	
-	bool try_parse_block(sym_table *, stmt_block *);
-	stmt_block *try_parse_body(sym_table *); /* parse function's or block's body */
+	bool try_parse_block(sym_table *, stmt_block *, bool);
+	stmt_block *try_parse_body(sym_table *, bool); /* parse function's or block's body */
 	void try_parse_init(symbol *, sym_table *, stmt_block *);
-	void try_parse_statements_list(sym_table *, stmt_block *);
-	bool try_parse_statement(sym_table *, stmt_block *);
+	void try_parse_statements_list(sym_table *, stmt_block *, bool);
+	bool try_parse_statement(sym_table *, stmt_block *, bool);
 	bool try_parse_declarator(sym_table *, stmt_block *);
 	
 	bool is_expr_start(token, sym_table *);
 	bool is_block_start();
 	bool is_stmt_start();
 	bool is_decl_start();
-	void try_parse_if_stmt(sym_table *, stmt_block *);
-	void try_parse_stmt_body(sym_table *, stmt_block *);
+
+	void try_parse_if_stmt(sym_table *, stmt_block *, bool);
+	void try_parse_stmt_body(sym_table *, stmt_block *, bool);
 	void try_parse_while_stmt(sym_table *, stmt_block *);
 	void try_parse_for_stmt(sym_table *, stmt_block *);
 	
