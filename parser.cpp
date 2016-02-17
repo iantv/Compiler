@@ -447,7 +447,7 @@ void parser::try_parse_statements_list(sym_table *sym_tbl, stmt_block *stmt_blck
 	token tk = lxr->next(); /* skip open brace '{' */
 	while (tk.type != TK_CLOSE_BRACE){
 		if (tk.type == TK_SEMICOLON){
-			tk = lxr->next();
+			lxr->next();
 		} else if (is_block_start()){
 			try_parse_block(sym_tbl, stmt_blck, loop);
 		} else if (is_decl_start()){
@@ -532,9 +532,17 @@ void parser::try_parse_declarator(sym_table *sym_tbl, stmt_block *stmt_blck = nu
 	bool func_def = false;
 	bool decl = false;
 	if (tk.is_type_specifier()){
-		declar dcl = parse_declare(sym_tbl);
-		func_def = dcl.is_def();
-		symbol *t = make_symbol(dcl);
+		symbol *t = make_symbol(parse_declare(sym_tbl));
+		if (lxr->get().type == TK_OPEN_BRACE){
+			sym_function *f = dynamic_cast<sym_function *>(t);
+			if (f->name == "main"){
+				point_of_entry = true;
+				global_init = true;
+			}
+			f->block = try_parse_body(f->table);
+			global_init = false;
+			func_def = f->block != nullptr;
+		}
 		check_decl2errors(sym_tbl, &t, tk);
 		if (t != nullptr){ 
 			sym_tbl->add_sym(t);
@@ -672,15 +680,8 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 				vector<string> params;
 				parse_fparams(st, &params);
 				if (info.check_id(nullptr)){
-					if (info.name == "main"){
-						point_of_entry = true;
-						global_init = true;
-					}
-					sym_function *f = new sym_function(info.name, st, params, try_parse_body(st));
-					//f->block = try_parse_body(st);
-					global_init = false;
+					sym_function *f = new sym_function(info.name, st, params, nullptr);
 					info.set_id(f);
-					info.def = f->block != nullptr;
 				} else {
 					string s = (info.get_type() == nullptr) ? typeid(*info.get_id()).name() : typeid(*info.get_type()).name();
 					if (s == "class sym_array"){
