@@ -64,7 +64,7 @@ class parser{
 	void try_parse_statements_list(sym_table *, stmt_block *, bool);
 	void try_parse_statement(sym_table *, stmt_block *, bool);
 	void try_parse_declarator(sym_table *, stmt_block *);
-	
+	bool try_parse_definition(symbol *);
 	bool is_expr_start(token, sym_table *);
 	bool is_block_start();
 	bool is_stmt_start();

@@ -526,6 +526,19 @@ void parser::try_parse_init(symbol *sym, sym_table *sym_tbl, stmt_block *stmt_bl
 		stmt_blck->push_back(statement);
 }
 
+bool parser::try_parse_definition(symbol *t){
+	if (lxr->get().type == TK_OPEN_BRACE){
+		sym_function *f = dynamic_cast<sym_function *>(t);
+		if (f->name == "main"){
+			point_of_entry = true;
+			global_init = true;
+		}
+		f->block = try_parse_body(f->table);
+		global_init = false;
+		return f->block != nullptr;
+	}
+	return false;
+}
 void parser::try_parse_declarator(sym_table *sym_tbl, stmt_block *stmt_blck = nullptr){
 	token tk = lxr->get();
 	sym_type *stype = nullptr;
@@ -533,16 +546,7 @@ void parser::try_parse_declarator(sym_table *sym_tbl, stmt_block *stmt_blck = nu
 	bool decl = false;
 	if (tk.is_type_specifier()){
 		symbol *t = make_symbol(parse_declare(sym_tbl));
-		if (lxr->get().type == TK_OPEN_BRACE){
-			sym_function *f = dynamic_cast<sym_function *>(t);
-			if (f->name == "main"){
-				point_of_entry = true;
-				global_init = true;
-			}
-			f->block = try_parse_body(f->table);
-			global_init = false;
-			func_def = f->block != nullptr;
-		}
+		func_def = try_parse_definition(t);
 		check_decl2errors(sym_tbl, &t, tk);
 		if (t != nullptr){ 
 			sym_tbl->add_sym(t);
