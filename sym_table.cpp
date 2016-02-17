@@ -170,8 +170,7 @@ bool sym_table::global_exist(string &name){
 }
 
 void sym_table::add_sym(symbol *sym){
-	string s = typeid(*sym).name();
-	if (s == "class sym_function"){
+	if (typeid(*sym).name() == typeid(sym_function).name()){
 		functions.push_back(dynamic_cast<sym_function *>(sym));
 		return;
 	}
@@ -201,8 +200,7 @@ void sym_table::print(ostream &os, int level){
 	}
 	for (auto it = symbols.begin(); it != symbols.end(); ++it){
 		symbol *t = it->second;
-		string s = typeid(*t).name();
-		if (s == "class sym_var_param")
+		if (typeid(*t).name() == typeid(sym_var_param).name())
 			continue;
 		t->print(os, level);
 	}
@@ -212,7 +210,7 @@ sym_type *sym_table::get_type_by_synonym(string s){
 	sym_type *t = get_type_specifier(s);
 	if (t == nullptr) return nullptr;
 	string id = typeid(*t).name();
-	if (id == "class sym_alias"){
+	if (id == typeid(sym_alias).name()){
 		return t->type;
 	}
 	return nullptr;
@@ -242,11 +240,3 @@ bool equal(sym_type *sym1, sym_type *sym2){
 		return true;
 	return false;
 }
-/*
-sym_function *sym_table::get_function(string name){
-	for (int i = 0; i < (int)functions.size(); i++){
-		if (functions[i]->name == name)
-			return functions[i];
-	}
-	return nullptr;
-}*/

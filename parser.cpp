@@ -272,8 +272,7 @@ void parser::parse_fparams(sym_table *lst, vector<string> *params){
 }
 
 void parser::check_struct_member(symbol *member, string struct_tag, position pos){
-	string s = typeid(*member).name();
-	if (s != "class sym_struct")
+	if (typeid(*member).name() != typeid(sym_struct).name())
 		return;
 	if (member->name == struct_tag)
 		throw error(C3769, "\"" + struct_tag + "\" : a nested class cannot have the same name as the immediately enclosing class", lxr->pos);
@@ -281,9 +280,7 @@ void parser::check_struct_member(symbol *member, string struct_tag, position pos
 	while (table->prev != nullptr){
 		table = table->prev;
 		if (table->global_exist(member->name)){
-			sym_type *t = table->get_type_specifier(member->name);
-			string str = typeid(*t).name();
-			if (str == "class sym_struct"){
+			if (typeid(*table->get_type_specifier(member->name)).name() == typeid(sym_struct).name()){
 				throw error(C2020, member->name + ": struct redifinition", pos);
 			}
 		}
@@ -501,17 +498,15 @@ void parser::check_func_decl2errors(symbol **t, token tk){
 }
 
 void parser::check_decl2errors(sym_table *sym_tbl, symbol **t, token tk){
-	string cur_type = typeid(**t).name();
-	if (cur_type == /*typeid(sym_var)*/"class sym_var" && sym_tbl->local_exist((*t)->name)){
+	if (typeid(**t).name() == typeid(sym_var).name() && sym_tbl->local_exist((*t)->name)){
 		throw error(C2086, (*t)->type->name + " " + (*t)->name + ": redefinition", tk.pos);
-	} else if (cur_type == "class sym_function"){
+	} else if (typeid(**t).name() == typeid(sym_function).name()){
 		check_func_decl2errors(t, tk);
 	}
 }
 
 void parser::try_parse_init(symbol *sym, sym_table *sym_tbl, stmt_block *stmt_blck){
-	string sym_name = typeid(*sym).name();
-	if (lxr->get().type != TK_ASSIGN || sym_name != "class sym_var") return;
+	if (lxr->get().type != TK_ASSIGN || typeid(*sym).name() != typeid(sym_var).name()) return;
 	sym_var *t = dynamic_cast<sym_var *>(sym);
 	token tk = lxr->get(); lxr->next();
 	stmt * statement = new stmt_expr(new_expr_bin_op(new_expr_var(sym_tbl, t->var_token), expression(sym_tbl, 2), tk), NOT_COND);
@@ -684,9 +679,9 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 					info.set_id(f);
 				} else {
 					string s = (info.get_type() == nullptr) ? typeid(*info.get_id()).name() : typeid(*info.get_type()).name();
-					if (s == "class sym_array"){
+					if (s == typeid(sym_array).name()){
 						throw error(C2092, "element type of array cannot be function", tk.pos);
-					} else if (s == "class sym_function" || s == "class sym_func_type"){
+					} else if (s == typeid(sym_function).name() || s == typeid(sym_func_type).name()){
 						throw error(C2091, "function returns function", tk.pos);
 					}
 					if (dir_dcl)
