@@ -328,10 +328,8 @@ bool parser::is_expr_start(token tk, sym_table *sym_tbl){
 void parser::try_parse_stmt_body(sym_table *sym_tbl, stmt_block *sym_blck, bool loop = false){
 	if (lxr->next().type == TK_OPEN_BRACE)
 		try_parse_statements_list(sym_tbl, sym_blck, loop);
-	else { 
-		if (!try_parse_statement(sym_tbl, sym_blck, loop))
-			check_semicolon();
-	}
+	else 
+		try_parse_statement(sym_tbl, sym_blck, loop);
 }
 
 void parser::try_parse_if_stmt(sym_table *sym_tbl, stmt_block *stmt_blck, bool loop){
@@ -384,7 +382,7 @@ void parser::try_parse_for_stmt(sym_table *sym_tbl, stmt_block *stmt_blck){
 	stmt_blck->push_back(new_for);
 }
 
-bool parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck, bool loop = false){
+void parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck, bool loop = false){
 	token tk = lxr->get();
 	if (is_expr_start(tk, sym_tbl)){
 		//DO tests and corresponding call, but while it's comment
@@ -400,7 +398,7 @@ bool parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck, bool
 			}
 		}
 		stmt_blck->push_back(new stmt_expr(expression(sym_tbl, MIN_PRIORITY), NOT_COND));
-		return false;
+		check_semicolon();
 	} else if (tk.type == TK_IF) {
 		try_parse_if_stmt(sym_tbl, stmt_blck, loop);
 	} else if (tk.type == TK_WHILE){
@@ -408,27 +406,27 @@ bool parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck, bool
 	} else if (tk.type == TK_FOR){
 		try_parse_for_stmt(sym_tbl, stmt_blck);
 	} else if (is_decl_start()){
-		return try_parse_declarator(sym_tbl, stmt_blck);
+		try_parse_declarator(sym_tbl, stmt_blck);
 	} else if (tk.type == TK_BREAK){
 		if (!loop)
 			throw error(C2044, "illegal '" + tk.get_src() + "'", tk.pos);
 		stmt_blck->push_back(new stmt_break());		
 		lxr->next();
-		return false;
+		check_semicolon();
 	} else if (tk.type == TK_CONTINUE){
 		if (!loop)
 			throw error(C2044, "illegal '" + tk.get_src() + "'", tk.pos);
 		stmt_blck->push_back(new stmt_continue());
 		lxr->next();
-		return false;
+		check_semicolon();
 	} else if (tk.type == TK_RETURN){
 		lxr->next();
 		if (is_expr_start(lxr->get(), sym_tbl))
 			stmt_blck->push_back(new stmt_return(new stmt_expr(expression(sym_tbl, MIN_PRIORITY), NOT_COND)));
 		else 
 			stmt_blck->push_back(new stmt_return(nullptr));
+		check_semicolon();
 	}
-	return true;
 }
 
 bool parser::is_block_start(){
@@ -447,23 +445,16 @@ bool parser::is_decl_start(){
 
 void parser::try_parse_statements_list(sym_table *sym_tbl, stmt_block *stmt_blck, bool loop = false){
 	token tk = lxr->next(); /* skip open brace '{' */
-	bool was_block = false;
 	while (tk.type != TK_CLOSE_BRACE){
-		was_block = false;
-		while (tk.type == TK_SEMICOLON){
+		if (tk.type == TK_SEMICOLON){
 			tk = lxr->next();
-		} 
-		if (is_block_start()){
-			was_block = try_parse_block(sym_tbl, stmt_blck, loop);
+		} else if (is_block_start()){
+			try_parse_block(sym_tbl, stmt_blck, loop);
 		} else if (is_decl_start()){
-			was_block = try_parse_declarator(sym_tbl, stmt_blck);
+			try_parse_declarator(sym_tbl, stmt_blck);
 		} else {
-			was_block = try_parse_statement(sym_tbl, stmt_blck, loop);
+			try_parse_statement(sym_tbl, stmt_blck, loop);
 		}
-		tk = lxr->get();
-		if (was_block)
-			continue;
-		check_semicolon();
 		tk = lxr->get();
 	}
 	
@@ -471,14 +462,13 @@ void parser::try_parse_statements_list(sym_table *sym_tbl, stmt_block *stmt_blck
 		lxr->next(); /* skip close brace '}' */
 }
 
-bool parser::try_parse_block(sym_table *sym_tbl_prev, stmt_block * stmt_prev_block, bool loop = false){
+void parser::try_parse_block(sym_table *sym_tbl_prev, stmt_block * stmt_prev_block, bool loop = false){
 	if (lxr->get().type != TK_OPEN_BRACE)
-		return false;
+		return;
 	sym_table *sym_tbl = new sym_table(sym_tbl_prev);
 	stmt_block *stmt_blck = new stmt_block(sym_tbl);
 	try_parse_statements_list(sym_tbl, stmt_blck, loop);
 	stmt_prev_block->push_back(stmt_blck);
-	return true;
 }
 
 stmt_block *parser::try_parse_body(sym_table *sym_tbl, bool loop = false){
@@ -517,7 +507,7 @@ void parser::check_func_decl2errors(symbol **t, token tk){
 
 void parser::check_decl2errors(sym_table *sym_tbl, symbol **t, token tk){
 	string cur_type = typeid(**t).name();
-	if (cur_type == "class sym_var" && sym_tbl->local_exist((*t)->name)){
+	if (cur_type == /*typeid(sym_var)*/"class sym_var" && sym_tbl->local_exist((*t)->name)){
 		throw error(C2086, (*t)->type->name + " " + (*t)->name + ": redefinition", tk.pos);
 	} else if (cur_type == "class sym_function"){
 		check_func_decl2errors(t, tk);
@@ -536,7 +526,7 @@ void parser::try_parse_init(symbol *sym, sym_table *sym_tbl, stmt_block *stmt_bl
 		stmt_blck->push_back(statement);
 }
 
-bool parser::try_parse_declarator(sym_table *sym_tbl, stmt_block *stmt_blck = nullptr){
+void parser::try_parse_declarator(sym_table *sym_tbl, stmt_block *stmt_blck = nullptr){
 	token tk = lxr->get();
 	sym_type *stype = nullptr;
 	bool func_def = false;
@@ -569,7 +559,8 @@ bool parser::try_parse_declarator(sym_table *sym_tbl, stmt_block *stmt_blck = nu
 		dcl.set_type(stype);
 		table->add_sym(make_symbol(dcl));
 	}
-	return func_def;
+	if (func_def == false)
+		check_semicolon();
 }
 
 declar parser::parse_declare(sym_table *sym_tbl){
@@ -686,6 +677,7 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 						global_init = true;
 					}
 					sym_function *f = new sym_function(info.name, st, params, try_parse_body(st));
+					//f->block = try_parse_body(st);
 					global_init = false;
 					info.set_id(f);
 					info.def = f->block != nullptr;
@@ -720,26 +712,16 @@ void parser::parse(ostream &os){
 	token tk = lxr->next();
 	sym_type *stype = nullptr;
 	table->prev = nullptr;
-	bool was_block = false;
 	while (tk.type != NOT_TK){
-		was_block = false;
-		while (tk.type == TK_SEMICOLON){
+		if (tk.type == TK_SEMICOLON){
 			tk = lxr->next();
-		} 
-		if (is_block_start()){
-			was_block = try_parse_block(table, nullptr);
+		} else if (is_block_start()){
+			try_parse_block(table, nullptr);
 		} else if (is_decl_start()){
-			was_block = try_parse_declarator(table);
+			try_parse_declarator(table);
 		} else {
-			was_block = try_parse_statement(table, nullptr);
+			try_parse_statement(table, nullptr);
 		}
-		tk = lxr->get();
-		if (tk.type == NOT_TK)
-			break;
-		if (was_block){
-			continue;
-		}
-		check_semicolon();
 		tk = lxr->get();
 	}
 	if (!point_of_entry)
