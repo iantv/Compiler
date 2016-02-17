@@ -433,11 +433,6 @@ bool parser::is_block_start(){
 	return lxr->get().type == TK_OPEN_BRACE;	
 }
 
-bool parser::is_stmt_start(){
-	token tk = lxr->get();
-	return is_expr_start(tk, nullptr) || tk.type ==  TK_IF || tk.type == TK_WHILE || tk.type == TK_FOR; // DO!!! FILL!!! CONTINUED!!!
-}
-
 bool parser::is_decl_start(){
 	token tk = lxr->get();
 	return tk.is_storage_class_specifier() || tk.is_type_qualifier() || tk.is_type_specifier();
@@ -539,6 +534,7 @@ bool parser::try_parse_definition(symbol *t){
 	}
 	return false;
 }
+
 void parser::try_parse_declarator(sym_table *sym_tbl, stmt_block *stmt_blck = nullptr){
 	token tk = lxr->get();
 	sym_type *stype = nullptr;
