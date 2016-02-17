@@ -158,3 +158,19 @@ void stmt_continue::print(ostream &os, int level){
 	print_level(os, level);
 	os << "continue" << endl;
 }
+
+/*--------------------------------------------STMT_RETURN--------------------------------------------*/
+
+stmt_return::stmt_return(stmt_expr *ret_expr){
+	ex = ret_expr;
+}
+
+void stmt_return::print(ostream &os, int level){
+	print_level(os, level);
+	os << "return";
+	if (ex != nullptr){
+		os << ":" << endl;
+		ex->print(os, level + 1);
+	} else 
+		os << endl;
+}

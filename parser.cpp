@@ -421,6 +421,12 @@ bool parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck, bool
 		stmt_blck->push_back(new stmt_continue());
 		lxr->next();
 		return false;
+	} else if (tk.type == TK_RETURN){
+		lxr->next();
+		if (is_expr_start(lxr->get(), sym_tbl))
+			stmt_blck->push_back(new stmt_return(new stmt_expr(expression(sym_tbl, MIN_PRIORITY), NOT_COND)));
+		else 
+			stmt_blck->push_back(new stmt_return(nullptr));
 	}
 	return true;
 }
@@ -484,6 +490,7 @@ stmt_block *parser::try_parse_body(sym_table *sym_tbl, bool loop = false){
 	try_parse_statements_list(sym_tbl, stmt_blck, loop);
 	return stmt_blck;
 }
+
 
 void parser::check_func_decl2errors(symbol **t, token tk){
 	sym_function *cur_func = dynamic_cast<sym_function *>(*t);

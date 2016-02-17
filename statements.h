@@ -79,3 +79,10 @@ public:
 	stmt_continue(){}
 	void print(ostream &os, int level);
 };
+
+class stmt_return: public stmt{
+	stmt_expr *ex;
+public:
+	stmt_return(stmt_expr *);
+	void print(ostream &os, int level);
+};

@@ -1,0 +1,8 @@
+main: function
+	{
+		return:
+			expression:
+				1
+	}
+returns
+	int
