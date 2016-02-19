@@ -117,7 +117,6 @@ class sym_table{
 public:
 	sym_table(){ prev = nullptr; level = 0; }
 	sym_table(sym_table *sym_table_prev): prev(sym_table_prev){ level = prev->level + 1; }
-	friend ostream &operator<<(ostream &os, const sym_table st);
 	friend class sym_function;
 	friend class sym_func_type;
 	friend class parser;

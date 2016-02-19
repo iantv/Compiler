@@ -184,16 +184,6 @@ void sym_table::del_sym(symbol *sym){
 		symbols.erase(sym->name);
 }
 
-ostream &operator<<(ostream &os, const sym_table st){
-	for (int i = 0; i < (int)st.functions.size(); i++){
-		st.functions[i]->print(os, st.level);
-	}
-	for (auto it = st.symbols.begin(); it != st.symbols.end(); ++it){
-		it->second->print(os, st.level);
-	}
-	return os;
-}
-
 void sym_table::print(ostream &os, int level){
 	for (int i = 0; i < (int)functions.size(); i++){
 		functions[i]->print(os, level);

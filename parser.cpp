@@ -733,5 +733,5 @@ void parser::init_prelude(){
 }
 
 void parser::print_sym_table(ostream &os){
-	os << (*table);
+	table->print(os, 0);
 }
