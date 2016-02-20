@@ -25,6 +25,7 @@ public:
 class stmt_block: public stmt{
 	sym_table *table;
 	vector<stmt *> stmt_list;
+	sym_function *owner;
 public:
 	friend class parser;
 	stmt_block(vector<stmt *>);
