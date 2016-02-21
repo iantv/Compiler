@@ -115,7 +115,7 @@ expr *parser::new_expr_bin_op(expr *ex1, expr *ex2, token tk){
 }
 
 expr *parser::try_cast2type(expr *ex, sym_type *type){
-	if (type->name == type->name)
+	if (ex->type->name == type->name)
 		return ex;
 	ex = new expr_cast2type(type->name, ex, prelude);
 	return ex;
