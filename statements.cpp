@@ -32,9 +32,10 @@ stmt_block::stmt_block(){
 	table = nullptr;
 }
 
-stmt_block::stmt_block(sym_table *sym_tbl){
+stmt_block::stmt_block(sym_table *sym_tbl, sym_function *func_owner){
 	type = STMT_BLOCK;
 	table = sym_tbl;
+	owner = func_owner;
 }
 
 stmt_block::stmt_block(vector<stmt *> list){
@@ -68,10 +69,10 @@ stmt_if::stmt_if(){
 	body_if_false = nullptr;
 }
 
-stmt_if::stmt_if(stmt_expr *ex, sym_table *sym_tbl){
+stmt_if::stmt_if(stmt_expr *ex, sym_table *sym_tbl, sym_function *owner){
 	type = STMT_IF;
 	cond = ex;
-	body_if_true = new stmt_block(sym_tbl);
+	body_if_true = new stmt_block(sym_tbl, owner);
 	body_if_false = nullptr;
 }
 
@@ -97,9 +98,9 @@ void stmt_if::print(ostream &os, int level){
 
 /*--------------------------------------------STMT_WHILE--------------------------------------------*/
 
-stmt_while::stmt_while(stmt_expr *ex, sym_table *sym_tbl){
+stmt_while::stmt_while(stmt_expr *ex, sym_table *sym_tbl, sym_function *owner){
 	cond = ex;
-	body = new stmt_block(sym_tbl);
+	body = new stmt_block(sym_tbl, owner);
 }
 
 void stmt_while::push_back(stmt *new_stmt){
@@ -115,12 +116,12 @@ void stmt_while::print(ostream &os, int level){
 
 /*--------------------------------------------STMT_FOR--------------------------------------------*/
 
-stmt_for::stmt_for(stmt_expr *initialization, stmt_expr *condition, stmt_expr *loop_step, sym_table *sym_tbl){
+stmt_for::stmt_for(stmt_expr *initialization, stmt_expr *condition, stmt_expr *loop_step, sym_table *sym_tbl, sym_function *owner){
 	init = initialization;
 	cond = condition;
 	step = loop_step;
 	table = sym_tbl;
-	body = new stmt_block(new sym_table(sym_tbl));
+	body = new stmt_block(new sym_table(sym_tbl), owner);
 }
 
 void stmt_for::push_back(stmt *new_stmt){

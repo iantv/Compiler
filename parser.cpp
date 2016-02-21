@@ -114,6 +114,13 @@ expr *parser::new_expr_bin_op(expr *ex1, expr *ex2, token tk){
 	return new expr_bin_op(ex1, ex2, tk);;
 }
 
+expr *parser::try_cast2type(expr *ex, sym_type *type){
+	if (type->name == type->name)
+		return ex;
+	ex = new expr_cast2type(type->name, ex, prelude);
+	return ex;
+}
+
 expr *parser::expression(sym_table *sym_tbl, int priority){
 	if (priority > MAX_PRIORITY) return factor(sym_tbl);		
 	expr *ex = expression(sym_tbl, priority + 1);
@@ -322,41 +329,41 @@ bool parser::is_expr_start(token tk, sym_table *sym_tbl){
 	return tk.is_literal() || tk.is_operator() || sym_tbl->symbol_not_alias_exist(tk.get_src());
 }
 
-void parser::try_parse_stmt_body(sym_table *sym_tbl, stmt_block *sym_blck, bool loop = false){
+void parser::try_parse_stmt_body(sym_table *sym_tbl, stmt_block *sym_blck, sym_function *owner, bool loop = false){
 	if (lxr->next().type == TK_OPEN_BRACE)
-		try_parse_statements_list(sym_tbl, sym_blck, loop);
+		try_parse_statements_list(sym_tbl, sym_blck, owner, loop);
 	else 
-		try_parse_statement(sym_tbl, sym_blck, loop);
+		try_parse_statement(sym_tbl, sym_blck, owner, loop);
 }
 
-void parser::try_parse_if_stmt(sym_table *sym_tbl, stmt_block *stmt_blck, bool loop){
+void parser::try_parse_if_stmt(sym_table *sym_tbl, stmt_block *stmt_blck, sym_function *owner, bool loop){
 	if (lxr->next().type != TK_OPEN_BRACKET)
 		throw syntax_error(C2059, lxr->get().get_src() + "; it requares openning bracket", lxr->get().pos);
 	lxr->next();
-	stmt_if *new_if = new stmt_if(new stmt_expr(expression(sym_tbl, MIN_PRIORITY), EXECUTION_COND), new sym_table(sym_tbl));
+	stmt_if *new_if = new stmt_if(new stmt_expr(expression(sym_tbl, MIN_PRIORITY), EXECUTION_COND), new sym_table(sym_tbl), owner);
 
 	if (lxr->get().type != TK_CLOSE_BRACKET)
 		throw syntax_error(C2059, lxr->get().get_src() + "; it requares closing bracket", lxr->get().pos);
-	try_parse_stmt_body(new_if->body_if_true->table, new_if->body_if_true, loop);
+	try_parse_stmt_body(new_if->body_if_true->table, new_if->body_if_true, owner, loop);
 	if (lxr->get().type == TK_ELSE){
-		new_if->body_if_false = new stmt_block(new sym_table(sym_tbl));
-		try_parse_stmt_body(new_if->body_if_false->table, new_if->body_if_false);
+		new_if->body_if_false = new stmt_block(new sym_table(sym_tbl), owner);
+		try_parse_stmt_body(new_if->body_if_false->table, new_if->body_if_false, owner);
 	}
 	stmt_blck->push_back(new_if);
 }
 
-void parser::try_parse_while_stmt(sym_table *sym_tbl, stmt_block *stmt_blck){
+void parser::try_parse_while_stmt(sym_table *sym_tbl, stmt_block *stmt_blck, sym_function *owner){
 	if (lxr->next().type != TK_OPEN_BRACKET)
 		throw syntax_error(C2059, lxr->get().get_src() + "; it requares openning bracket", lxr->get().pos);
 	lxr->next();
-	stmt_while *new_while = new stmt_while(new stmt_expr(expression(sym_tbl, MIN_PRIORITY), CONTINUED_COND), new sym_table (sym_tbl));
+	stmt_while *new_while = new stmt_while(new stmt_expr(expression(sym_tbl, MIN_PRIORITY), CONTINUED_COND), new sym_table (sym_tbl), owner);
 	if (lxr->get().type != TK_CLOSE_BRACKET)
 		throw syntax_error(C2059, lxr->get().get_src() + "; it requares closing bracket", lxr->get().pos);
-	try_parse_stmt_body(new_while->body->table, new_while->body, true);
+	try_parse_stmt_body(new_while->body->table, new_while->body, owner, true);
 	stmt_blck->push_back(new_while);
 }
 
-void parser::try_parse_for_stmt(sym_table *sym_tbl, stmt_block *stmt_blck){
+void parser::try_parse_for_stmt(sym_table *sym_tbl, stmt_block *stmt_blck, sym_function *owner){
 	if (lxr->next().type != TK_OPEN_BRACKET)
 		throw syntax_error(C2059, lxr->get().get_src() + "; it requares openning bracket", lxr->get().pos);
 	lxr->next();
@@ -373,13 +380,13 @@ void parser::try_parse_for_stmt(sym_table *sym_tbl, stmt_block *stmt_blck){
 	if (lxr->get().type != TK_CLOSE_BRACKET)
 		throw syntax_error(C2059, lxr->get().get_src() + "; it requares closing bracket", lxr->get().pos);
 	
-	stmt_for *new_for = new stmt_for(init, cond, step, new sym_table(sym_tbl));
+	stmt_for *new_for = new stmt_for(init, cond, step, new sym_table(sym_tbl), owner);
 
-	try_parse_stmt_body(new_for->body->table, new_for->body, true);
+	try_parse_stmt_body(new_for->body->table, new_for->body, owner, true);
 	stmt_blck->push_back(new_for);
 }
 
-void parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck, bool loop = false){
+void parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck, sym_function *owner, bool loop = false){
 	token tk = lxr->get();
 	if (is_expr_start(tk, sym_tbl)){
 		//DO tests and corresponding call, but while it's comment
@@ -397,11 +404,11 @@ void parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck, bool
 		stmt_blck->push_back(new stmt_expr(expression(sym_tbl, MIN_PRIORITY), NOT_COND));
 		check_semicolon();
 	} else if (tk.type == TK_IF) {
-		try_parse_if_stmt(sym_tbl, stmt_blck, loop);
+		try_parse_if_stmt(sym_tbl, stmt_blck, owner, loop);
 	} else if (tk.type == TK_WHILE){
-		try_parse_while_stmt(sym_tbl, stmt_blck);
+		try_parse_while_stmt(sym_tbl, stmt_blck, owner);
 	} else if (tk.type == TK_FOR){
-		try_parse_for_stmt(sym_tbl, stmt_blck);
+		try_parse_for_stmt(sym_tbl, stmt_blck, owner);
 	} else if (is_decl_start()){
 		try_parse_declarator(sym_tbl, stmt_blck);
 	} else if (tk.type == TK_BREAK){
@@ -418,13 +425,15 @@ void parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck, bool
 		check_semicolon();
 	} else if (tk.type == TK_RETURN){
 		lxr->next();
-		if (is_expr_start(lxr->get(), sym_tbl))
-			stmt_blck->push_back(new stmt_return(new stmt_expr(expression(sym_tbl, MIN_PRIORITY), NOT_COND)));
-		else 
+		if (is_expr_start(lxr->get(), sym_tbl)){
+			expr *ex = try_cast2type(expression(sym_tbl, MIN_PRIORITY), owner->type);
+			stmt_blck->push_back(new stmt_return(new stmt_expr(ex, NOT_COND)));
+		} else {
 			stmt_blck->push_back(new stmt_return(nullptr));
+		}
 		check_semicolon();
 	}
-}
+}	
 
 bool parser::is_block_start(){
 	return lxr->get().type == TK_OPEN_BRACE;	
@@ -435,17 +444,17 @@ bool parser::is_decl_start(){
 	return tk.is_storage_class_specifier() || tk.is_type_qualifier() || tk.is_type_specifier();
 }
 
-void parser::try_parse_statements_list(sym_table *sym_tbl, stmt_block *stmt_blck, bool loop = false){
+void parser::try_parse_statements_list(sym_table *sym_tbl, stmt_block *stmt_blck, sym_function *owner, bool loop = false){
 	token tk = lxr->next(); /* skip open brace '{' */
 	while (tk.type != TK_CLOSE_BRACE){
 		if (tk.type == TK_SEMICOLON){
 			lxr->next();
 		} else if (is_block_start()){
-			try_parse_block(sym_tbl, stmt_blck, loop);
+			try_parse_block(sym_tbl, stmt_blck, owner, loop);
 		} else if (is_decl_start()){
 			try_parse_declarator(sym_tbl, stmt_blck);
 		} else {
-			try_parse_statement(sym_tbl, stmt_blck, loop);
+			try_parse_statement(sym_tbl, stmt_blck, owner, loop);
 		}
 		tk = lxr->get();
 	}
@@ -454,22 +463,22 @@ void parser::try_parse_statements_list(sym_table *sym_tbl, stmt_block *stmt_blck
 		lxr->next(); /* skip close brace '}' */
 }
 
-void parser::try_parse_block(sym_table *sym_tbl_prev, stmt_block * stmt_prev_block, bool loop = false){
+void parser::try_parse_block(sym_table *sym_tbl_prev, stmt_block * stmt_prev_block, sym_function *owner, bool loop = false){
 	if (lxr->get().type != TK_OPEN_BRACE)
 		return;
 	sym_table *sym_tbl = new sym_table(sym_tbl_prev);
-	stmt_block *stmt_blck = new stmt_block(sym_tbl);
-	try_parse_statements_list(sym_tbl, stmt_blck, loop);
+	stmt_block *stmt_blck = new stmt_block(sym_tbl, owner);
+	try_parse_statements_list(sym_tbl, stmt_blck, owner, loop);
 	stmt_prev_block->push_back(stmt_blck);
 }
 
-stmt_block *parser::try_parse_body(sym_table *sym_tbl, bool loop = false){
+stmt_block *parser::try_parse_body(sym_table *sym_tbl, sym_function *owner, bool loop = false){
 	if (lxr->get().type != TK_OPEN_BRACE)
 		return nullptr;
-	stmt_block *stmt_blck = new stmt_block(sym_tbl);
+	stmt_block *stmt_blck = new stmt_block(sym_tbl, owner);
 	if (global_init)
 		stmt_blck->stmt_list = init_list;
-	try_parse_statements_list(sym_tbl, stmt_blck, loop);
+	try_parse_statements_list(sym_tbl, stmt_blck, owner, loop);
 	return stmt_blck;
 }
 
@@ -523,7 +532,7 @@ bool parser::try_parse_definition(symbol *t){
 			point_of_entry = true;
 			global_init = true;
 		}
-		f->block = try_parse_body(f->table);
+		f->block = try_parse_body(f->table, f);
 		global_init = false;
 		return f->block != nullptr;
 	}
@@ -712,11 +721,11 @@ void parser::parse(ostream &os){
 		if (tk.type == TK_SEMICOLON){
 			tk = lxr->next();
 		} else if (is_block_start()){
-			try_parse_block(table, nullptr);
+			try_parse_block(table, nullptr, nullptr);
 		} else if (is_decl_start()){
 			try_parse_declarator(table);
 		} else {
-			try_parse_statement(table, nullptr);
+			try_parse_statement(table, nullptr, nullptr);
 		}
 		tk = lxr->get();
 	}

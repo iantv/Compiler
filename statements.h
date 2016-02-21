@@ -1,6 +1,7 @@
 #pragma once
 #include "expression.h"
 
+class sym_function;
 enum stmt_t{ STMT_EXPR, STMT_BLOCK, STMT_IF };
 
 class stmt{
@@ -30,7 +31,7 @@ public:
 	friend class parser;
 	stmt_block(vector<stmt *>);
 	stmt_block();
-	stmt_block(sym_table *);
+	stmt_block(sym_table *, sym_function *);
 	void push_back(stmt *);
 	void print(ostream &os, int level) override;
 };
@@ -42,7 +43,7 @@ class stmt_if: public stmt{
 public:
 	friend class parser;
 	stmt_if();
-	stmt_if(stmt_expr *, sym_table *);
+	stmt_if(stmt_expr *, sym_table *, sym_function *);
 	void push_back_if_true(stmt *);
 	void push_back_if_false(stmt *);
 	void print(ostream &os, int level) override;
@@ -53,7 +54,7 @@ class stmt_while: public stmt{
 	stmt_expr *cond;
 public:
 	friend class parser;
-	stmt_while(stmt_expr *, sym_table *);
+	stmt_while(stmt_expr *, sym_table *, sym_function *);
 	void push_back(stmt *);
 	void print(ostream &os, int level);
 };
@@ -64,7 +65,7 @@ class stmt_for: public stmt{
 	stmt_expr *init, *cond, *step;
 public:
 	friend class parser;
-	stmt_for(stmt_expr *, stmt_expr *, stmt_expr *, sym_table *);
+	stmt_for(stmt_expr *, stmt_expr *, stmt_expr *, sym_table *, sym_function *);
 	void push_back(stmt *);
 	void print(ostream &os, int level);
 };
