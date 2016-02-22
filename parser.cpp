@@ -114,10 +114,52 @@ expr *parser::new_expr_bin_op(expr *ex1, expr *ex2, token tk){
 	return new expr_bin_op(ex1, ex2, tk);;
 }
 
-expr *parser::try_cast2type(expr *ex, sym_type *type){
-	if (ex->type->name == type->name)
-		return ex;
-	ex = new expr_cast2type(type->name, ex, prelude);
+expr *parser::try_cast2type(expr *ex, sym_type *type, sym_table *sym_tbl){
+	string et = ex->type->get_type_str_name(), nt = type->get_type_str_name();
+	if (et == nt) return ex;
+	
+	if (prelude->local_exist(et)){
+		if (prelude->local_exist(nt)){
+			ex = new expr_cast2type(nt, ex, prelude); /* if each type is from prelude table */
+		} else if (sym_tbl->global_exist(nt) || sym_tbl->local_exist(nt)){
+			sym_type *t = dynamic_cast<sym_type *>(sym_tbl->get_symbol(nt));
+			if (typeid(*t) != typeid(sym_pointer)){
+				throw error(C2440, "cannot convert \"" + et + "\" to \"" + nt+ "\"", lxr->get().pos);
+			}
+			ex = new expr_cast2type(type, ex);
+		} else {
+		
+		}
+	}
+	/*if (prelude->local_exist(et) && prelude->local_exist(nt)){
+		ex = new expr_cast2type(nt, ex, prelude); /* if each type is from prelude table */
+	//} else if (sym_tbl->local_exist(et) || sym_tbl->global_exist(et)){
+	//	if (prelude->local_exist(nt)){
+	//		// will error int a = f(); where f return struct point;
+	//		if (typeid(sym_tbl->get_symbol(et)->get_type()) != typeid(sym_pointer))
+	//			throw error(C2440, "cannot convert \"" + et + "\" to \"" + nt+ "\"", lxr->get().pos);
+	//		ex = new expr_cast2type(type, ex);
+	//	} else if (sym_tbl->global_exist(nt) || sym_tbl->local_exist(nt)){
+	//		// int * vs int
+	//	} else {
+	//		ex = new expr_cast2type(type, ex);
+	//	}
+	//	/*sym_type *t = sym_tbl->get_type_by_synonym(et);
+	//	if (typeid((t->type)) != typeid(sym_pointer))
+	//		throw error(C2440, "cannot convert \"" + et + "\" to \"" + nt+ "\"", lxr->get().pos);*/
+	//	//ex = new expr_cast2type(type->name, new sym_pointer(ex->type), prelude);
+	//} else if (prelude->local_exist(et)){
+	//	if (prelude->local_exist(nt)){
+	//		// will error int a = f(); where f return struct point;
+	//		if (typeid(sym_tbl->get_symbol(et)->get_type()) != typeid(sym_pointer))
+	//			throw error(C2440, "cannot convert \"" + et + "\" to \"" + nt+ "\"", lxr->get().pos);
+	//		ex = new expr_cast2type(type, ex);
+	//	} else if (sym_tbl->global_exist(nt) || sym_tbl->local_exist(nt)){
+	//		// int * vs int
+	//	} else {
+	//		ex = new expr_cast2type(type, ex);
+	//	}
+	//} else if ()*/
 	return ex;
 }
 
@@ -409,7 +451,7 @@ void parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck, sym_
 		try_parse_while_stmt(sym_tbl, stmt_blck, owner);
 	} else if (tk.type == TK_FOR){
 		try_parse_for_stmt(sym_tbl, stmt_blck, owner);
-	} else if (is_decl_start()){
+	} else if (is_decl_start(sym_tbl)){
 		try_parse_declarator(sym_tbl, stmt_blck);
 	} else if (tk.type == TK_BREAK){
 		if (!loop)
@@ -426,7 +468,7 @@ void parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck, sym_
 	} else if (tk.type == TK_RETURN){
 		lxr->next();
 		if (is_expr_start(lxr->get(), sym_tbl)){
-			expr *ex = try_cast2type(expression(sym_tbl, MIN_PRIORITY), owner->type);
+			expr *ex = try_cast2type(expression(sym_tbl, MIN_PRIORITY), owner->type, sym_tbl);
 			stmt_blck->push_back(new stmt_return(new stmt_expr(ex, NOT_COND)));
 		} else {
 			stmt_blck->push_back(new stmt_return(nullptr));
@@ -439,9 +481,9 @@ bool parser::is_block_start(){
 	return lxr->get().type == TK_OPEN_BRACE;	
 }
 
-bool parser::is_decl_start(){
+bool parser::is_decl_start(sym_table *sym_tbl){
 	token tk = lxr->get();
-	return tk.is_storage_class_specifier() || tk.is_type_qualifier() || tk.is_type_specifier();
+	return tk.is_storage_class_specifier() || tk.is_type_qualifier() || tk.is_type_specifier() || sym_tbl->global_exist(tk.src) || sym_tbl->local_exist(tk.src);
 }
 
 void parser::try_parse_statements_list(sym_table *sym_tbl, stmt_block *stmt_blck, sym_function *owner, bool loop = false){
@@ -451,7 +493,7 @@ void parser::try_parse_statements_list(sym_table *sym_tbl, stmt_block *stmt_blck
 			lxr->next();
 		} else if (is_block_start()){
 			try_parse_block(sym_tbl, stmt_blck, owner, loop);
-		} else if (is_decl_start()){
+		} else if (is_decl_start(sym_tbl)){
 			try_parse_declarator(sym_tbl, stmt_blck);
 		} else {
 			try_parse_statement(sym_tbl, stmt_blck, owner, loop);
@@ -544,7 +586,7 @@ void parser::try_parse_declarator(sym_table *sym_tbl, stmt_block *stmt_blck = nu
 	sym_type *stype = nullptr;
 	bool func_def = false;
 	bool decl = false;
-	if (tk.is_type_specifier()){
+	if (tk.is_type_specifier() || (sym_tbl->global_exist(tk.src) || sym_tbl->local_exist(tk.src))){
 		symbol *t = make_symbol(parse_declare(sym_tbl));
 		func_def = try_parse_definition(t);
 		check_decl2errors(sym_tbl, &t, tk);
@@ -722,7 +764,7 @@ void parser::parse(ostream &os){
 			tk = lxr->next();
 		} else if (is_block_start()){
 			try_parse_block(table, nullptr, nullptr);
-		} else if (is_decl_start()){
+		} else if (is_decl_start(table)){
 			try_parse_declarator(table);
 		} else {
 			try_parse_statement(table, nullptr, nullptr);
