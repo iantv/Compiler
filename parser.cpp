@@ -483,7 +483,12 @@ bool parser::is_block_start(){
 
 bool parser::is_decl_start(sym_table *sym_tbl){
 	token tk = lxr->get();
-	return tk.is_storage_class_specifier() || tk.is_type_qualifier() || tk.is_type_specifier() || sym_tbl->global_exist(tk.src) || sym_tbl->local_exist(tk.src);
+	if (sym_tbl->global_exist(tk.src) || sym_tbl->local_exist(tk.src)){
+		symbol *t = sym_tbl->get_symbol(tk.src);
+		if (typeid(*t) == typeid(sym_type *))
+			return true;
+	}
+	return tk.is_storage_class_specifier() || tk.is_type_qualifier() || tk.is_type_specifier();
 }
 
 void parser::try_parse_statements_list(sym_table *sym_tbl, stmt_block *stmt_blck, sym_function *owner, bool loop = false){
