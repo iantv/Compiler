@@ -485,7 +485,8 @@ bool parser::is_decl_start(sym_table *sym_tbl){
 	token tk = lxr->get();
 	if (sym_tbl->global_exist(tk.src) || sym_tbl->local_exist(tk.src)){
 		symbol *t = sym_tbl->get_symbol(tk.src);
-		if (typeid(*t) == typeid(sym_type *))
+		string s = typeid(*t).name();
+		if (typeid(*t) == typeid(sym_alias) || typeid(*t) == typeid(sym_const) || typeid(*t) == typeid(sym_array) || typeid(*t) == typeid(sym_struct) || typeid(*t) == typeid(sym_pointer) || typeid(*t) == typeid(sym_func_type))
 			return true;
 	}
 	return tk.is_storage_class_specifier() || tk.is_type_qualifier() || tk.is_type_specifier();

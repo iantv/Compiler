@@ -1,8 +1,8 @@
 import subprocess
 LTESTCNT = 40
 EXPR = 53
-PRS =  41
-PRSERR = 8
+PRS =  42
+PRSERR = 10
 PDTESTCNT = 50
 
 ERRPRSDCL = 25 #Error Parser Declare

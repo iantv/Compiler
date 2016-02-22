@@ -1,0 +1,10 @@
+main: function
+	{
+	}
+returns
+	void
+a: pointer(s) to
+	int
+ptr2int: alias for
+	pointer(s) to
+		int

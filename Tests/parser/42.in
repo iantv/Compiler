@@ -1,0 +1,4 @@
+typedef int *ptr2int;
+ptr2int a;
+void main(){
+}
