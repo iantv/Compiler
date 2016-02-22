@@ -77,7 +77,6 @@ void sym_function::print(ostream &os, int level){
 	os << name << ": function" << endl;
 	for (int i = 0; i < (int)params.size(); i++)
 		table->get_symbol(params[i])->print(os, level + 1);
-	//table->print(os, level + 1);
 	if (block != nullptr)
 		block->print(os, level + 1);
 	print_level(os, level);
@@ -110,7 +109,7 @@ void sym_struct::print(ostream &os, int level){
 	else
 		os << endl;
 	table->print(os, level + 1);
-}
+} 
 
 void sym_array::print(ostream &os, int level){
 	print_level(os, level);
@@ -134,6 +133,41 @@ void sym_const::print(ostream &os, int level){
 	type->print(os, level + 1);
 }
 
+string sym_type::get_type_str_name(){
+	return name;
+}
+
+string sym_array::get_type_str_name(){
+	return "array of " + type->get_type_str_name();
+}
+
+string sym_struct::get_type_str_name(){
+	return "struct " + name;
+}
+
+string sym_alias::get_type_str_name(){
+	return name + " ";
+}
+
+string sym_pointer::get_type_str_name(){
+	return type->get_type_str_name() + " *";
+}
+
+string sym_func_type::get_type_str_name(){
+	string par;
+	for (auto it = params.begin(); it != params.end(); ){
+		sym_type *t = table->get_symbol(*it)->get_type();
+		par += t->get_type_str_name();
+		it++;
+		if (it != params.end()) par += ", ";
+	}
+	return type->get_type_str_name() + " " + name + "(" + par + ")";
+}
+
+string sym_const::get_type_str_name(){
+	return "constant " + type->get_type_str_name();
+}
+/*------------------------------------------------SYM_TABLE------------------------------------------------*/
 bool sym_table::local_exist(string &name){
 	if (symbols.size() == 0)
 		return false;

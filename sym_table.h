@@ -26,6 +26,7 @@ public:
 	symbol(){ name = ""; type = nullptr; }
 	symbol(const string &sym_name) { name = sym_name; }
 	bool type_eq(string type_name);
+	sym_type *get_type(){ return type; }
 };
 
 symbol *make_symbol(declar &);
@@ -49,6 +50,7 @@ public:
 	void print(ostream &os, int level);
 	sym_type(){}
 	sym_type(const string &sym_name) { name = sym_name; type = nullptr; }
+	virtual string get_type_str_name();
 };
 
 class sym_array: public sym_type{
@@ -56,6 +58,7 @@ class sym_array: public sym_type{
 public:
 	void print(ostream &os, int level) override;
 	sym_array(size_t size){ length = size; }
+	string get_type_str_name() override;
 };
 
 class sym_struct: public sym_type{
@@ -64,18 +67,21 @@ public:
 	friend parser;
 	void print(ostream &os, int level) override;
 	sym_struct(const string &sym_name, sym_table *lst);
+	string get_type_str_name() override;
 };
 
 class sym_alias: public sym_type{
 public:
 	void print(ostream &os, int level) override;
 	sym_alias(sym_type *stype){ type = stype; }
+	string get_type_str_name() override;
 };
 
 class sym_pointer: public sym_type{
 public:
 	void print(ostream &os, int level) override;
 	sym_pointer(sym_type *stype){ type = stype; }
+	string get_type_str_name() override;
 };
 
 class sym_func_type: public sym_type{
@@ -84,12 +90,14 @@ class sym_func_type: public sym_type{
 public:
 	void print(ostream &os, int level) override;
 	sym_func_type(sym_type *stype, sym_table *lst, vector<string> &param_list);
+	string get_type_str_name() override;
 };
 
 class sym_const: public sym_type{
 public:
 	void print(ostream &os, int level) override;
 	sym_const(sym_type *stype){ type = stype; }
+	string get_type_str_name() override;
 };
 
 class sym_var: public symbol{
