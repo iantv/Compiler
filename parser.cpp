@@ -128,38 +128,23 @@ expr *parser::try_cast2type(expr *ex, sym_type *type, sym_table *sym_tbl){
 			}
 			ex = new expr_cast2type(type, ex);
 		} else {
-		
+			throw error(C2440, "cannot convert \"" + et + "\" to \"" + nt+ "\"", lxr->get().pos);
+		}
+	} else if (sym_tbl->type_exists_by_real_typename(et)){
+		if (prelude->local_exist(nt)){
+			if (typeid(*(ex->type)) != typeid(sym_pointer))
+				throw error(C2440, "cannot convert \"" + et + "\" to \"" + nt+ "\"", lxr->get().pos);
+			ex = new expr_cast2type(nt, ex, prelude);
+		} else if (sym_tbl->type_exists_by_real_typename(nt)){
+			string s = typeid(*type).name();
+			if (typeid(*type) != typeid(sym_pointer) || typeid(*(ex->type)) != typeid(sym_pointer)){
+				throw error(C2440, "cannot convert \"" + et + "\" to \"" + nt+ "\"", lxr->get().pos);
+			}
+			ex = new expr_cast2type(type, ex);
+		} else {
+			throw error(C2440, "cannot convert \"" + et + "\" to \"" + nt+ "\"", lxr->get().pos);
 		}
 	}
-	/*if (prelude->local_exist(et) && prelude->local_exist(nt)){
-		ex = new expr_cast2type(nt, ex, prelude); /* if each type is from prelude table */
-	//} else if (sym_tbl->local_exist(et) || sym_tbl->global_exist(et)){
-	//	if (prelude->local_exist(nt)){
-	//		// will error int a = f(); where f return struct point;
-	//		if (typeid(sym_tbl->get_symbol(et)->get_type()) != typeid(sym_pointer))
-	//			throw error(C2440, "cannot convert \"" + et + "\" to \"" + nt+ "\"", lxr->get().pos);
-	//		ex = new expr_cast2type(type, ex);
-	//	} else if (sym_tbl->global_exist(nt) || sym_tbl->local_exist(nt)){
-	//		// int * vs int
-	//	} else {
-	//		ex = new expr_cast2type(type, ex);
-	//	}
-	//	/*sym_type *t = sym_tbl->get_type_by_synonym(et);
-	//	if (typeid((t->type)) != typeid(sym_pointer))
-	//		throw error(C2440, "cannot convert \"" + et + "\" to \"" + nt+ "\"", lxr->get().pos);*/
-	//	//ex = new expr_cast2type(type->name, new sym_pointer(ex->type), prelude);
-	//} else if (prelude->local_exist(et)){
-	//	if (prelude->local_exist(nt)){
-	//		// will error int a = f(); where f return struct point;
-	//		if (typeid(sym_tbl->get_symbol(et)->get_type()) != typeid(sym_pointer))
-	//			throw error(C2440, "cannot convert \"" + et + "\" to \"" + nt+ "\"", lxr->get().pos);
-	//		ex = new expr_cast2type(type, ex);
-	//	} else if (sym_tbl->global_exist(nt) || sym_tbl->local_exist(nt)){
-	//		// int * vs int
-	//	} else {
-	//		ex = new expr_cast2type(type, ex);
-	//	}
-	//} else if ()*/
 	return ex;
 }
 
