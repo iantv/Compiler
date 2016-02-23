@@ -25,6 +25,8 @@
 #define C2332 "C2332"
 #define C2371 "C2371"
 
+#define C2440 "C2440"
+
 #define C2556 "C2556"
 
 #define C3769 "C3769"

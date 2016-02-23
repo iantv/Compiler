@@ -133,6 +133,8 @@ public:
 	void del_sym(symbol *sym);
 	bool local_exist(string &name);
 	bool global_exist(string &name);
+	bool type_exists_by_real_typename(string &type_name);
+	bool type_by_name(string &);
 	symbol *get_symbol(string);
 	sym_type *get_type_specifier(string);
 	bool type_alias_exist(string);

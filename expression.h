@@ -94,5 +94,6 @@ class expr_cast2type: public expr{
 	expr *ex;
 public:
 	expr_cast2type(string, expr *, sym_table *);
+	expr_cast2type(sym_type *, expr *);
 	void print(ostream &os, int level);
 };

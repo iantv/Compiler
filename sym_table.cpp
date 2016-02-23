@@ -146,7 +146,7 @@ string sym_struct::get_type_str_name(){
 }
 
 string sym_alias::get_type_str_name(){
-	return name + " ";
+	return type->get_type_str_name();
 }
 
 string sym_pointer::get_type_str_name(){
@@ -199,6 +199,33 @@ bool sym_table::global_exist(string &name){
 		if (st->local_exist(name))
 			return true;
 		st = st->prev;
+	}
+	return false;
+}
+
+bool sym_table::type_exists_by_real_typename(string &type_name){
+	map<string, symbol *>::iterator it;
+	for (it = symbols.begin(); it != symbols.end(); it++){
+		symbol *sym = (*it).second;
+		if (typeid(*sym) == typeid(sym_alias) || typeid(*sym) == typeid(sym_const) || typeid(*sym) == typeid(sym_array) || typeid(*sym) == typeid(sym_struct) || typeid(*sym) == typeid(sym_pointer) || typeid(*sym) == typeid(sym_func_type)){
+			sym_type *st = dynamic_cast<sym_type *>(sym);
+			if (st->get_type_str_name() == type_name)
+				return true;
+		}
+	}
+	if (prev == nullptr) return false;
+	return prev->type_exists_by_real_typename(type_name);
+}
+
+bool sym_table::type_by_name(string &type_name){
+	map<string, symbol *>::iterator it;
+	for (it = symbols.begin(); it != symbols.end(); it++){
+		symbol *sym = (*it).second;
+		if (typeid(*sym) == typeid(sym_alias) || typeid(*sym) == typeid(sym_const) || typeid(*sym) == typeid(sym_array) || typeid(*sym) == typeid(sym_struct) || typeid(*sym) == typeid(sym_pointer) || typeid(*sym) == typeid(sym_func_type)){
+			sym_type *st = dynamic_cast<sym_type *>(sym);
+			if (sym->name == type_name)
+				return true;
+		}
 	}
 	return false;
 }

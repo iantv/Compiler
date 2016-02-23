@@ -121,9 +121,9 @@ expr *parser::try_cast2type(expr *ex, sym_type *type, sym_table *sym_tbl){
 	if (prelude->local_exist(et)){
 		if (prelude->local_exist(nt)){
 			ex = new expr_cast2type(nt, ex, prelude); /* if each type is from prelude table */
-		} else if (sym_tbl->global_exist(nt) || sym_tbl->local_exist(nt)){
-			sym_type *t = dynamic_cast<sym_type *>(sym_tbl->get_symbol(nt));
-			if (typeid(*t) != typeid(sym_pointer)){
+		} else if (sym_tbl->type_exists_by_real_typename(nt)){
+			string s = typeid(*type).name();
+			if (typeid(*type) != typeid(sym_pointer)){
 				throw error(C2440, "cannot convert \"" + et + "\" to \"" + nt+ "\"", lxr->get().pos);
 			}
 			ex = new expr_cast2type(type, ex);
@@ -529,7 +529,6 @@ stmt_block *parser::try_parse_body(sym_table *sym_tbl, sym_function *owner, bool
 	try_parse_statements_list(sym_tbl, stmt_blck, owner, loop);
 	return stmt_blck;
 }
-
 
 void parser::check_func_decl2errors(symbol **t, token tk){
 	sym_function *cur_func = dynamic_cast<sym_function *>(*t);

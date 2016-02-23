@@ -1,0 +1,5 @@
+typedef int *ptr2int;
+ptr2int a;
+ptr2int main(){
+	return 1;
+}

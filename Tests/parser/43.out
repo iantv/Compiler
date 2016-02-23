@@ -1,0 +1,15 @@
+main: function
+	{
+		return:
+			expression:
+					1
+				int *
+	}
+returns
+	pointer(s) to
+		int
+a: pointer(s) to
+	int
+ptr2int: alias for
+	pointer(s) to
+		int
