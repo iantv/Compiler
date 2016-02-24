@@ -1,0 +1,11 @@
+point: variable
+	struct _0
+		x: variable
+			int
+		y: variable
+			int
+struct _0
+	x: variable
+		int
+	y: variable
+		int

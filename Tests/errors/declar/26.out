@@ -1,0 +1,1 @@
+error C2079: "pt" uses undefined struct "struct point" in line 2 column 16

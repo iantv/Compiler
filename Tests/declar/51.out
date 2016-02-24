@@ -1,0 +1,6 @@
+struct _0
+	a: variable
+		int
+struct _1
+	b: variable
+		int

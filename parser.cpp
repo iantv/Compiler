@@ -345,8 +345,7 @@ void parser::try_parse_struct_member_list(sym_struct *my_struct){
 		}
 		if (tk.type == TK_CLOSE_BRACE && !my_struct->table->count_symbols())
 			throw error(C2016, "C requires that a struct or union has at least one member", tk.pos);
-	} else
-		throw error(C2332, "struct: missing tag name", tk.pos);
+	}
 }
 
 bool parser::is_expr_start(token tk, sym_table *sym_tbl){
@@ -610,29 +609,33 @@ declar parser::parse_declare(sym_table *sym_tbl){
 }
 
 sym_type *parser::try_parse_struct_decl(sym_table *sym_tbl, bool alias, bool constant){
-	token tk = lxr->next();
+	token tk = lxr->next(); /* skip TK_STRUCT and next token assign to tk */
 	sym_table *slt = new sym_table(sym_tbl); /* struct local table */
 	sym_struct *t = new sym_struct("struct", slt);
-	if (tk.type == TK_ID){ /* struct [name] { ... }|| struct { ... }[var1][, [var2]]; || struct name {}; */
+	if (tk.type == TK_ID){ /* struct [name] { ... } || struct { ... }[var1][, [var2]]; || struct name {}; */
 		t->name += " " + tk.get_src();
 		if (lxr->look_next_token(TK_ID)){ /* struct name [id_name: variable || function ] */
 			if (!sym_tbl->global_exist(t->name) && !sym_tbl->local_exist(t->name)){	
-				tk = lxr->next();
-				throw error(C2079, "\"" + tk.get_src() + "\" uses undefined struct \"" + t->name + "\"", tk.pos);
+				throw error(C2079, "\"" + lxr->next().get_src() + "\" uses undefined struct \"" + t->name + "\"", tk.pos);
 			}
 			sym_struct* sym = dynamic_cast<sym_struct *>(sym_tbl->get_symbol(t->name));
 			delete t; delete slt;
+			t = sym;
 			return sym;
 		}
-		lxr->next();
 		sym_tbl->add_sym(t);
+		if (lxr->look_next_token(TK_OPEN_BRACE))
+			lxr->next();
+	}
+	if (lxr->get().type != TK_OPEN_BRACE && alias){
+		throw error(C2332, "struct: missing tag name", lxr->get().pos);
 	}
 	try_parse_struct_member_list(t);
 	if (t->name == "struct"){
 		t->name += " _" + to_string(id_name);
 		id_name++;
 		sym_tbl->add_sym(t);
-	}
+	} 
 	return t;
 }
 
@@ -684,6 +687,12 @@ declar parser::parse_declare(sym_table *sym_tbl, bool alias, bool constant){
 		if (typeid(info.type) == typeid(sym_struct)){
 			info.id = info.type;
 			info.type = nullptr;
+		}
+	} else {
+		if (info.type != nullptr && (typeid(*info.type) == typeid(sym_struct))){
+			sym_struct *my_struct = dynamic_cast<sym_struct *>(info.type);
+			if (my_struct->table->symbols.size() == 0)
+				throw error(C2079, "\"" + tk.get_src() + "\" uses undefined struct \"" + my_struct->name + "\"", lxr->get().pos);
 		}
 	}
 	return info;
