@@ -8,7 +8,8 @@ bool symbol::type_eq(string type_name){
 
 symbol *make_symbol(declar &dcl){
 	symbol *t = dcl.get_id();
-	t->type = dcl.get_type();
+	if (t != nullptr)
+		t->type = dcl.get_type();
 	return t;
 }
 
@@ -103,11 +104,7 @@ void sym_var_param::print(ostream &os, int level){
 
 void sym_struct::print(ostream &os, int level){
 	print_level(os, level);
-	os << "struct";
-	if (name != "")
-		os << " " << name << endl;
-	else
-		os << endl;
+	os << name << endl;
 	table->print(os, level + 1);
 } 
 
@@ -142,7 +139,7 @@ string sym_array::get_type_str_name(){
 }
 
 string sym_struct::get_type_str_name(){
-	return "struct " + name;
+	return name;
 }
 
 string sym_alias::get_type_str_name(){

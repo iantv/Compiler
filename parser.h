@@ -37,6 +37,7 @@ class parser{
 	sym_table *table;
 	sym_table *prelude;
 	vector<stmt *> init_list;
+	int id_name;
 	bool global_init;
 	expr *expression(sym_table *, int priority);
 	expr *factor(sym_table *);
@@ -50,7 +51,8 @@ class parser{
 	declar parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst);
 	declar parse_declare(sym_table *sym_tbl, bool tdef, bool tconst);
 	declar parse_declare(sym_table *sym_tbl);
-	symbol *try_parse_struct_member_list(string &struct_tag, sym_table *sym_tbl);
+	sym_type *try_parse_struct_decl(sym_table *, bool, bool);
+	void try_parse_struct_member_list(sym_struct *);
 	void check_struct_member(symbol *member, string struct_tag, position pos);
 	void init_prelude(); /* init global symtable prelude */
 	void try_type_cast(expr **, expr **);

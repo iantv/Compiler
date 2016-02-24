@@ -1,1 +1,1 @@
-error C3769: "a" : a nested class cannot have the same name as the immediately enclosing class in line 4 column 4
+error C3769: "struct a" : a nested class cannot have the same name as the immediately enclosing class in line 4 column 5

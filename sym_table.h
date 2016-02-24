@@ -36,7 +36,6 @@ class sym_function: public symbol{
 	sym_table *table;
 	stmt_block *block;
 	vector<string> params;
-	sym_function *next;
 public:
 	friend class parser;
 	void print(ostream &os, int level) override;

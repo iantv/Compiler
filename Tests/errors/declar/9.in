@@ -1,6 +1,6 @@
 struct a{
 	struct a{
 		int b;
-	};
+	}c;
 	int b;
 };

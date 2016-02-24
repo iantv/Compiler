@@ -1,11 +1,11 @@
-struct
-	x: variable
-		int
-	y: variable
-		int
 point: alias for
-	struct
+	struct _0
 		x: variable
 			int
 		y: variable
 			int
+struct _0
+	x: variable
+		int
+	y: variable
+		int
