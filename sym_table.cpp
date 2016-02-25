@@ -278,6 +278,10 @@ bool sym_table::symbol_not_alias_exist(string s){
 	return false;
 }
 
+bool sym_table::local_is_empty(){
+	return symbols.size() == 0;
+}
+
 bool equal(sym_type *sym1, sym_type *sym2){
 	sym_type *t1 = sym1, *t2 = sym2;
 	while (t1 != nullptr && t2 != nullptr && t1->type && t2->type && (t1->name == t2->name)){

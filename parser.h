@@ -49,9 +49,9 @@ class parser{
 	
 	size_t parse_size_of_array();
 	declar parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst);
-	declar parse_declare(sym_table *sym_tbl, bool tdef, bool tconst);
-	declar parse_declare(sym_table *sym_tbl);
-	sym_type *try_parse_struct_decl(sym_table *, bool, bool);
+	declar parse_declare(sym_table *);
+	declar parse_declare(sym_table *, bool, bool);
+	sym_struct *try_parse_struct_decl(sym_table *, bool, bool);
 	void try_parse_struct_member_list(sym_struct *);
 	void check_struct_member(symbol *member, string struct_tag, position pos);
 	void init_prelude(); /* init global symtable prelude */
@@ -82,6 +82,7 @@ class parser{
 	void check_semicolon();
 	void check_decl2errors(sym_table *, symbol **, token);
 	void check_func_decl2errors(symbol **, token);
+	void check_struct_decl2errors(sym_table *, symbol **, token);
 public:
 	parser(lexer *l);
 	expr *parse_expr(sym_table *);

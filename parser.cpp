@@ -327,7 +327,16 @@ void parser::try_parse_struct_member_list(sym_struct *my_struct){
 	if (tk.type == TK_OPEN_BRACE){
 		tk = lxr->next(); /* skip open square bracket '{' */
 		while (tk.type != TK_CLOSE_BRACE){
-			symbol *sym = make_symbol(parse_declare(my_struct->table));
+			declar dcl = parse_declare(my_struct->table);
+			if (dcl.id == nullptr && dcl.type != nullptr){
+				check_struct_member(dcl.type, my_struct->name, lxr->get().pos);
+			}
+			symbol *sym = make_symbol(dcl);
+			if (sym == nullptr){
+				check_semicolon();
+				tk = lxr->get();
+				continue;
+			}
 			if (typeid(*sym) == typeid(sym_struct))
 				sym->type = dynamic_cast<sym_type *>(sym);
 			check_struct_member(sym->type, my_struct->name, lxr->get().pos);
@@ -510,7 +519,7 @@ stmt_block *parser::try_parse_body(sym_table *sym_tbl, sym_function *owner, bool
 	try_parse_statements_list(sym_tbl, stmt_blck, owner, loop);
 	return stmt_blck;
 }
-
+	
 void parser::check_func_decl2errors(symbol **t, token tk){
 	sym_function *cur_func = dynamic_cast<sym_function *>(*t);
 	for (vector<sym_function *>::iterator it = table->functions.begin(); it != table->functions.end(); it++){
@@ -534,10 +543,66 @@ void parser::check_func_decl2errors(symbol **t, token tk){
 	}
 }
 
+void parser::check_struct_decl2errors(sym_table *sym_tbl, symbol **sym, token tk){
+	sym_struct *struct1 = dynamic_cast<sym_struct *>(*sym);
+	
+	if (sym_tbl->local_exist(struct1->name)){
+		sym_struct *struct2 = dynamic_cast<sym_struct *>(sym_tbl->get_symbol(struct1->name));
+		if (struct1->table->local_is_empty()){
+			if (struct2->table->local_is_empty()){
+				delete *sym; *sym = nullptr;
+			} else {
+				delete *sym; *sym = nullptr;
+			}
+		} else {
+			if (struct2->table->local_is_empty()){
+				sym_tbl->del_sym(struct2);
+			} else {
+				throw error(C2011, "\'" + struct1->name + "\': \'struct\' redifinition", tk.pos);
+			}
+		}
+	} else if (sym_tbl->global_exist(struct1->name)){
+		sym_struct *struct2 = dynamic_cast<sym_struct *>(sym_tbl->get_symbol(struct1->name));
+		if (struct1->table->local_is_empty()){
+			if (struct2->table->local_is_empty()){
+				//
+			} else {
+				delete *sym; *sym = nullptr;
+			}
+		} else {
+			if (struct2->table->local_is_empty()){
+				//
+			} else {
+				//
+			}
+		}
+	}
+}
+
+sym_struct *parser::try_parse_struct_decl(sym_table *sym_tbl, bool alias, bool constant){
+	token tk = lxr->next(); /* skip TK_STRUCT and next token assign to tk */
+	sym_table *slt = new sym_table(sym_tbl); /* struct local table */
+	sym_struct *t = new sym_struct("struct", slt);
+	if (tk.type == TK_ID){ /* struct [name] { ... } || struct { ... }[var1][, [var2]]; || struct name {}; */
+		t->name += " " + tk.get_src();
+		if (lxr->look_next_token(TK_ID))
+			return t;
+		if (lxr->look_next_token(TK_OPEN_BRACE))
+			lxr->next();
+	} else if (t->name == "struct"){
+		t->name += " _" + to_string(id_name);
+		id_name++;
+	} 
+	if (lxr->get().type != TK_OPEN_BRACE && alias){
+		throw error(C2332, "struct: missing tag name", lxr->get().pos);
+	}
+	return t;
+}
+
 void parser::check_decl2errors(sym_table *sym_tbl, symbol **t, token tk){
-	if (typeid(**t).name() == typeid(sym_var).name() && sym_tbl->local_exist((*t)->name)){
+	if (typeid(**t) == typeid(sym_var) && sym_tbl->local_exist((*t)->name)){
 		throw error(C2086, (*t)->type->name + " " + (*t)->name + ": redefinition", tk.pos);
-	} else if (typeid(**t).name() == typeid(sym_function).name()){
+	} else if (typeid(**t) == typeid(sym_function)){
 		check_func_decl2errors(t, tk);
 	}
 }
@@ -573,11 +638,10 @@ void parser::try_parse_declarator(sym_table *sym_tbl, stmt_block *stmt_blck = nu
 	bool func_def = false;
 	bool decl = false;
 	if (tk.is_type_specifier() || (sym_tbl->global_exist(tk.src) || sym_tbl->local_exist(tk.src))){
-		symbol *t = make_symbol(parse_declare(sym_tbl));
+		symbol *t = make_symbol(parse_declare(sym_tbl)); /* if t is sym_type then t->type == nullptr */
 		func_def = try_parse_definition(t);
-		check_decl2errors(sym_tbl, &t, tk);
-
-		if (t != nullptr && t->type != nullptr){ 
+		if (t != nullptr){
+			check_decl2errors(sym_tbl, &t, tk);
 			sym_tbl->add_sym(t);
 			try_parse_init(t, sym_tbl, stmt_blck);
 			stype = t->type;
@@ -608,61 +672,41 @@ declar parser::parse_declare(sym_table *sym_tbl){
 	return parse_declare(sym_tbl, false, false);
 }
 
-sym_type *parser::try_parse_struct_decl(sym_table *sym_tbl, bool alias, bool constant){
-	token tk = lxr->next(); /* skip TK_STRUCT and next token assign to tk */
-	sym_table *slt = new sym_table(sym_tbl); /* struct local table */
-	sym_struct *t = new sym_struct("struct", slt);
-	if (tk.type == TK_ID){ /* struct [name] { ... } || struct { ... }[var1][, [var2]]; || struct name {}; */
-		t->name += " " + tk.get_src();
-		if (lxr->look_next_token(TK_ID)){ /* struct name [id_name: variable || function ] */
-			if (!sym_tbl->global_exist(t->name) && !sym_tbl->local_exist(t->name)){	
-				throw error(C2079, "\"" + lxr->next().get_src() + "\" uses undefined struct \"" + t->name + "\"", tk.pos);
-			}
-			sym_struct* sym = dynamic_cast<sym_struct *>(sym_tbl->get_symbol(t->name));
-			delete t; delete slt;
-			t = sym;
-			return sym;
-		}
-		sym_tbl->add_sym(t);
-		if (lxr->look_next_token(TK_OPEN_BRACE))
-			lxr->next();
-	}
-	if (lxr->get().type != TK_OPEN_BRACE && alias){
-		throw error(C2332, "struct: missing tag name", lxr->get().pos);
-	}
-	try_parse_struct_member_list(t);
-	if (t->name == "struct"){
-		t->name += " _" + to_string(id_name);
-		id_name++;
-		sym_tbl->add_sym(t);
-	} 
-	return t;
-}
-
 declar parser::parse_declare(sym_table *sym_tbl, bool alias, bool constant){
 	declar info;
 	token tk = lxr->get();
 	if (tk.is_type_specifier()){
 		if (tk.type == TK_STRUCT){
-			info.set_type(try_parse_struct_decl(sym_tbl, alias, constant));
-		} else {
+			sym_struct *t = try_parse_struct_decl(sym_tbl, alias, constant);
+			try_parse_struct_member_list(t);
+			symbol *sym = dynamic_cast<symbol *>(t);
+			string s = t->name;
+			check_struct_decl2errors(sym_tbl, &sym, lxr->get());
+			info.set_type( sym == nullptr ? dynamic_cast<sym_type *>(sym_tbl->get_symbol(s)) : t);
+			
+			if (sym != nullptr) sym_tbl->add_sym(info.type);
+			
+			tk = lxr->next();
+			if (tk.type == TK_SEMICOLON) /* do test: typedef struct;*/
+				return info;	/* if it's type decalration */
+		} else { 
 			info.set_type(prelude->get_type_specifier(tk.get_src()));
+			tk = lxr->next(); /* skip type from prelude */
 		}
-		tk = lxr->next();
 		while (tk.is_storage_class_specifier() || tk.is_type_qualifier()){
 			if (alias && tk.is_storage_class_specifier()) throw error(C2159, "more than one storage class specified", tk.pos);
 			alias = (!alias) ? tk.is_storage_class_specifier() : alias;
 			constant = (!constant) ? tk.is_type_qualifier() : constant;
 			tk = lxr->next();
 		}
-		if (constant)
-			info.reset_type(new sym_const(info.get_type()));
+		if (constant) info.reset_type(new sym_const(info.get_type()));
 	} else if (sym_tbl->type_alias_exist(tk.get_src())){
 		info.set_type(sym_tbl->get_type_by_synonym(tk.get_src()));
 		tk = lxr->next();
 	} else {
 		tk = lxr->next();
 	}
+
 	if (alias && tk.is_storage_class_specifier()) throw error(C2159, "more than one storage class specified", tk.pos);
 	while (tk.type == TK_MUL){
 		info.reset_type(new sym_pointer(info.get_type()));
@@ -673,27 +717,10 @@ declar parser::parse_declare(sym_table *sym_tbl, bool alias, bool constant){
 		}
 		if (alias && tk.is_storage_class_specifier()) throw error(C2159, "more than one storage class specified", tk.pos);
 	}
-	if (tk.type == TK_SEMICOLON || tk.type == TK_COMMA){
-		info.id = info.type;
-		info.type = nullptr;
-		return info;
-	}
 	info.rebuild(parse_dir_declare(sym_tbl, alias, constant));
 	tk = lxr->get();
 	if (tk.type == TK_TYPEDEF || tk.type == TK_CONST){
 		throw error(C2143, "missing \";\" before \"" + tk.get_src() + "\"", tk.pos);
-	}
-	if (info.id == nullptr){
-		if (typeid(info.type) == typeid(sym_struct)){
-			info.id = info.type;
-			info.type = nullptr;
-		}
-	} else {
-		if (info.type != nullptr && (typeid(*info.type) == typeid(sym_struct))){
-			sym_struct *my_struct = dynamic_cast<sym_struct *>(info.type);
-			if (my_struct->table->symbols.size() == 0)
-				throw error(C2079, "\"" + tk.get_src() + "\" uses undefined struct \"" + my_struct->name + "\"", lxr->get().pos);
-		}
 	}
 	return info;
 }

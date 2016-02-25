@@ -4,6 +4,7 @@
 #include <string>
 #include "lexer.h"
 
+#define C2011 "C2011"
 #define C2016 "C2016"
 #define C2020 "C2020"
 #define C2044 "C2044"

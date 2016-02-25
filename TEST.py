@@ -3,9 +3,9 @@ LTESTCNT = 40
 EXPR = 53
 PRS =  43
 PRSERR = 9
-PDTESTCNT = 52
+PDTESTCNT = 53
 
-ERRPRSDCL = 25 #Error Parser Declare
+ERRPRSDCL = 26 #Error Parser Declare
 TCAST = 2
 IMPTCAST = 8
 def testproc(testname, cmd, N, output, ansdir):
