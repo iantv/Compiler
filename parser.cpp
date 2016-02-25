@@ -585,8 +585,17 @@ sym_struct *parser::try_parse_struct_decl(sym_table *sym_tbl, bool alias, bool c
 	sym_struct *t = new sym_struct("struct", slt);
 	if (tk.type == TK_ID){ /* struct [name] { ... } || struct { ... }[var1][, [var2]]; || struct name {}; */
 		t->name += " " + tk.get_src();
-		if (lxr->look_next_token(TK_ID))
+		if (lxr->look_next_token(TK_ID)){
+			if (!sym_tbl->local_exist(t->name) && !sym_tbl->global_exist(t->name)){
+				throw error(C2079, "\"" + lxr->next().get_src() + "\" uses undefined struct \"" + t->name + "\"", tk.pos );
+			}
+			sym_struct *temp = dynamic_cast<sym_struct *>(sym_tbl->get_symbol(t->name));
+			if (temp->table->local_is_empty()){
+				tk = lxr->next();
+				throw error(C2079, "\"" + tk.get_src() + "\" uses undefined struct \"" + t->name + "\"", tk.pos );
+			}
 			return t;
+		}
 		if (lxr->look_next_token(TK_OPEN_BRACE))
 			lxr->next();
 	} else if (t->name == "struct"){
