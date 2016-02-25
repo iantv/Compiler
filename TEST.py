@@ -18,10 +18,10 @@ def testproc(testname, cmd, N, output, ansdir):
 		if (f1.read() == f2.read()):
 			print '.',
 		else:
-			if (ansdir == 'Tests/errors/declar/' and i == 11) or (ansdir == 'Tests/parser/' and i == 9):
+			if (ansdir == 'Tests/errors/declar/' and i == 11):
 				print '.',
 			else:
-				print str(i) + 'E',
+				print str(i),
 		f1.close()
 		f2.close()
 	print

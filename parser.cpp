@@ -609,9 +609,12 @@ sym_struct *parser::try_parse_struct_decl(sym_table *sym_tbl, bool alias, bool c
 }
 
 void parser::check_decl2errors(sym_table *sym_tbl, symbol **t, token tk){
-	if (typeid(**t) == typeid(sym_var) && sym_tbl->local_exist((*t)->name)){
-		throw error(C2086, (*t)->type->name + " " + (*t)->name + ": redefinition", tk.pos);
-	} else if (typeid(**t) == typeid(sym_function)){
+	if (*t == nullptr)
+		return;
+	if (typeid(*(*t)) == typeid(sym_var)){
+		if  (sym_tbl->local_exist((*t)->name))
+			throw error(C2086, (*t)->type->name + " " + (*t)->name + ": redefinition", tk.pos);
+	} else if (typeid(*(*t)) == typeid(sym_function)){
 		check_func_decl2errors(t, tk);
 	}
 }
@@ -649,8 +652,8 @@ void parser::try_parse_declarator(sym_table *sym_tbl, stmt_block *stmt_blck = nu
 	if (tk.is_type_specifier() || (sym_tbl->global_exist(tk.src) || sym_tbl->local_exist(tk.src))){
 		symbol *t = make_symbol(parse_declare(sym_tbl)); /* if t is sym_type then t->type == nullptr */
 		func_def = try_parse_definition(t);
+		check_decl2errors(sym_tbl, &t, tk);
 		if (t != nullptr){
-			check_decl2errors(sym_tbl, &t, tk);
 			sym_tbl->add_sym(t);
 			try_parse_init(t, sym_tbl, stmt_blck);
 			stype = t->type;
