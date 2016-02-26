@@ -650,7 +650,7 @@ void parser::try_parse_declarator(sym_table *sym_tbl, stmt_block *stmt_blck = nu
 	bool func_def = false;
 	bool decl = false;
 	if (tk.is_type_specifier() || (sym_tbl->global_exist(tk.src) || sym_tbl->local_exist(tk.src))){
-		symbol *t = make_symbol(parse_declare(sym_tbl)); /* if t is sym_type then t->type == nullptr */
+		symbol *t = make_symbol(parse_declare(sym_tbl));
 		func_def = try_parse_definition(t);
 		check_decl2errors(sym_tbl, &t, tk);
 		if (t != nullptr){
