@@ -1,0 +1,11 @@
+main: function
+	{
+		printf:
+			
+				expression:
+					%d
+				expression:
+					1
+	}
+returns
+	void

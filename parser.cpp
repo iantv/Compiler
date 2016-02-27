@@ -418,6 +418,13 @@ void parser::try_parse_for_stmt(sym_table *sym_tbl, stmt_block *stmt_blck, sym_f
 	stmt_blck->push_back(new_for);
 }
 
+void parser::try_parse_printf_stmt(sym_table *sym_tbl, stmt_block *stmt_blck){
+	if (lxr->next().type != TK_OPEN_BRACKET)
+		throw syntax_error(C2059, lxr->get().get_src() + "; it requares openning bracket", lxr->get().pos);
+	stmt_printf *new_print = new stmt_printf(parse_fargs(sym_tbl));
+	stmt_blck->push_back(new_print);
+}
+
 void parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck, sym_function *owner, bool loop = false){
 	token tk = lxr->get();
 	if (is_expr_start(tk, sym_tbl)){
@@ -463,6 +470,9 @@ void parser::try_parse_statement(sym_table *sym_tbl, stmt_block *stmt_blck, sym_
 		} else {
 			stmt_blck->push_back(new stmt_return(nullptr));
 		}
+		check_semicolon();
+	} else if (tk.type == TK_PRINTF){
+		try_parse_printf_stmt(sym_tbl, stmt_blck);
 		check_semicolon();
 	}
 }	

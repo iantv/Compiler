@@ -88,3 +88,11 @@ public:
 	stmt_return(stmt_expr *);
 	void print(ostream &os, int level);
 };
+
+class stmt_printf: public stmt{
+	string format;
+	vector<stmt_expr *> args;
+public:
+	stmt_printf(vector<expr *> &);
+	void print(ostream &os, int level);
+}; 
