@@ -4,6 +4,7 @@
 #include "parser.h"
 #include "error.h"
 #include "sym_table.h"
+#include "asm_generator.h"
 
 int main(int argc, const char *argv[]){
 	if (argc == 1){
@@ -25,6 +26,11 @@ int main(int argc, const char *argv[]){
 					fout << L.next();
 				}
 				fout.close();
+			} else if (strcmp(argv[1], "-g") == 0){
+				parser P(&L);
+				fout.open("asmgen.out");
+				P.parse(fout);
+				
 			}
 		}
 		if (argc == 4){
