@@ -13,7 +13,7 @@ enum token_t{
 	TK_CHAR, TK_RETURN, TK_UNION,
 	TK_CONST, TK_FLOAT, TK_SHORT, TK_UNSIGNED,
 	TK_CONTINUE, TK_FOR, TK_SIGNED, TK_VOID,
-	TK_DEFAULT, TK_SIZEOF, TK_DO, TK_IF, TK_WHILE, 
+	TK_PRINTF, TK_DEFAULT, TK_SIZEOF, TK_DO, TK_IF, TK_WHILE, 
 	/* Tokens of statements */
 	TK_PLUS, TK_MINUS, TK_MUL, TK_DIV, TK_MOD, TK_XOR_BIT, TK_OR_BIT, TK_AND_BIT, TK_NOT_BIT, TK_SHL, TK_SHR,
 	TK_ASSIGN, TK_PLUS_ASSIGN, TK_MINUS_ASSIGN, TK_MUL_ASSIGN, TK_DIV_ASSIGN,
@@ -38,7 +38,7 @@ static const char * const token_names[] = {
 	"char", "return", "union",
 	"const", "float", "short", "unsigned",
 	"continue", "for", "signed", "void",
-	"default", "sizeof", "do", "if", "while", 
+	"printf", "default", "sizeof", "do", "if", "while", 
 	
 	"+", "-", "*", "/", "%", "^", "|", "&", "~", "<<", ">>", 
 	"=", "+=", "-=", "*=", "/=", "%=", "^=", "|=", "&=", "<<=", ">>=",

@@ -297,7 +297,7 @@ token lexer::next(){
 		tk = token(pos, tt);
 		skip_symbol();
 		return tk;
-	}
+ 	}
 	return tk = token();
 }
 
