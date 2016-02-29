@@ -1,4 +1,5 @@
 import subprocess
+import shutil
 LTESTCNT = 40
 EXPR = 53
 PRS =  46
@@ -8,7 +9,7 @@ PDTESTCNT = 53
 ERRPRSDCL = 26 #Error Parser Declare
 TCAST = 2
 IMPTCAST = 8
-ASMCNT = 1
+ASMCNT = 2
 
 compiler = '../Debug/Compiler.exe '
 def testproc(testname, cmd, N, output, ansdir, runml = 0):
@@ -17,7 +18,9 @@ def testproc(testname, cmd, N, output, ansdir, runml = 0):
 	for i in range(1, N + 1):
 		subprocess.call(compiler + cmd + ' ' + ansdir + '{}.in'.format(i))
 		if (runml == 1):
-			subprocess.call('dotest.bat')
+			subprocess.call('ml.exe /c /coff /Cp asmgen.asm')
+			subprocess.call('link.exe /subsystem:console asmgen.obj')
+			subprocess.call('asmgen.exe > asmgen.out')
 		f1 = open(output, 'r')
 		f2 = open(ansdir + '{}.out'.format(i))
 		if (f1.read() == f2.read()):
@@ -27,6 +30,7 @@ def testproc(testname, cmd, N, output, ansdir, runml = 0):
 				print '.',
 			else:
 				print str(i),
+				exit()
 		f1.close()
 		f2.close()
 	print

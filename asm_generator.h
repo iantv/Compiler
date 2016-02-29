@@ -37,18 +37,21 @@ public:
 	void push_back(asm_t *cmd);
 	void print(ostream &) override;
 };
-/*
-class asm_function: public asm_t{
-	
-};*/
 
 class asm_main_function: public asm_t{
-	string name;
 	asm_cmd_list *cmds;
 public:
-	asm_main_function(string);
+	asm_main_function();
 	string get_code() override;
 	void print(ostream &) override;
+};
+
+class asm_function: public asm_main_function{
+	string name;
+public:
+	asm_function(string);
+	string get_code() override;
+	void print(ostream &os) override;
 };
 
 class parser;

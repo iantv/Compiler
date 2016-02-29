@@ -297,8 +297,8 @@ bool equal(sym_type *sym1, sym_type *sym2){
 
 /*------------------------------GENERATE METHODS------------------------------*/
 asm_t *sym_function::generate(){
-	asm_main_function *amf = new asm_main_function(name);
-	//asm_main_function * amf = new asm_main_function(name, block->generate()	);
+	asm_t *amf = (name == "main") ? new asm_main_function() : new asm_function(name);
+	//asm_main_function *amf = new asm_main_function(name, block->generate());
 	//amf->cmds = block->generate();
 	return amf;
 }

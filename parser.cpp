@@ -633,7 +633,7 @@ void parser::try_parse_init(symbol *sym, sym_table *sym_tbl, stmt_block *stmt_bl
 	if (lxr->get().type != TK_ASSIGN || typeid(*sym).name() != typeid(sym_var).name()) return;
 	sym_var *t = dynamic_cast<sym_var *>(sym);
 	token tk = lxr->get(); lxr->next();
-	stmt * statement = new stmt_expr(new_expr_bin_op(new_expr_var(sym_tbl, t->var_token), expression(sym_tbl, 2), tk), NOT_COND);
+	stmt *statement = new stmt_expr(new_expr_bin_op(new_expr_var(sym_tbl, t->var_token), expression(sym_tbl, 2), tk), NOT_COND);
 	if (sym_tbl->prev == nullptr)
 		init_list.push_back(statement);
 	else
