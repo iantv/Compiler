@@ -5,6 +5,7 @@
 #include "expression.h"
 #include "sym_table.h"
 #include "statements.h"
+#include "asm_generator.h"
 
 #include <list>
 
@@ -84,6 +85,7 @@ class parser{
 	void check_func_decl2errors(symbol **, token);
 	void check_struct_decl2errors(sym_table *, symbol **, token);
 public:
+	friend class asm_code;
 	parser(lexer *l);
 	expr *parse_expr(sym_table *);
 	void parse(ostream &os);

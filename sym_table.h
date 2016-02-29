@@ -4,6 +4,9 @@
 #include <string>
 #include <map>
 #include <iostream>
+#include "asm_generator.h"
+//class asm_t;
+//class asm_code;
 
 using namespace std;
 class sym_type;
@@ -27,6 +30,7 @@ public:
 	symbol(const string &sym_name) { name = sym_name; }
 	bool type_eq(string type_name);
 	sym_type *get_type(){ return type; }
+	virtual asm_t *generate() { return nullptr; }
 };
 
 symbol *make_symbol(declar &);
@@ -40,6 +44,7 @@ public:
 	friend class parser;
 	void print(ostream &os, int level) override;
 	sym_function(const string &sym_name, sym_table *lst, vector<string> &param_list, stmt_block *); /* lst is pointer to Local Symbol Table */
+	asm_t *generate() override;
 };
 
 class sym_type: public symbol{
@@ -127,6 +132,7 @@ public:
 	friend class sym_function;
 	friend class sym_func_type;
 	friend class parser;
+	friend class asm_code;
 	void print(ostream &os, int level);
 	void add_sym(symbol *sym);
 	void del_sym(symbol *sym);

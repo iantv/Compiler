@@ -28,9 +28,11 @@ int main(int argc, const char *argv[]){
 				fout.close();
 			} else if (strcmp(argv[1], "-g") == 0){
 				parser P(&L);
-				fout.open("asmgen.out");
+				fout.open("asmgen.asm");
 				P.parse(fout);
-				
+				asm_code *code = new asm_code(P);
+				code->print(fout);
+				fout.close();
 			}
 		}
 		if (argc == 4){

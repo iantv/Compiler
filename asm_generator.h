@@ -1,5 +1,7 @@
 #ifndef ASMGEN_H
 #define ASMGEN_H
+#include <vector>
+
 enum asm_op_t{ 
 	PUSH, POP, IMUL, DIV, ADD, SUB,
 	NEG, NOT, OR, AND, XOR, SHL, SHR,
@@ -19,9 +21,43 @@ enum asm_type_t{
 	DB, DW, DD, DQ
 };
 
-class asm_code{
+using namespace std;
+
+
+class asm_t{
 public:
-	asm_code();
+	asm_t(){};
+	virtual string get_code(){ return ""; }
+	virtual void print(ostream &) = 0;
+};
+
+class asm_cmd_list: public asm_t{
+	vector<asm_t *> cmds;
+public:
+	void push_back(asm_t *cmd);
+	void print(ostream &) override;
+};
+/*
+class asm_function: public asm_t{
+	
+};*/
+
+class asm_main_function: public asm_t{
+	string name;
+	asm_cmd_list *cmds;
+public:
+	asm_main_function(string);
+	string get_code() override;
+	void print(ostream &) override;
+};
+
+class parser;
+class asm_code{
+	string head;
+	vector<asm_t *> code;
+public:
+	asm_code(parser &);
+	void print(ostream &);
 };
 
 #endif

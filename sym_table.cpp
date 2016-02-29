@@ -2,6 +2,8 @@
 #include "statements.h"
 #include "parser.h"
 
+#include "asm_generator.h"
+
 bool symbol::type_eq(string type_name){
 	return type->name == type_name;
 }
@@ -291,4 +293,12 @@ bool equal(sym_type *sym1, sym_type *sym2){
 	if (t1 == t2)
 		return true;
 	return false;
+}
+
+/*------------------------------GENERATE METHODS------------------------------*/
+asm_t *sym_function::generate(){
+	asm_main_function *amf = new asm_main_function(name);
+	//asm_main_function * amf = new asm_main_function(name, block->generate()	);
+	//amf->cmds = block->generate();
+	return amf;
 }
