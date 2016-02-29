@@ -10,3 +10,6 @@ expression.out
 typecast.out
 temp
 test
+asmgen.exe
+asmgen.out
+asmgen.obj

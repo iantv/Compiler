@@ -8,11 +8,16 @@ PDTESTCNT = 53
 ERRPRSDCL = 26 #Error Parser Declare
 TCAST = 2
 IMPTCAST = 8
-def testproc(testname, cmd, N, output, ansdir):
+ASMCNT = 1
+
+compiler = '../Debug/Compiler.exe '
+def testproc(testname, cmd, N, output, ansdir, runml = 0):
 	if testname != '' :
 		print testname
 	for i in range(1, N + 1):
-		subprocess.call('../Debug/Compiler.exe ' + cmd + ' ' + ansdir + '{}.in'.format(i))
+		subprocess.call(compiler + cmd + ' ' + ansdir + '{}.in'.format(i))
+		if (runml == 1):
+			subprocess.call('dotest.bat')
 		f1 = open(output, 'r')
 		f2 = open(ansdir + '{}.out'.format(i))
 		if (f1.read() == f2.read()):
@@ -32,3 +37,4 @@ testproc('Declarations parsing', '-p -decl', PDTESTCNT, 'declar.out', 'Tests/dec
 testproc('', '-p -decl', ERRPRSDCL, 'declar.out', 'Tests/errors/declar/')
 testproc('Parser global + definitions', '-p', PRS, 'parser.out', 'Tests/parser/')
 testproc('', '-p', PRSERR, 'parser.out', 'Tests/errors/parser/')
+testproc('asm', '-g', ASMCNT, 'asmgen.out', 'Tests/generator/', 1)
