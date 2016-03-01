@@ -2,7 +2,7 @@
 #include "statements.h"
 #include "parser.h"
 
-#include "asm_generator.h"
+//#include "asm_generator.h"
 
 bool symbol::type_eq(string type_name){
 	return type->name == type_name;
@@ -296,9 +296,13 @@ bool equal(sym_type *sym1, sym_type *sym2){
 }
 
 /*------------------------------GENERATE METHODS------------------------------*/
-asm_t *sym_function::generate(){
-	asm_t *amf = (name == "main") ? new asm_main_function() : new asm_function(name);
-	//asm_main_function *amf = new asm_main_function(name, block->generate());
-	//amf->cmds = block->generate();
-	return amf;
+void sym_function::generate(asm_code *code){
+	asm_cmd_list *cmds = new asm_cmd_list();
+	block->generate(cmds);
+	cmds->add(RET); // Do later for returning value
+	if (name == "main"){
+		code->add(new asm_main_function(cmds));
+		return;
+	}
+	code->add(new asm_function(name, cmds));
 }

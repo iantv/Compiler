@@ -11,6 +11,7 @@ public:
 	stmt(){}
 	virtual void print(ostream &os, int level) = 0;
 	void print_level(ostream &os, int level);
+	virtual void generate(asm_cmd_list *){}
 };
 
 enum cond_t{ EXECUTION_COND, END_COND, CONTINUED_COND, NOT_COND };
@@ -21,6 +22,7 @@ public:
 	friend class parser;
 	stmt_expr(expr *, cond_t);
 	void print(ostream &os, int level) override;
+	void generate(asm_cmd_list *) override;
 };
 
 class stmt_block: public stmt{
@@ -34,6 +36,7 @@ public:
 	stmt_block(sym_table *, sym_function *);
 	void push_back(stmt *);
 	void print(ostream &os, int level) override;
+	void generate(asm_cmd_list *) override;
 };
 
 class stmt_if: public stmt{

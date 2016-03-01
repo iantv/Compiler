@@ -25,6 +25,11 @@ void stmt_expr::print(ostream &os, int level){
 	e->print(os, level + 1);
 }
 
+void stmt_expr::generate(asm_cmd_list *cmds){
+	e->generate(cmds);
+	cmds->add(POP, EAX);
+}
+
 /*--------------------------------------------STMT_BLOCK--------------------------------------------*/
 
 stmt_block::stmt_block(){
@@ -58,6 +63,11 @@ void stmt_block::print(ostream &os, int level){
 	}
 	print_level(os, level);
 	os << "}" << endl;
+}
+
+void stmt_block::generate(asm_cmd_list *cmds){
+	for (auto it = stmt_list.begin(); it != stmt_list.end(); it++)
+		(*it)->generate(cmds);
 }
 
 /*--------------------------------------------STMT_IF--------------------------------------------*/

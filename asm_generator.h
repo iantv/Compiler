@@ -25,33 +25,39 @@ using namespace std;
 
 
 class asm_t{
+	string cmd;
 public:
-	asm_t(){};
-	virtual string get_code(){ return ""; }
-	virtual void print(ostream &) = 0;
+	asm_t(){}
+	asm_t(string);
+	virtual void print(ostream &);
 };
 
 class asm_cmd_list: public asm_t{
 	vector<asm_t *> cmds;
 public:
+	asm_cmd_list(){}
 	void push_back(asm_t *cmd);
 	void print(ostream &) override;
+
+	void add (asm_op_t);
+	void add(asm_op_t, string);
+	void add(asm_op_t, asm_reg_t);
 };
 
-class asm_main_function: public asm_t{
+class asm_function: public asm_t{
+protected:
+	string name;
 	asm_cmd_list *cmds;
 public:
-	asm_main_function();
-	string get_code() override;
+	asm_function(){}
+	asm_function(string, asm_cmd_list *);
 	void print(ostream &) override;
 };
 
-class asm_function: public asm_main_function{
-	string name;
+class asm_main_function: public asm_function{
 public:
-	asm_function(string);
-	string get_code() override;
-	void print(ostream &os) override;
+	asm_main_function(asm_cmd_list *);
+	void print(ostream &) override;
 };
 
 class parser;
@@ -61,6 +67,8 @@ class asm_code{
 public:
 	asm_code(parser &);
 	void print(ostream &);
+
+	void add(asm_function *);
 };
 
 #endif

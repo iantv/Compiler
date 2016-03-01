@@ -26,7 +26,7 @@ asm_code::asm_code(parser &prs){
 	/*for (auto it = prs.table->symbols.begin(); it != prs.table->symbols.end(); it++)
 		code.push_back((*it).second->generate());*/
 	for (auto it = prs.table->functions.begin(); it != prs.table->functions.end(); it++){
-		code.push_back((*it)->generate());
+		(*it)->generate(this);
 	}
 }
 
@@ -38,24 +38,64 @@ void asm_code::print(ostream &os){
 	}
 }
 
-asm_main_function::asm_main_function(){}
+void asm_code::add(asm_function *new_func){
+	code.push_back(new_func);
+}
 
-string asm_main_function::get_code(){
-	return "main:\n" /* + cmds->get_code() + */ "\tret\nend main";
+/*-------------------------------class asm_function------------------------------*/
+
+asm_main_function::asm_main_function(asm_cmd_list *fcmds){
+	cmds = fcmds;
 }
 
 void asm_main_function::print(ostream &os){
-	os << get_code();
+	os << "main:" << endl;
+	cmds->print(os);
+	os << "end main" << endl;
 }
 
-asm_function::asm_function(string func_name){
+asm_function::asm_function(string func_name, asm_cmd_list *fcmds){
 	name = func_name;
-}
-
-string asm_function::get_code(){
-	return name + " proc\n" /* + cmds->get_code() + */ "\tret\n" + name + " endp\n";
+	cmds = fcmds;
 }
 
 void asm_function::print(ostream &os){
-	os << get_code();
+	os << name << "proc" << endl;
+	cmds->print(os);
+	os << name << " endp" << endl;
+}
+
+/*-------------------------------class asm_cmd_list---------------------------------*/
+
+void asm_cmd_list::push_back(asm_t *cmd){
+	cmds.push_back(cmd);
+}
+
+void asm_cmd_list::print(ostream &os){
+	for (auto it = cmds.begin(); it != cmds.end(); it++){
+		os << '\t';
+		(*it)->print(os);
+	}
+}
+
+void asm_cmd_list::add(asm_op_t op){
+	cmds.push_back(new asm_t(asm_op_str[op]));
+}
+
+void asm_cmd_list::add(asm_op_t op, string val){
+	cmds.push_back(new asm_t(asm_op_str[op] + ' ' + val));
+}
+
+void asm_cmd_list::add(asm_op_t op, asm_reg_t reg){
+	cmds.push_back(new asm_t(asm_op_str[op] + ' ' + asm_reg_str[reg]));
+}
+
+/*-----------------------------------class asm_cmd----------------------------------*/
+
+asm_t::asm_t(string cmd_str){
+	cmd = cmd_str;
+}
+
+void asm_t::print(ostream &os){
+	os << cmd << endl;
 }

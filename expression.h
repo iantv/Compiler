@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include "lexer.h"
+#include "asm_generator.h"
 
 #define MAX_PRIORITY 16
 #define MIN_PRIORITY 1
@@ -24,6 +25,7 @@ public:
 	void print_level(ostream &os, int level);
 	int operator<<(int);
 	bool of_ctype(string s);
+	virtual void generate(asm_cmd_list *){}
 };
 
 class expr_bin_op: public expr{
@@ -56,7 +58,7 @@ public:
 	expr_literal(token t, sym_type *);
 	expr_literal(token t);
 	void print(ostream &os, int level) override;
-
+	void generate(asm_cmd_list *) override;
 };
 
 class expr_var: public expr{

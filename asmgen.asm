@@ -5,9 +5,8 @@ include \masm32\include\msvcrt.inc
 includelib \masm32\lib\msvcrt.lib
 
 .code
-f proc
-	ret
-f endp
 main:
+	push 1
+	pop eax
 	ret
 end main

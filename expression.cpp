@@ -137,7 +137,12 @@ int get_priority(token tk, bool unar){
 	}
 }
 
+void expr_literal::generate(asm_cmd_list *cmds){
+	cmds->add(PUSH, tk.get_src());
+}
+
 /*-------------------------------------------------Type casting-------------------------------------------------*/
+
 bool expr::of_ctype(string s){
 	return type->name == s;
 }
