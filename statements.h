@@ -98,4 +98,5 @@ class stmt_printf: public stmt{
 public:
 	stmt_printf(vector<expr *> &);
 	void print(ostream &os, int level);
+	void generate(asm_cmd_list *) override;
 }; 

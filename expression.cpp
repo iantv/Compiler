@@ -152,7 +152,7 @@ void expr_bin_op::generate(asm_cmd_list *cmds){
 		cmds->add(IMUL, EAX, EBX);
 	} else if (tk == TK_DIV){
 		cmds->add(XOR, EDX, EDX);
-		cmds->add(DIV, EBX);
+		cmds->add(IDIV, EBX);
 	}
 
 	cmds->add(PUSH, EAX);

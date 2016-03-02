@@ -4,15 +4,21 @@
 include \masm32\include\msvcrt.inc
 includelib \masm32\lib\msvcrt.lib
 
+.data
+	format	db	'%d', 0
 .code
 start:
+	mov ebp,esp
 	push 2
-	push 1
+	push 5
 	pop ebx
 	pop eax
-	xor edx,edx
-	div ebx
+	sub eax,ebx
 	push eax
 	pop eax
+	push eax
+	push offset format
+	call crt_printf
+	mov esp,ebp
 	ret
 end start

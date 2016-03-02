@@ -13,7 +13,7 @@ static const string asm_op_str[] = {
 	"fld", "fild", "fstp", "fadd", "fsub", "fdiv", "fmul",
 	"fiadd", "fisub", "fidiv", "fimul",
 	"ja", "jb", "jae", "jbe",
-	"fcom", "fcomi", "fcomip"
+	"fcom", "fcomi", "fcomip", "offset"
 };
 
 static const string asm_reg_str[] =  { "eax", "ebx", "ecx", "edx", "ebp", "esp" };
@@ -21,7 +21,9 @@ static const string asm_reg_str[] =  { "eax", "ebx", "ecx", "edx", "ebp", "esp" 
 static const string asm_type_str[] = { "db", "dw", "dd", "dq" };
 
 asm_code::asm_code(parser &prs){
-	head = ".686\n.model flat, stdcall\n\ninclude \\masm32\\include\\msvcrt.inc\nincludelib \\masm32\\lib\\msvcrt.lib\n\n";
+	head = ".686\n.model flat, stdcall\n\ninclude \\masm32\\include\\msvcrt.inc\nincludelib \\masm32\\lib\\msvcrt.lib\n\n"; 
+		head += ".data\n\tformat\tdb	\'%d\', 0\n";
+
 	// do global vars
 	/*for (auto it = prs.table->symbols.begin(); it != prs.table->symbols.end(); it++)
 		code.push_back((*it).second->generate());*/
@@ -32,6 +34,9 @@ asm_code::asm_code(parser &prs){
 
 void asm_code::print(ostream &os){
 	os << head;
+	/*os << ".data" << endl;
+	for (auto it = gvar.begin(); it != gvar.end(); it++)
+		(*it)->print(os);*/
 	os << ".code" << endl;
 	for (auto it = code.begin(); it != code.end(); it++){
 		(*it)->print(os);
@@ -94,6 +99,9 @@ void asm_cmd_list::add(asm_op_t op, asm_reg_t reg1, asm_reg_t reg2){
 	cmds.push_back(new asm_t(asm_op_str[op] + ' ' + asm_reg_str[reg1] + ',' + asm_reg_str[reg2]));
 }
 
+void asm_cmd_list::add(asm_op_t op, asm_op_t offset, string fmt){
+	cmds.push_back(new asm_t(asm_op_str[op] + ' ' + asm_op_str[offset] + ' ' + fmt));
+}
 /*-----------------------------------class asm_cmd----------------------------------*/
 
 asm_t::asm_t(string cmd_str){

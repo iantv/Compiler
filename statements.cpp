@@ -201,3 +201,12 @@ void stmt_printf::print(ostream &os, int level){
 	for (int i = 0; i < (int)args.size(); i++)
 		args[i]->print(os, level + 2);
 }
+
+void stmt_printf::generate(asm_cmd_list * cmds){
+	for (auto it = args.begin(); it != args.end(); it++){
+		(*it)->generate(cmds);
+		cmds->add(PUSH, EAX);
+	}
+	cmds->add(PUSH, OFFSET, "format"); //
+	cmds->add(CALL, "crt_printf");
+}

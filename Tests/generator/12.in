@@ -1,0 +1,3 @@
+void main(){
+	printf(100/2/5);
+}

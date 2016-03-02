@@ -9,7 +9,7 @@ PDTESTCNT = 53
 ERRPRSDCL = 26 #Error Parser Declare
 TCAST = 2
 IMPTCAST = 8
-ASMCNT = 6
+ASMCNT = 14
 
 compiler = '../Debug/Compiler.exe '
 def testproc(testname, cmd, N, output, ansdir, runml = 0):
@@ -20,7 +20,7 @@ def testproc(testname, cmd, N, output, ansdir, runml = 0):
 		if (runml == 1):
 			subprocess.call('ml.exe /c /coff /Cp asmgen.asm')
 			subprocess.call('link.exe /subsystem:console asmgen.obj')
-			subprocess.call('asmgen.exe > asmgen.out')
+			subprocess.call('asmgen.exe > asmgen.out', shell = True)
 		f1 = open(output, 'r')
 		f2 = open(ansdir + '{}.out'.format(i))
 		if (f1.read() == f2.read()):

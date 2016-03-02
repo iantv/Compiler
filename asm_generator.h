@@ -3,14 +3,15 @@
 #include <vector>
 
 enum asm_op_t{ 
-	PUSH, POP, IMUL, DIV, ADD, SUB,
+	PUSH, POP, IMUL, IDIV, ADD, SUB,
 	NEG, NOT, OR, AND, XOR, SHL, SHR,
 	CALL, MOV, RET, TEST, CMP,
 	JZ, JNZ, JMP, JG, JGE, JL, JLE, JE, JNE, 
 	FLD, FILD, FSTP, FADD, FSUB, FDIV, FMUL,
 	FIADD, FISUB, FIDIV, FIMUL,
 	JA, JB, JAE, JBE,
-	FCOM, FCOMI, FCOMIP
+	FCOM, FCOMI, FCOMIP,
+	OFFSET
 };
 
 enum asm_reg_t{
@@ -43,6 +44,7 @@ public:
 	void add(asm_op_t, string);
 	void add(asm_op_t, asm_reg_t);
 	void add(asm_op_t, asm_reg_t, asm_reg_t);
+	void add(asm_op_t, asm_op_t, string);
 };
 
 class asm_function: public asm_t{
