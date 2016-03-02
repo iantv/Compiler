@@ -80,7 +80,8 @@ public:
 	bool is_storage_class_specifier();
 	bool is_literal();
 	string get_type_name();
-	bool operator==(token &tk){ return pos == tk.pos && type == tk.type && src == tk.get_src(); };
+	bool operator==(token &tk){ return pos == tk.pos && type == tk.type && src == tk.get_src(); }
+	bool operator==(token_t tk_type){ return type == tk_type; }
 	bool is_assign_op();
 };
 

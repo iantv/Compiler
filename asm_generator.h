@@ -39,9 +39,10 @@ public:
 	void push_back(asm_t *cmd);
 	void print(ostream &) override;
 
-	void add (asm_op_t);
+	void add(asm_op_t);
 	void add(asm_op_t, string);
 	void add(asm_op_t, asm_reg_t);
+	void add(asm_op_t, asm_reg_t, asm_reg_t);
 };
 
 class asm_function: public asm_t{

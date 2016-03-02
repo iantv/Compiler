@@ -31,12 +31,13 @@ public:
 class expr_bin_op: public expr{
 protected:
 	expr *left, *right;
-public:
+public:	
 	expr_bin_op(expr *l, expr *r, token t, sym_type *st);
 	expr_bin_op(expr *l, expr *r, token t);
 	expr_bin_op(expr *l, expr *r, string op, sym_type *st);
 	expr_bin_op(expr *l, expr *r, string op);
 	void print(ostream &os, int level) override;
+	void generate(asm_cmd_list *) override;
 };
 
 class expr_prefix_unar_op: public expr{

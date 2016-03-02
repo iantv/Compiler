@@ -49,9 +49,9 @@ asm_main_function::asm_main_function(asm_cmd_list *fcmds){
 }
 
 void asm_main_function::print(ostream &os){
-	os << "main:" << endl;
+	os << "start:" << endl;
 	cmds->print(os);
-	os << "end main" << endl;
+	os << "end start" << endl;
 }
 
 asm_function::asm_function(string func_name, asm_cmd_list *fcmds){
@@ -60,7 +60,7 @@ asm_function::asm_function(string func_name, asm_cmd_list *fcmds){
 }
 
 void asm_function::print(ostream &os){
-	os << name << "proc" << endl;
+	os << name << " proc" << endl;
 	cmds->print(os);
 	os << name << " endp" << endl;
 }
@@ -88,6 +88,10 @@ void asm_cmd_list::add(asm_op_t op, string val){
 
 void asm_cmd_list::add(asm_op_t op, asm_reg_t reg){
 	cmds.push_back(new asm_t(asm_op_str[op] + ' ' + asm_reg_str[reg]));
+}
+
+void asm_cmd_list::add(asm_op_t op, asm_reg_t reg1, asm_reg_t reg2){
+	cmds.push_back(new asm_t(asm_op_str[op] + ' ' + asm_reg_str[reg1] + ',' + asm_reg_str[reg2]));
 }
 
 /*-----------------------------------class asm_cmd----------------------------------*/
