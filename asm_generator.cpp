@@ -21,8 +21,14 @@ static const string asm_reg_str[] =  { "eax", "ebx", "ecx", "edx", "ebp", "esp" 
 static const string asm_type_str[] = { "db", "dw", "dd", "dq" };
 
 asm_code::asm_code(parser &prs){
-	head = ".686\n.model flat, stdcall\n\ninclude \\masm32\\include\\msvcrt.inc\nincludelib \\masm32\\lib\\msvcrt.lib\n\n"; 
-		head += ".data\n\tformat\tdb	\'%d\', 0\n";
+	head = ".686\n.model flat, stdcall\n\ninclude \\masm32\\include\\msvcrt.inc\nincludelib \\masm32\\lib\\msvcrt.lib\n\n\
+STR_LITERAL macro value : req\n\
+	LOCAL lbl\n\
+	.data\n\
+	lbl BYTE value, 0\n\
+	.code\n\
+	EXITM <lbl>\n\
+endm\n\n";
 
 	// do global vars
 	/*for (auto it = prs.table->symbols.begin(); it != prs.table->symbols.end(); it++)

@@ -196,17 +196,16 @@ stmt_printf::stmt_printf(vector<expr *> &fargs){
 void stmt_printf::print(ostream &os, int level){
 	print_level(os, level);
 	os << "printf:" << endl;
-	print_level(os, level + 1);
+	print_level(os, level + 1); 
 	os << format << endl;
 	for (int i = 0; i < (int)args.size(); i++)
 		args[i]->print(os, level + 2);
 }
 
 void stmt_printf::generate(asm_cmd_list * cmds){
-	for (auto it = args.begin(); it != args.end(); it++){
+	for (auto it = args.rbegin(); it != args.rend(); it++){
 		(*it)->generate(cmds);
 		cmds->add(PUSH, EAX);
 	}
-	cmds->add(PUSH, OFFSET, "format"); //
 	cmds->add(CALL, "crt_printf");
 }

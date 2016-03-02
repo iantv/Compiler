@@ -1,4 +1,6 @@
 #include "sym_table.h"
+#include <map>
+
 expr::expr(){ type = nullptr; }
 expr_bin_op::expr_bin_op(expr *l, expr *r, token t): left(l), right(r), expr_bin_op::expr() {
 	type = l->type; /* Assign type of one of two operand, because type casting happens in the function which call this */
@@ -7,7 +9,13 @@ expr_bin_op::expr_bin_op(expr *l, expr *r, token t): left(l), right(r), expr_bin
 expr_bin_op::expr_bin_op(expr *l, expr *r, string s): left(l), right(r), expr_bin_op::expr(){ op = s; }
 expr_prefix_unar_op::expr_prefix_unar_op(expr *e, token t): ex(e), expr_bin_op::expr(){ tk = t; }
 expr_postfix_unar_op::expr_postfix_unar_op(expr *e, token t): ex(e), expr_bin_op::expr(){ tk = t; }
-expr_literal::expr_literal(token t): expr_bin_op::expr(){ tk = t; }
+expr_literal::expr_literal(token t): expr_bin_op::expr(){
+	tk = t; 
+	/*if (t == TK_STRING_LITERAL){
+		literals.insert(make_pair(tk.get_src(), string("char")/* + id));
+	}*/
+}
+
 expr_var::expr_var(token t, sym_type *var_type): expr_bin_op::expr(){ tk = t; type = var_type; }
 expr_tern_op::expr_tern_op(expr *l, expr *m, expr *r, string s): left(l), middle(m), right(r), expr_bin_op::expr(){ op = s; };
 function::function(expr *id, const vector<expr *> &args): fid(id), expr_bin_op::expr(){ fargs = args; };
@@ -159,7 +167,11 @@ void expr_bin_op::generate(asm_cmd_list *cmds){
 }
 
 void expr_literal::generate(asm_cmd_list *cmds){
-	cmds->add(PUSH, tk.get_src());
+	if (tk == TK_STRING_LITERAL){
+		cmds->add(PUSH, OFFSET, "STR_LITERAL(\'" + tk.get_src() + "\')");
+	} else {
+		cmds->add(PUSH, tk.get_src());
+	}
 }
 
 /*-------------------------------------------------Type casting-------------------------------------------------*/
