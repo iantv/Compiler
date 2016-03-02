@@ -3,7 +3,6 @@ main: function
 		expression:
 			2
 		printf:
-			
 				expression:
 					%d
 				expression:

@@ -186,9 +186,11 @@ void stmt_return::print(ostream &os, int level){
 		os << endl;
 }
 
-/*--------------------------------------------STMT_RETURN--------------------------------------------*/
+/*--------------------------------------------STMT_PRINTF--------------------------------------------*/
 
 stmt_printf::stmt_printf(vector<expr *> &fargs){
+	if (fargs[0]->tk.get_type_name() != "const char *")
+		throw 1; 
 	for (int i = 0; i < (int)fargs.size(); i++)
 		args.push_back(new stmt_expr(fargs[i]));
 }
@@ -196,8 +198,6 @@ stmt_printf::stmt_printf(vector<expr *> &fargs){
 void stmt_printf::print(ostream &os, int level){
 	print_level(os, level);
 	os << "printf:" << endl;
-	print_level(os, level + 1); 
-	os << format << endl;
 	for (int i = 0; i < (int)args.size(); i++)
 		args[i]->print(os, level + 2);
 }

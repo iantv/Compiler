@@ -9,12 +9,7 @@ expr_bin_op::expr_bin_op(expr *l, expr *r, token t): left(l), right(r), expr_bin
 expr_bin_op::expr_bin_op(expr *l, expr *r, string s): left(l), right(r), expr_bin_op::expr(){ op = s; }
 expr_prefix_unar_op::expr_prefix_unar_op(expr *e, token t): ex(e), expr_bin_op::expr(){ tk = t; }
 expr_postfix_unar_op::expr_postfix_unar_op(expr *e, token t): ex(e), expr_bin_op::expr(){ tk = t; }
-expr_literal::expr_literal(token t): expr_bin_op::expr(){
-	tk = t; 
-	/*if (t == TK_STRING_LITERAL){
-		literals.insert(make_pair(tk.get_src(), string("char")/* + id));
-	}*/
-}
+expr_literal::expr_literal(token t): expr_bin_op::expr(){ tk = t; }
 
 expr_var::expr_var(token t, sym_type *var_type): expr_bin_op::expr(){ tk = t; type = var_type; }
 expr_tern_op::expr_tern_op(expr *l, expr *m, expr *r, string s): left(l), middle(m), right(r), expr_bin_op::expr(){ op = s; };

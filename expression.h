@@ -21,6 +21,7 @@ public:
 	expr();
 	friend class parser;
 	friend class expr_bin_op;
+	friend class stmt_printf;
 	virtual void print(ostream &os, int level) = 0;
 	void print_level(ostream &os, int level);
 	int operator<<(int);

@@ -108,6 +108,7 @@ void asm_cmd_list::add(asm_op_t op, asm_reg_t reg1, asm_reg_t reg2){
 void asm_cmd_list::add(asm_op_t op, asm_op_t offset, string fmt){
 	cmds.push_back(new asm_t(asm_op_str[op] + ' ' + asm_op_str[offset] + ' ' + fmt));
 }
+
 /*-----------------------------------class asm_cmd----------------------------------*/
 
 asm_t::asm_t(string cmd_str){

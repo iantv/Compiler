@@ -1,7 +1,6 @@
 main: function
 	{
 		printf:
-			
 				expression:
 					%d
 				expression:

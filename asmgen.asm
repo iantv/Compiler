@@ -15,15 +15,7 @@ endm
 .code
 start:
 	mov ebp,esp
-	push 2
-	push 5
-	pop ebx
-	pop eax
-	sub eax,ebx
-	push eax
-	pop eax
-	push eax
-	push offset STR_LITERAL('%d')
+	push offset STR_LITERAL('Hello world!')
 	pop eax
 	push eax
 	call crt_printf
