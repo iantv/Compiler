@@ -22,7 +22,7 @@ public:
 	friend class sym_var;
 	friend class expr;
 	friend symbol *make_symbol(declar &dcl);
-	virtual void print(ostream &os, int level) = 0;
+	virtual void print(ostream &os, int level){};
 	friend symbol *add_elem_to_list(symbol *sym_list, symbol *sym2);
 	symbol(){ name = ""; type = nullptr; }
 	symbol(const string &sym_name) { name = sym_name; }
@@ -117,6 +117,11 @@ class sym_var_param: public sym_var{
 public:
 	void print(ostream &os, int level) override;
 	sym_var_param(const string &sym_name, sym_type *sym_param_type = nullptr);
+};
+
+class sym_var_global: public sym_var{
+public:
+	sym_var_global(const string &, sym_type *, token);
 };
 
 class sym_table{

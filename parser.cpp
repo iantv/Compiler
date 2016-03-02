@@ -630,7 +630,7 @@ void parser::check_decl2errors(sym_table *sym_tbl, symbol **t, token tk){
 }
 
 void parser::try_parse_init(symbol *sym, sym_table *sym_tbl, stmt_block *stmt_blck){
-	if (lxr->get().type != TK_ASSIGN || typeid(*sym).name() != typeid(sym_var).name()) return;
+	if (lxr->get().type != TK_ASSIGN || (typeid(*sym).name() != typeid(sym_var).name() && typeid(*sym) != typeid(sym_var_global))) return;
 	sym_var *t = dynamic_cast<sym_var *>(sym);
 	token tk = lxr->get(); lxr->next();
 	stmt *statement = new stmt_expr(new_expr_bin_op(new_expr_var(sym_tbl, t->var_token), expression(sym_tbl, 2), tk), NOT_COND);
@@ -768,7 +768,10 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 			info.set_id(new sym_alias(info.type));
 			info.set_name(info.name);
 		} else {
-			info.set_id(new sym_var(info.name, nullptr, tk_id));
+			if (sym_tbl->prev == nullptr)
+				info.set_id(new sym_var_global(info.name, nullptr, tk_id));
+			else 
+				info.set_id(new sym_var(info.name, nullptr, tk_id));
 		}
 	} else {
 		while (((tk.type == TK_OPEN_BRACKET) || (tk.type == TK_OPEN_SQUARE_BRACKET)) && tk.type != NOT_TK){

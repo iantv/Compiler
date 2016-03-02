@@ -2,8 +2,6 @@
 #include "statements.h"
 #include "parser.h"
 
-//#include "asm_generator.h"
-
 bool symbol::type_eq(string type_name){
 	return type->name == type_name;
 }
@@ -44,6 +42,10 @@ sym_var::sym_var(const string &sym_name, sym_type *sym_vartype, token tk){
 
 sym_var_param::sym_var_param(const string &sym_name, sym_type *sym_param_type){
 	name = sym_name; type = sym_param_type; 
+}
+
+sym_var_global::sym_var_global(const string &sym_name, sym_type *sym_param_type, token tk){
+	name = sym_name; type = sym_param_type;  var_token = tk;
 }
 
 static void print_level(ostream &os, int level){
@@ -166,7 +168,9 @@ string sym_func_type::get_type_str_name(){
 string sym_const::get_type_str_name(){
 	return "constant " + type->get_type_str_name();
 }
+
 /*------------------------------------------------SYM_TABLE------------------------------------------------*/
+
 bool sym_table::local_exist(string &name){
 	if (symbols.size() == 0)
 		return false;
@@ -296,6 +300,7 @@ bool equal(sym_type *sym1, sym_type *sym2){
 }
 
 /*------------------------------GENERATE METHODS------------------------------*/
+
 void sym_function::generate(asm_code *code){
 	asm_cmd_list *cmds = new asm_cmd_list();
 	cmds->add(MOV, EBP, ESP);
