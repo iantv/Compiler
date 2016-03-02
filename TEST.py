@@ -19,7 +19,7 @@ def testproc(testname, cmd, N, output, ansdir, runml = 0):
 		subprocess.call(compiler + cmd + ' ' + ansdir + '{}.in'.format(i))
 		if (runml == 1):
 			subprocess.call('ml.exe /c /coff /Cp asmgen.asm')
-			subprocess.call('link.exe /subsystem:console asmgen.obj'.format(i))
+			subprocess.call('link.exe /subsystem:console asmgen.obj')
 			subprocess.call('asmgen.exe > asmgen.out', shell = True)
 		f1 = open(output, 'r')
 		f2 = open(ansdir + '{}.out'.format(i))
