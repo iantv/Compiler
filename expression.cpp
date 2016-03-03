@@ -164,6 +164,8 @@ void expr_bin_op::generate_simple_bin_op(asm_cmd_list * cmds, token_t tk_t){
 		cmds->add(XOR, EAX, EBX);
 	} else if (tk_t == TK_OR_BIT){
 		cmds->add(OR, EAX, EBX);
+	} else if (tk_t == TK_AND_BIT){
+		cmds->add(AND, EAX, EBX);
 	}
 }
 
@@ -207,6 +209,11 @@ void expr_bin_op::generate(asm_cmd_list *cmds){
 	} else if (tk == TK_OR_ASSIGN){
 		left->generate_addr(cmds);
 		generate_simple_bin_op(cmds, TK_OR_BIT);
+		cmds->add(POP, EBX);
+		cmds->add_assign(MOV, EBX, EAX);
+	} else if (tk == TK_AND_ASSIGN){
+		left->generate_addr(cmds);
+		generate_simple_bin_op(cmds, TK_AND_BIT);
 		cmds->add(POP, EBX);
 		cmds->add_assign(MOV, EBX, EAX);
 	} else {
