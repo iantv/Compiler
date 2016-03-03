@@ -1,0 +1,7 @@
+int a;
+void main(){
+	a = 100;
+	printf("%d ", a % 7);
+	a %= 7;
+	printf("%d", a);
+}
