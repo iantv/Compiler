@@ -126,6 +126,10 @@ void asm_cmd_list::add_assign(asm_op_t op, asm_reg_t addr, asm_reg_t val){
 	cmds.push_back(new asm_t(asm_op_str[op] + " [" + asm_reg_str[addr] + "], " + asm_reg_str[val]));
 }
 
+void asm_cmd_list::add(asm_op_t op, asm_reg_t reg, string val){
+	cmds.push_back(new asm_t(asm_op_str[op] + ' ' + asm_reg_str[reg] + ',' + val));
+}
+
 /*-----------------------------------class asm_cmd----------------------------------*/
 
 asm_t::asm_t(string cmd_str){
