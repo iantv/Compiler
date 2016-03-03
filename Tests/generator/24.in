@@ -1,0 +1,7 @@
+int a;
+void main(){
+	a = 5;
+	printf("%d ", a | 2);
+	a |= 4;
+	printf("%d", a);
+}
