@@ -1,0 +1,11 @@
+int a; int b;
+void main(){
+	a = 100;
+	printf("%d ", a);
+	a *= 10;
+	printf("%d ", a);
+	b = 2;
+	printf("%d ", b);
+	a /= b;
+	printf("%d", a);
+}

@@ -1,0 +1,6 @@
+int a;
+void main(){
+	a = 100;
+	a -=50;
+	printf("%d", a);
+}

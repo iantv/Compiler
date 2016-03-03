@@ -142,6 +142,23 @@ int get_priority(token tk, bool unar){
 
 /*-----------------------------------------------EXPR::GENERATE------------------------------------------------*/
 
+void expr_bin_op::generate_simple_bin_op(asm_cmd_list * cmds, token_t tk_t){
+	left->generate(cmds);
+	right->generate(cmds);
+	cmds->add(POP, EBX);
+	cmds->add(POP, EAX);
+	if (tk_t == TK_PLUS){
+		cmds->add(ADD, EAX, EBX);
+	} else if (tk_t == TK_MINUS){
+		cmds->add(SUB, EAX, EBX);
+	} else if (tk_t == TK_MUL){
+		cmds->add(IMUL, EAX, EBX);
+	} else if (tk_t == TK_DIV){
+		cmds->add(XOR, EDX, EDX);
+		cmds->add(IDIV, EBX);
+	}
+}
+
 void expr_bin_op::generate(asm_cmd_list *cmds){
 	if (tk == TK_ASSIGN){
 		left->generate_addr(cmds);
@@ -151,28 +168,26 @@ void expr_bin_op::generate(asm_cmd_list *cmds){
 		cmds->add_assign(MOV, EAX, EBX);
 	} else if (tk == TK_PLUS_ASSIGN){
 		left->generate_addr(cmds);
-		left->generate(cmds);
-		right->generate(cmds);
+		generate_simple_bin_op(cmds, TK_PLUS);
 		cmds->add(POP, EBX);
-		cmds->add(POP, EAX);
-		cmds->add(ADD, EAX, EBX);
+		cmds->add_assign(MOV, EBX, EAX);
+	} else if (tk == TK_MINUS_ASSIGN){
+		left->generate_addr(cmds);
+		generate_simple_bin_op(cmds, TK_MINUS);
+		cmds->add(POP, EBX);
+		cmds->add_assign(MOV, EBX, EAX);
+	} else if (tk == TK_MUL_ASSIGN){
+		left->generate_addr(cmds);
+		generate_simple_bin_op(cmds, TK_MUL);
+		cmds->add(POP, EBX);
+		cmds->add_assign(MOV, EBX, EAX);
+	} else if (tk == TK_DIV_ASSIGN){
+		left->generate_addr(cmds);
+		generate_simple_bin_op(cmds, TK_DIV);
 		cmds->add(POP, EBX);
 		cmds->add_assign(MOV, EBX, EAX);
 	} else {
-		left->generate(cmds);
-		right->generate(cmds);
-		cmds->add(POP, EBX);
-		cmds->add(POP, EAX);
-		if (tk == TK_PLUS){
-			cmds->add(ADD, EAX, EBX);
-		} else if (tk == TK_MINUS){
-			cmds->add(SUB, EAX, EBX);
-		} else if (tk == TK_MUL){
-			cmds->add(IMUL, EAX, EBX);
-		} else if (tk == TK_DIV){
-			cmds->add(XOR, EDX, EDX);
-			cmds->add(IDIV, EBX);
-		}
+		generate_simple_bin_op(cmds, tk.get_type());
 	}
 	cmds->add(PUSH, EAX);
 }

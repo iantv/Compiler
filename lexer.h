@@ -83,6 +83,7 @@ public:
 	bool operator==(token &tk){ return pos == tk.pos && type == tk.type && src == tk.get_src(); }
 	bool operator==(token_t tk_type){ return type == tk_type; }
 	bool is_assign_op();
+	token_t get_type(){ return type; }
 };
 
 class lexer{

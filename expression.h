@@ -40,6 +40,7 @@ public:
 	expr_bin_op(expr *l, expr *r, string op);
 	void print(ostream &os, int level) override;
 	void generate(asm_cmd_list *) override;
+	void generate_simple_bin_op(asm_cmd_list *, token_t); /* +, -, *, / */
 };
 
 class expr_prefix_unar_op: public expr{
