@@ -13,3 +13,4 @@ test
 asmgen.exe
 asmgen.out
 asmgen.obj
+asmgen.asm
