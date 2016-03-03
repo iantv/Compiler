@@ -63,15 +63,25 @@ public:
 	void print(ostream &) override;
 };
 
+class asm_global_var: public asm_t{
+	string gv_name;
+	asm_type_t gv_type;
+public:
+	asm_global_var(string &, asm_type_t);
+	void print(ostream &os) override;
+};
+
 class parser;
 class asm_code{
 	string head;
 	vector<asm_t *> code;
+	vector<asm_t *> data;
 public:
 	asm_code(parser &);
 	void print(ostream &);
 
 	void add(asm_function *);
+	void add(asm_global_var *);
 };
 
 #endif

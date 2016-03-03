@@ -30,19 +30,17 @@ STR_LITERAL macro value : req\n\
 	EXITM <lbl>\n\
 endm\n\n";
 
-	// do global vars
-	/*for (auto it = prs.table->symbols.begin(); it != prs.table->symbols.end(); it++)
-		code.push_back((*it).second->generate());*/
-	for (auto it = prs.table->functions.begin(); it != prs.table->functions.end(); it++){
+	for (auto it = prs.table->symbols.begin(); it != prs.table->symbols.end(); it++)
+		(*it).second->generate(this);
+	for (auto it = prs.table->functions.begin(); it != prs.table->functions.end(); it++)
 		(*it)->generate(this);
-	}
 }
 
 void asm_code::print(ostream &os){
 	os << head;
-	/*os << ".data" << endl;
-	for (auto it = gvar.begin(); it != gvar.end(); it++)
-		(*it)->print(os);*/
+	os << ".data" << endl;
+	for (auto it = data.begin(); it != data.end(); it++)
+		(*it)->print(os);
 	os << ".code" << endl;
 	for (auto it = code.begin(); it != code.end(); it++){
 		(*it)->print(os);
@@ -51,6 +49,10 @@ void asm_code::print(ostream &os){
 
 void asm_code::add(asm_function *new_func){
 	code.push_back(new_func);
+}
+
+void asm_code::add(asm_global_var *new_var){
+	data.push_back(new_var);
 }
 
 /*-------------------------------class asm_function------------------------------*/
@@ -74,6 +76,17 @@ void asm_function::print(ostream &os){
 	os << name << " proc" << endl;
 	cmds->print(os);
 	os << name << " endp" << endl;
+}
+
+/*-------------------------------class asm_global_var---------------------------------*/
+
+asm_global_var::asm_global_var(string &name, asm_type_t type){
+	gv_name = name;
+	gv_type = type;
+}
+
+void asm_global_var::print(ostream &os){
+	os << '\t' << gv_name << '\t' << asm_type_str[gv_type] << '\t' << 0 << endl;
 }
 
 /*-------------------------------class asm_cmd_list---------------------------------*/

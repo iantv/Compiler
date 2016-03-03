@@ -12,10 +12,12 @@ STR_LITERAL macro value : req
 	EXITM <lbl>
 endm
 
+.data
+	a_	db	0
 .code
 start:
 	mov ebp,esp
-	push offset STR_LITERAL('Hello world!')
+	push offset STR_LITERAL('Hello\tworld!')
 	pop eax
 	push eax
 	call crt_printf

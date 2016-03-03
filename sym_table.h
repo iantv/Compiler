@@ -122,6 +122,7 @@ public:
 class sym_var_global: public sym_var{
 public:
 	sym_var_global(const string &, sym_type *, token);
+	void generate(asm_code *) override;
 };
 
 class sym_table{
