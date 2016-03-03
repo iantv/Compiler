@@ -149,6 +149,15 @@ void expr_bin_op::generate(asm_cmd_list *cmds){
 		cmds->add(POP, EBX);
 		cmds->add(POP, EAX);
 		cmds->add_assign(MOV, EAX, EBX);
+	} else if (tk == TK_PLUS_ASSIGN){
+		left->generate_addr(cmds);
+		left->generate(cmds);
+		right->generate(cmds);
+		cmds->add(POP, EBX);
+		cmds->add(POP, EAX);
+		cmds->add(ADD, EAX, EBX);
+		cmds->add(POP, EBX);
+		cmds->add_assign(MOV, EBX, EAX);
 	} else {
 		left->generate(cmds);
 		right->generate(cmds);
