@@ -27,6 +27,7 @@ public:
 	int operator<<(int);
 	bool of_ctype(string s);
 	virtual void generate(asm_cmd_list *){}
+	virtual void generate_addr(asm_cmd_list *){}
 };
 
 class expr_bin_op: public expr{
@@ -68,6 +69,7 @@ public:
 	expr_var(token t, sym_type *);
 	void print(ostream &os, int level) override;
 	void generate(asm_cmd_list *) override;
+	void generate_addr(asm_cmd_list *) override;
 };
 
 class expr_tern_op: public expr{

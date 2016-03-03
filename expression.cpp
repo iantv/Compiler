@@ -143,21 +143,28 @@ int get_priority(token tk, bool unar){
 /*-----------------------------------------------EXPR::GENERATE------------------------------------------------*/
 
 void expr_bin_op::generate(asm_cmd_list *cmds){
-	left->generate(cmds);
-	right->generate(cmds);
-	cmds->add(POP, EBX);
-	cmds->add(POP, EAX);
-	if (tk == TK_PLUS){
-		cmds->add(ADD, EAX, EBX);
-	} else if (tk == TK_MINUS){
-		cmds->add(SUB, EAX, EBX);
-	} else if (tk == TK_MUL){
-		cmds->add(IMUL, EAX, EBX);
-	} else if (tk == TK_DIV){
-		cmds->add(XOR, EDX, EDX);
-		cmds->add(IDIV, EBX);
+	if (tk == TK_ASSIGN){
+		left->generate_addr(cmds);
+		right->generate(cmds);
+		cmds->add(POP, EBX);
+		cmds->add(POP, EAX);
+		cmds->add_assign(MOV, EAX, EBX);
+	} else {
+		left->generate(cmds);
+		right->generate(cmds);
+		cmds->add(POP, EBX);
+		cmds->add(POP, EAX);
+		if (tk == TK_PLUS){
+			cmds->add(ADD, EAX, EBX);
+		} else if (tk == TK_MINUS){
+			cmds->add(SUB, EAX, EBX);
+		} else if (tk == TK_MUL){
+			cmds->add(IMUL, EAX, EBX);
+		} else if (tk == TK_DIV){
+			cmds->add(XOR, EDX, EDX);
+			cmds->add(IDIV, EBX);
+		}
 	}
-
 	cmds->add(PUSH, EAX);
 }
 
@@ -171,6 +178,10 @@ void expr_literal::generate(asm_cmd_list *cmds){
 
 void expr_var::generate(asm_cmd_list *cmds){
 	cmds->add(PUSH, tk.get_src() + '_');	
+}
+
+void expr_var::generate_addr(asm_cmd_list * cmds){
+	cmds->add(PUSH, OFFSET, tk.get_src() + '_');
 }
 
 /*-------------------------------------------------Type casting-------------------------------------------------*/
