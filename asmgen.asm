@@ -13,11 +13,22 @@ STR_LITERAL macro value : req
 endm
 
 .data
-	a_	db	0
+	a_	dd	0
 .code
 start:
 	mov ebp,esp
-	push offset STR_LITERAL('Hello\tworld!')
+	push a_
+	push 1
+	pop ebx
+	pop eax
+	add eax,ebx
+	push eax
+	pop eax
+	push eax
+	push a_
+	pop eax
+	push eax
+	push offset STR_LITERAL('%d %d')
 	pop eax
 	push eax
 	call crt_printf

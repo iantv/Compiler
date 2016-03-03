@@ -67,6 +67,7 @@ class expr_var: public expr{
 public:
 	expr_var(token t, sym_type *);
 	void print(ostream &os, int level) override;
+	void generate(asm_cmd_list *) override;
 };
 
 class expr_tern_op: public expr{
