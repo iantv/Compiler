@@ -16,11 +16,18 @@ def testproc(testname, cmd, N, output, ansdir, runml = 0):
 	if testname != '' :
 		print testname
 	for i in range(1, N + 1):
-		subprocess.call(compiler + cmd + ' ' + ansdir + '{}.in'.format(i))
+		p = subprocess.Popen(compiler + cmd + ' ' + ansdir + '{}.in'.format(i))
+		p.wait()
 		if (runml == 1):
-			subprocess.call('ml.exe /c /coff /Cp asmgen.asm')
-			subprocess.call('link.exe /subsystem:console asmgen.obj')
-			subprocess.call('asmgen.exe > asmgen.out', shell = True)
+			bucket1 = open('bucket1', 'w')
+			bucket2 = open('bucket2', 'w')
+			bucket3 = open('asmgen.out', 'w')
+			p = subprocess.call('ml.exe /c /coff /Cp asmgen.asm', shell = True, stdout = bucket1)
+			p = subprocess.call('link.exe /subsystem:console asmgen.obj', shell = True, stdout = bucket2)
+			p = subprocess.call('asmgen.exe', stdout = bucket3)
+			bucket1.close()
+			bucket2.close()
+			bucket3.close()
 		f1 = open(output, 'r')
 		f2 = open(ansdir + '{}.out'.format(i))
 		if (f1.read() == f2.read()):

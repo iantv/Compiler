@@ -2,7 +2,9 @@
 #include "error.h"
 #include "statements.h"
 #include <typeinfo.h>
+
 /*--------------------------------------class declar--------------------------------------*/
+
 declar::declar(): id(nullptr), type(nullptr), def(false){ }
 
 void declar::set_id(symbol *decl_id){ id = decl_id; }

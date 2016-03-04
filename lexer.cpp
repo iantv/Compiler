@@ -331,6 +331,10 @@ bool token::is_rel_bin_op(){
 	return type >= FIRST_REL_TK && type <= LAST_REL_TK;
 }
 
+bool token::is_assign_op(){
+	return type >= FIRST_ASSIGN_TK && type <= LAST_ASSIGN_TK;
+}
+
 string token::get_type_name(){
 	switch (type){
 		case TK_CHAR_VAL:	return token_names[TK_CHAR];
@@ -339,10 +343,6 @@ string token::get_type_name(){
 		case TK_STRING_LITERAL: return "const char *";
 		default:			return "";
 	}
-}
-
-bool token::is_assign_op(){
-	return type >= TK_ASSIGN && type <= TK_SHR_ASSIGN;
 }
 
 bool lexer::look_next_token(token_t tk_t){

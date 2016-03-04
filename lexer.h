@@ -30,8 +30,12 @@ enum token_t{
 	NOT_TK
 };
 #define LAST_KWD (TK_WHILE - FIRST_KWD)
+
 #define FIRST_REL_TK TK_LT
 #define LAST_REL_TK TK_NE
+
+#define FIRST_ASSIGN_TK TK_ASSIGN
+#define LAST_ASSIGN_TK TK_SHR_ASSIGN
 
 static const char * const token_names[] = {
 	"double", "int", "struct",

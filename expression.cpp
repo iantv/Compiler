@@ -181,18 +181,14 @@ void expr_bin_op::generate_rel_bin_op(asm_cmd_list *cmds){
 	cmds->add(CMP, EAX, EBX);
 	string label1 = cmds->get_label_name();
 	string label2 = cmds->get_label_name();
-	if (tk == TK_EQ)
-		cmds->add(JE, label1);
-	else if (tk == TK_GE)
-		cmds->add(JGE, label1);
-	else if (tk == TK_LE)
-		cmds->add(JLE, label1);
-	else if (tk == TK_GT)
-		cmds->add(JG, label1);
-	else if (tk == TK_LT)
-		cmds->add(JL, label1);
-	else if (tk == TK_NE)
-		cmds->add(JNE, label1);
+	switch (tk.get_type()){
+		case TK_EQ: { cmds->add(JE, label1);	break; }
+		case TK_GE: { cmds->add(JGE, label1);	break; }
+		case TK_LE: { cmds->add(JLE, label1);	break; }
+		case TK_GT: { cmds->add(JG, label1);	break; }
+		case TK_LT: { cmds->add(JL, label1);	break; }
+		case TK_NE: { cmds->add(JNE, label1);	break; }
+	}
 	cmds->add(PUSH, string("0"));
 	cmds->add(JMP, label2);
 	cmds->add_label(label1);
@@ -200,63 +196,28 @@ void expr_bin_op::generate_rel_bin_op(asm_cmd_list *cmds){
 	cmds->add_label(label2);
 }
 
+void expr_bin_op::generate_assign_bin_op(asm_cmd_list *cmds){
+	left->generate_addr(cmds);
+	switch (tk.get_type()){
+		case TK_ASSIGN:			{ right->generate(cmds); cmds->add(POP, EAX);	break; }
+		case TK_PLUS_ASSIGN:	{ generate_simple_bin_op(cmds, TK_PLUS);		break; }
+		case TK_MINUS_ASSIGN:	{ generate_simple_bin_op(cmds, TK_MINUS);		break; }
+		case TK_MUL_ASSIGN:		{ generate_simple_bin_op(cmds, TK_MUL);			break; }
+		case TK_DIV_ASSIGN:		{ generate_simple_bin_op(cmds, TK_DIV);			break; }
+		case TK_MOD_ASSIGN:		{ generate_simple_bin_op(cmds, TK_MOD);			break; }
+		case TK_XOR_ASSIGN:		{ generate_simple_bin_op(cmds, TK_XOR_BIT);		break; }
+		case TK_OR_ASSIGN:		{ generate_simple_bin_op(cmds, TK_OR_BIT);		break; }
+		case TK_AND_ASSIGN:		{ generate_simple_bin_op(cmds, TK_AND_BIT);		break; }
+		case TK_SHL_ASSIGN:		{ generate_simple_bin_op(cmds, TK_SHL);			break; }
+		case TK_SHR_ASSIGN:		{ generate_simple_bin_op(cmds, TK_SHR);			break; }
+	}
+	cmds->add(POP, EBX);
+	cmds->add_assign(MOV, EBX, EAX);
+}
+
 void expr_bin_op::generate(asm_cmd_list *cmds){
-	if (tk == TK_ASSIGN){
-		left->generate_addr(cmds);
-		right->generate(cmds);
-		cmds->add(POP, EBX);
-		cmds->add(POP, EAX);
-		cmds->add_assign(MOV, EAX, EBX);
-	} else if (tk == TK_PLUS_ASSIGN){
-		left->generate_addr(cmds);
-		generate_simple_bin_op(cmds, TK_PLUS);
-		cmds->add(POP, EBX);
-		cmds->add_assign(MOV, EBX, EAX);
-	} else if (tk == TK_MINUS_ASSIGN){
-		left->generate_addr(cmds);
-		generate_simple_bin_op(cmds, TK_MINUS);
-		cmds->add(POP, EBX);
-		cmds->add_assign(MOV, EBX, EAX);
-	} else if (tk == TK_MUL_ASSIGN){
-		left->generate_addr(cmds);
-		generate_simple_bin_op(cmds, TK_MUL);
-		cmds->add(POP, EBX);
-		cmds->add_assign(MOV, EBX, EAX);
-	} else if (tk == TK_DIV_ASSIGN){
-		left->generate_addr(cmds);
-		generate_simple_bin_op(cmds, TK_DIV);
-		cmds->add(POP, EBX);
-		cmds->add_assign(MOV, EBX, EAX);
-	} else if (tk == TK_MOD_ASSIGN){
-		left->generate_addr(cmds);
-		generate_simple_bin_op(cmds, TK_MOD);
-		cmds->add(POP, EBX);
-		cmds->add_assign(MOV, EBX, EAX);
-	} else if (tk == TK_XOR_ASSIGN){
-		left->generate_addr(cmds);
-		generate_simple_bin_op(cmds, TK_XOR_BIT);
-		cmds->add(POP, EBX);
-		cmds->add_assign(MOV, EBX, EAX);
-	} else if (tk == TK_OR_ASSIGN){
-		left->generate_addr(cmds);
-		generate_simple_bin_op(cmds, TK_OR_BIT);
-		cmds->add(POP, EBX);
-		cmds->add_assign(MOV, EBX, EAX);
-	} else if (tk == TK_AND_ASSIGN){
-		left->generate_addr(cmds);
-		generate_simple_bin_op(cmds, TK_AND_BIT);
-		cmds->add(POP, EBX);
-		cmds->add_assign(MOV, EBX, EAX);
-	} else if (tk == TK_SHL_ASSIGN){
-		left->generate_addr(cmds);
-		generate_simple_bin_op(cmds, TK_SHL);
-		cmds->add(POP, EBX);
-		cmds->add_assign(MOV, EBX, EAX);
-	} else if (tk == TK_SHR_ASSIGN){
-		left->generate_addr(cmds);
-		generate_simple_bin_op(cmds, TK_SHR);
-		cmds->add(POP, EBX);
-		cmds->add_assign(MOV, EBX, EAX);
+	if (tk.is_assign_op()){
+		generate_assign_bin_op(cmds);
 	} else if (tk.is_rel_bin_op()) {
 		generate_rel_bin_op(cmds);
 		return;
@@ -267,16 +228,24 @@ void expr_bin_op::generate(asm_cmd_list *cmds){
 }
 
 void expr_prefix_unar_op::generate(asm_cmd_list *cmds){
-	ex->generate_addr(cmds);
-	ex->generate(cmds);
-	cmds->add(POP, EBX);
-	cmds->add(POP, EAX);
-	if (tk == TK_INC)
-		cmds->add(INC, EBX);
-	else if (tk == TK_DEC)
-		cmds->add(DEC, EBX);
-	cmds->add_assign(MOV, EAX, EBX);
-	cmds->add(PUSH, EBX);
+	if (tk == TK_INC || tk == TK_DEC){
+		ex->generate_addr(cmds);
+		ex->generate(cmds);
+		cmds->add(POP, EBX);
+		cmds->add(POP, EAX);
+		if (tk == TK_INC)
+			cmds->add(INC, EBX);
+		else if (tk == TK_DEC)
+			cmds->add(DEC, EBX);
+		cmds->add_assign(MOV, EAX, EBX);
+		cmds->add(PUSH, EBX);
+	} else if (tk == TK_AND_BIT){
+		//ex->generate_addr(cmds);
+	} else if (tk == TK_MUL){
+		/*ex->generate(cmds);
+		cmds->add(POP, EAX);
+		cmds->add_dereference(PUSH, EAX);*/
+	}
 }
 
 void expr_postfix_unar_op::generate(asm_cmd_list *cmds){
