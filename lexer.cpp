@@ -328,7 +328,7 @@ bool token::is_literal(){
 }
 
 bool token::is_rel_bin_op(){
-	return type == TK_EQ || type == TK_GE || type == TK_LE || type == TK_GT || type == TK_LT || type == TK_NE;
+	return type >= FIRST_REL_TK && type <= LAST_REL_TK;
 }
 
 string token::get_type_name(){
