@@ -13,7 +13,7 @@ static const string asm_op_str[] = {
 	"fld", "fild", "fstp", "fadd", "fsub", "fdiv", "fmul",
 	"fiadd", "fisub", "fidiv", "fimul",
 	"ja", "jb", "jae", "jbe",
-	"fcom", "fcomi", "fcomip", "offset"
+	"fcom", "fcomi", "fcomip", "offset", "inc", "dec"
 };
 
 static const string asm_reg_str[] =  { "eax", "ebx", "ecx", "edx", "ebp", "esp" };

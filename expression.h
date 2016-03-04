@@ -49,6 +49,7 @@ class expr_prefix_unar_op: public expr{
 public:
 	expr_prefix_unar_op(expr *e, token t);
 	void print(ostream &os, int level);
+	void generate(asm_cmd_list *) override;
 };
 
 class expr_postfix_unar_op: public expr{
@@ -56,6 +57,7 @@ class expr_postfix_unar_op: public expr{
 public:
 	expr_postfix_unar_op(expr *e, token t);
 	void print(ostream &os, int level);
+	void generate(asm_cmd_list *) override;
 };
 
 class expr_literal: public expr{

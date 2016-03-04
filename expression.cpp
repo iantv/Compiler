@@ -266,6 +266,32 @@ void expr_bin_op::generate(asm_cmd_list *cmds){
 	cmds->add(PUSH, EAX);
 }
 
+void expr_prefix_unar_op::generate(asm_cmd_list *cmds){
+	ex->generate_addr(cmds);
+	ex->generate(cmds);
+	cmds->add(POP, EBX);
+	cmds->add(POP, EAX);
+	if (tk == TK_INC)
+		cmds->add(INC, EBX);
+	else if (tk == TK_DEC)
+		cmds->add(DEC, EBX);
+	cmds->add_assign(MOV, EAX, EBX);
+	cmds->add(PUSH, EBX);
+}
+
+void expr_postfix_unar_op::generate(asm_cmd_list *cmds){
+	ex->generate_addr(cmds);
+	ex->generate(cmds);
+	cmds->add(POP, EBX);
+	cmds->add(POP, EAX);
+	cmds->add(PUSH, EBX);
+	if (tk == TK_INC)
+		cmds->add(INC, EBX);
+	else if (tk == TK_DEC)
+		cmds->add(DEC, EBX);
+	cmds->add_assign(MOV, EAX, EBX);
+}
+
 void expr_literal::generate(asm_cmd_list *cmds){
 	if (tk == TK_STRING_LITERAL){
 		cmds->add(PUSH, OFFSET, "STR_LITERAL(\'" + tk.get_src() + "\')");

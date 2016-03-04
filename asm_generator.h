@@ -11,7 +11,7 @@ enum asm_op_t{
 	FIADD, FISUB, FIDIV, FIMUL,
 	JA, JB, JAE, JBE,
 	FCOM, FCOMI, FCOMIP,
-	OFFSET
+	OFFSET, INC, DEC
 };
 
 enum asm_reg_t{
@@ -48,6 +48,7 @@ public:
 	void add(asm_op_t, asm_op_t, string);
 	void add_assign(asm_op_t, asm_reg_t, asm_reg_t);
 	void add(asm_op_t, asm_reg_t, string);
+
 	string get_label_name();
 	void add_label(string);
 };
