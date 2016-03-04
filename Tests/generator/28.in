@@ -1,0 +1,4 @@
+int a;
+void main(){
+	printf("%d", a == 0);
+}

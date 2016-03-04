@@ -130,6 +130,14 @@ void asm_cmd_list::add(asm_op_t op, asm_reg_t reg, string val){
 	cmds.push_back(new asm_t(asm_op_str[op] + ' ' + asm_reg_str[reg] + ',' + val));
 }
 
+string asm_cmd_list::get_label_name(){
+	return "L_" + to_string(label_cnt++);
+}
+
+void asm_cmd_list::add_label(string lname){
+	cmds.push_back(new asm_t(lname + ':'));
+}
+
 /*-----------------------------------class asm_cmd----------------------------------*/
 
 asm_t::asm_t(string cmd_str){
