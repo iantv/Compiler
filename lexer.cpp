@@ -327,6 +327,10 @@ bool token::is_literal(){
 	return type == TK_INT_VAL || type == TK_DOUBLE_VAL || type == TK_CHAR_VAL || type == TK_STRING_LITERAL;
 }
 
+bool token::is_rel_bin_op(){
+	return type == TK_EQ || type == TK_GE || type == TK_LE || type == TK_GT || type == TK_LT || type == TK_NE;
+}
+
 string token::get_type_name(){
 	switch (type){
 		case TK_CHAR_VAL:	return token_names[TK_CHAR];

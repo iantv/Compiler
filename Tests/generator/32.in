@@ -1,0 +1,5 @@
+int a;
+void main(){
+	int a = 8;
+	printf("%d %d %d", a <= 8, a <= 7, a <= 9);
+}

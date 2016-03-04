@@ -173,6 +173,33 @@ void expr_bin_op::generate_simple_bin_op(asm_cmd_list * cmds, token_t tk_t){
 	}
 }
 
+void expr_bin_op::generate_rel_bin_op(asm_cmd_list *cmds){
+	left->generate(cmds);
+	right->generate(cmds);
+	cmds->add(POP, EBX);
+	cmds->add(POP, EAX);
+	cmds->add(CMP, EAX, EBX);
+	string label1 = cmds->get_label_name();
+	string label2 = cmds->get_label_name();
+	if (tk == TK_EQ)
+		cmds->add(JE, label1);
+	else if (tk == TK_GE)
+		cmds->add(JGE, label1);
+	else if (tk == TK_LE)
+		cmds->add(JLE, label1);
+	else if (tk == TK_GT)
+		cmds->add(JG, label1);
+	else if (tk == TK_LT)
+		cmds->add(JL, label1);
+	else if (tk == TK_NE)
+		cmds->add(JNE, label1);
+	cmds->add(PUSH, string("0"));
+	cmds->add(JMP, label2);
+	cmds->add_label(label1);
+	cmds->add(PUSH, string("1"));
+	cmds->add_label(label2);
+}
+
 void expr_bin_op::generate(asm_cmd_list *cmds){
 	if (tk == TK_ASSIGN){
 		left->generate_addr(cmds);
@@ -230,20 +257,8 @@ void expr_bin_op::generate(asm_cmd_list *cmds){
 		generate_simple_bin_op(cmds, TK_SHR);
 		cmds->add(POP, EBX);
 		cmds->add_assign(MOV, EBX, EAX);
-	} else if (tk == TK_EQ) {
-		left->generate(cmds);
-		right->generate(cmds);
-		cmds->add(POP, EBX);
-		cmds->add(POP, EAX);
-		cmds->add(CMP, EAX, EBX);
-		string label1 = cmds->get_label_name();
-		string label2 = cmds->get_label_name();
-		cmds->add(JE, label1);
-		cmds->add(PUSH, string("0"));
-		cmds->add(JMP, label2);
-		cmds->add_label(label1);
-		cmds->add(PUSH, string("1"));
-		cmds->add_label(label2);
+	} else if (tk.is_rel_bin_op()) {
+		generate_rel_bin_op(cmds);
 		return;
 	} else {
 		generate_simple_bin_op(cmds, tk.get_type());
