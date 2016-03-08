@@ -49,6 +49,7 @@ public:
 	void add_assign(asm_op_t, asm_reg_t, asm_reg_t);
 	void add(asm_op_t, asm_reg_t, string);
 	void add_dereference(asm_op_t, asm_reg_t);
+	void add_comment(string);
 	string get_label_name();
 	void add_label(string);
 };

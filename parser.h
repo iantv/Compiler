@@ -60,7 +60,9 @@ class parser{
 	
 	expr *new_expr_bin_op(expr *ex1, expr *ex2, token tk);
 	expr *new_expr_var(sym_table *, token);
-	
+	expr *new_expr_postfix_unar_op(sym_table *, expr *, token);
+	expr *new_expr_prefix_unar_op(sym_table *, expr *, token);
+
 	void try_parse_block(sym_table *, stmt_block *, sym_function *, bool);
 	stmt_block *try_parse_body(sym_table *, sym_function *, bool); /* parse function's body */
 	void try_parse_init(symbol *, sym_table *, stmt_block *);

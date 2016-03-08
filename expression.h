@@ -10,6 +10,8 @@
 class sym_type;
 class sym_table;
 class expr_bin_op;
+class expr_postfix_unar_op;
+class expr_prefix_unar_op;
 int get_priority(token tk, bool unar = 0);
 
 class expr{
@@ -21,7 +23,9 @@ public:
 	expr();
 	friend class parser;
 	friend class expr_bin_op;
+	friend class expr_postfix_unar_op;
 	friend class stmt_printf;
+	friend class expr_prefix_unar_op;
 	virtual void print(ostream &os, int level) = 0;
 	void print_level(ostream &os, int level);
 	int operator<<(int);
@@ -51,6 +55,7 @@ public:
 	expr_prefix_unar_op(expr *e, token t);
 	void print(ostream &os, int level);
 	void generate(asm_cmd_list *) override;
+	void generate_addr(asm_cmd_list *) override;
 };
 
 class expr_postfix_unar_op: public expr{

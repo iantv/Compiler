@@ -150,6 +150,23 @@ expr *parser::try_cast2type(expr *ex, sym_type *type, sym_table *sym_tbl){
 	return ex;
 }
 
+expr *parser::new_expr_postfix_unar_op(sym_table *sym_tbl, expr *ex, token tk){
+	ex = new expr_postfix_unar_op(ex, tk); 
+	return ex;
+}
+
+expr *parser::new_expr_prefix_unar_op(sym_table *sym_tbl, expr *ex, token tk){
+	ex = new expr_prefix_unar_op(ex, tk); 
+	if (tk == TK_ASSIGN){
+		ex->type = new sym_pointer(ex->type);
+	} else if (tk == TK_MUL){
+		sym_type *t = ex->type->type;
+		free(ex->type);
+		ex->type = t;
+	}
+	return ex;
+}
+
 expr *parser::expression(sym_table *sym_tbl, int priority){
 	if (priority > MAX_PRIORITY) return factor(sym_tbl);		
 	expr *ex = expression(sym_tbl, priority + 1);
@@ -166,7 +183,7 @@ expr *parser::expression(sym_table *sym_tbl, int priority){
 		} else if (priority == 2){			
 			ex = new_expr_bin_op(ex, expression(sym_tbl, priority), tk);
 		} else if (tk.type == TK_INC || tk.type == TK_DEC){
-			ex = new expr_postfix_unar_op(ex, tk);			
+			ex = new_expr_postfix_unar_op(sym_tbl, ex, tk);
 		} else {
 			ex = new_expr_bin_op(ex, expression(sym_tbl, priority + 1), tk);
 		}

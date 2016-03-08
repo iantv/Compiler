@@ -321,3 +321,7 @@ void sym_var_global::generate(asm_code *code){
 		code->add(new asm_global_var(var_token.get_src() + '_', DD));
 	}
 }
+/*
+void sym_pointer::generate(asm_cmd_list *cmds){
+
+}*/

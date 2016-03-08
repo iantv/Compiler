@@ -7,8 +7,16 @@ expr_bin_op::expr_bin_op(expr *l, expr *r, token t): left(l), right(r), expr_bin
 	tk = t; 
 }
 expr_bin_op::expr_bin_op(expr *l, expr *r, string s): left(l), right(r), expr_bin_op::expr(){ op = s; }
-expr_prefix_unar_op::expr_prefix_unar_op(expr *e, token t): ex(e), expr_bin_op::expr(){ tk = t; }
-expr_postfix_unar_op::expr_postfix_unar_op(expr *e, token t): ex(e), expr_bin_op::expr(){ tk = t; }
+expr_prefix_unar_op::expr_prefix_unar_op(expr *e, token t): ex(e), expr_bin_op::expr(){ 
+	type = e->type;
+	tk = t; 
+}
+
+expr_postfix_unar_op::expr_postfix_unar_op(expr *e, token t): ex(e), expr_bin_op::expr(){ 
+	type = e->type;
+	tk = t; 
+}
+
 expr_literal::expr_literal(token t): expr_bin_op::expr(){ tk = t; }
 
 expr_var::expr_var(token t, sym_type *var_type): expr_bin_op::expr(){ tk = t; type = var_type; }
@@ -142,7 +150,7 @@ int get_priority(token tk, bool unar){
 
 /*-----------------------------------------------EXPR::GENERATE------------------------------------------------*/
 
-void expr_bin_op::generate_simple_bin_op(asm_cmd_list * cmds, token_t tk_t){
+void expr_bin_op::generate_simple_bin_op(asm_cmd_list *cmds, token_t tk_t){
 	left->generate(cmds);
 	right->generate(cmds);
 	cmds->add(POP, EBX);
@@ -238,13 +246,24 @@ void expr_prefix_unar_op::generate(asm_cmd_list *cmds){
 		else if (tk == TK_DEC)
 			cmds->add(DEC, EBX);
 		cmds->add_assign(MOV, EAX, EBX);
-		cmds->add(PUSH, EBX);
+		cmds->add(MOV, EAX, EBX);
 	} else if (tk == TK_AND_BIT){
-		//ex->generate_addr(cmds);
+		ex->generate_addr(cmds);
+		return;
 	} else if (tk == TK_MUL){
-		/*ex->generate(cmds);
+		ex->generate(cmds);
 		cmds->add(POP, EAX);
-		cmds->add_dereference(PUSH, EAX);*/
+		cmds->add_dereference(PUSH, EAX);
+		return;
+	}
+	cmds->add(PUSH, EAX);
+}
+
+void expr_prefix_unar_op::generate_addr(asm_cmd_list *cmds){
+	if (tk == TK_MUL){
+		ex->generate_addr(cmds);
+		cmds->add(POP, EAX);
+		cmds->add_dereference(PUSH, EAX);
 	}
 }
 

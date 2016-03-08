@@ -139,7 +139,11 @@ void asm_cmd_list::add_label(string lname){
 }
 
 void asm_cmd_list::add_dereference(asm_op_t op, asm_reg_t reg){
-	cmds.push_back(new asm_t(op + " [" + asm_reg_str[reg] + "] "));
+	cmds.push_back(new asm_t(asm_op_str[op] + " [" + asm_reg_str[reg] + "] "));
+}
+
+void asm_cmd_list::add_comment(string s){
+	cmds.push_back(new asm_t(s));
 }
 
 /*-----------------------------------class asm_cmd----------------------------------*/

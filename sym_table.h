@@ -84,6 +84,7 @@ public:
 	void print(ostream &os, int level) override;
 	sym_pointer(sym_type *stype){ type = stype; }
 	string get_type_str_name() override;
+	//void generate(asm_cmd_list *) override;
 };
 
 class sym_func_type: public sym_type{
