@@ -253,7 +253,7 @@ void expr_prefix_unar_op::generate(asm_cmd_list *cmds){
 	} else if (tk == TK_MUL){
 		ex->generate(cmds);
 		cmds->add(POP, EAX);
-		cmds->add_dereference(PUSH, EAX);
+		cmds->add_deref(PUSH, EAX);
 		return;
 	}
 	cmds->add(PUSH, EAX);
@@ -263,7 +263,7 @@ void expr_prefix_unar_op::generate_addr(asm_cmd_list *cmds){
 	if (tk == TK_MUL){
 		ex->generate_addr(cmds);
 		cmds->add(POP, EAX);
-		cmds->add_dereference(PUSH, EAX);
+		cmds->add_deref(PUSH, EAX);
 	}
 }
 
@@ -282,7 +282,7 @@ void expr_postfix_unar_op::generate(asm_cmd_list *cmds){
 
 void expr_literal::generate(asm_cmd_list *cmds){
 	if (tk == TK_STRING_LITERAL){
-		cmds->add(PUSH, OFFSET, "STR_LITERAL(\'" + tk.get_src() + "\')");
+		cmds->add_offset(PUSH, "STR_LITERAL(\'" + tk.get_src() + "\')");
 	} else {
 		cmds->add(PUSH, tk.get_src());
 	}
@@ -293,7 +293,7 @@ void expr_var::generate(asm_cmd_list *cmds){
 }
 
 void expr_var::generate_addr(asm_cmd_list * cmds){
-	cmds->add(PUSH, OFFSET, tk.get_src() + '_');
+	cmds->add_offset(PUSH, tk.get_src() + '_');
 }
 
 /*-------------------------------------------------Type casting-------------------------------------------------*/

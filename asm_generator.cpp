@@ -13,7 +13,7 @@ static const string asm_op_str[] = {
 	"fld", "fild", "fstp", "fadd", "fsub", "fdiv", "fmul",
 	"fiadd", "fisub", "fidiv", "fimul",
 	"ja", "jb", "jae", "jbe",
-	"fcom", "fcomi", "fcomip", "offset", "inc", "dec"
+	"fcom", "fcomi", "fcomip", "inc", "dec"
 };
 
 static const string asm_reg_str[] =  { "eax", "ebx", "ecx", "edx", "ebp", "esp" };
@@ -102,32 +102,37 @@ void asm_cmd_list::print(ostream &os){
 	}
 }
 
+
 void asm_cmd_list::add(asm_op_t op){
-	cmds.push_back(new asm_t(asm_op_str[op]));
+	cmds.push_back(new asm_t(op));
 }
 
 void asm_cmd_list::add(asm_op_t op, string val){
-	cmds.push_back(new asm_t(asm_op_str[op] + ' ' + val));
+	cmds.push_back(new asm_unar_op_t(op, new asm_operand_const(val)));
 }
 
 void asm_cmd_list::add(asm_op_t op, asm_reg_t reg){
-	cmds.push_back(new asm_t(asm_op_str[op] + ' ' + asm_reg_str[reg]));
+	cmds.push_back(new asm_unar_op_t(op, new asm_operand_reg_t(reg)));
 }
 
 void asm_cmd_list::add(asm_op_t op, asm_reg_t reg1, asm_reg_t reg2){
-	cmds.push_back(new asm_t(asm_op_str[op] + ' ' + asm_reg_str[reg1] + ',' + asm_reg_str[reg2]));
-}
-
-void asm_cmd_list::add(asm_op_t op, asm_op_t offset, string fmt){
-	cmds.push_back(new asm_t(asm_op_str[op] + ' ' + asm_op_str[offset] + ' ' + fmt));
-}
-
-void asm_cmd_list::add_assign(asm_op_t op, asm_reg_t addr, asm_reg_t val){
-	cmds.push_back(new asm_t(asm_op_str[op] + " [" + asm_reg_str[addr] + "], " + asm_reg_str[val]));
+	cmds.push_back(new asm_bin_op_t(op, new asm_operand_reg_t(reg1), new asm_operand_reg_t(reg2)));
 }
 
 void asm_cmd_list::add(asm_op_t op, asm_reg_t reg, string val){
-	cmds.push_back(new asm_t(asm_op_str[op] + ' ' + asm_reg_str[reg] + ',' + val));
+	cmds.push_back(new asm_bin_op_t(op, new asm_operand_reg_t(reg), new asm_operand_const(val)));
+}
+
+void asm_cmd_list::add_offset(asm_op_t op, string value){
+	cmds.push_back(new asm_unar_op_t(op, new asm_operand_offset(value)));
+}
+
+void asm_cmd_list::add_assign(asm_op_t op, asm_reg_t addr, asm_reg_t val){
+	cmds.push_back(new asm_bin_op_t(op, new asm_operand_deref(addr), new asm_operand_reg_t(val)));
+}
+
+void asm_cmd_list::add_deref(asm_op_t op, asm_reg_t reg){
+	cmds.push_back(new asm_unar_op_t(op, new asm_operand_deref(reg)));
 }
 
 string asm_cmd_list::get_label_name(){
@@ -135,23 +140,84 @@ string asm_cmd_list::get_label_name(){
 }
 
 void asm_cmd_list::add_label(string lname){
-	cmds.push_back(new asm_t(lname + ':'));
+	cmds.push_back(new asm_label_t(lname));
 }
 
-void asm_cmd_list::add_dereference(asm_op_t op, asm_reg_t reg){
-	cmds.push_back(new asm_t(asm_op_str[op] + " [" + asm_reg_str[reg] + "] "));
-}
+/*---------------------------------------class asm_t-----------------------------------------*/
 
-void asm_cmd_list::add_comment(string s){
-	cmds.push_back(new asm_t(s));
-}
-
-/*-----------------------------------class asm_cmd----------------------------------*/
-
-asm_t::asm_t(string cmd_str){
-	cmd = cmd_str;
+asm_t::asm_t(asm_op_t asm_op){
+	op = asm_op;
 }
 
 void asm_t::print(ostream &os){
-	os << cmd << endl;
+	os << asm_op_str[op] << endl;
+}
+
+asm_label_t::asm_label_t(string label_name){
+	name = label_name;
+}
+
+void asm_label_t::print(ostream &os){
+	os << name << ':' << endl;
+}
+
+/*-----------------------------------class asm_operand----------------------------------------*/
+
+asm_operand_reg_t::asm_operand_reg_t(asm_reg_t asm_reg){
+	reg = asm_reg;
+}
+
+void asm_operand_reg_t::print(ostream &os){
+	os << asm_reg_str[reg];
+}
+
+asm_operand_const::asm_operand_const(string value){
+	val = value;
+}
+
+void asm_operand_const::print(ostream &os){
+	os << val;
+}
+
+asm_operand_offset::asm_operand_offset(string variable){
+	var = variable;
+}
+
+void asm_operand_offset::print(ostream &os){
+	os << "offset " << var;
+}
+
+asm_operand_deref::asm_operand_deref(asm_reg_t asm_reg){
+	reg = asm_reg;	
+}
+
+void asm_operand_deref::print(ostream &os){
+	os << "[" << asm_reg_str[reg] << "]";
+}
+
+/*------------------------------------class asm_unar_op_t----------------------------------*/
+
+asm_unar_op_t::asm_unar_op_t(asm_op_t asm_op, asm_operand_t *asm_operand){
+	op = asm_op;
+	operand = asm_operand;
+}
+
+void asm_unar_op_t::print(ostream &os){
+	os << asm_op_str[op] << ' ';
+	operand->print(os);
+	os << endl;
+}
+
+asm_bin_op_t::asm_bin_op_t(asm_op_t asm_op, asm_operand_t *asm_operand1, asm_operand_t *asm_operand2){
+	op = asm_op;
+	operand1 = asm_operand1;
+	operand2 = asm_operand2;
+}
+
+void asm_bin_op_t::print(ostream &os){
+	os << asm_op_str[op] << ' ';
+	operand1->print(os);
+	os << ',';
+	operand2->print(os);
+	os << endl;
 }

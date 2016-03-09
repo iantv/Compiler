@@ -11,7 +11,7 @@ enum asm_op_t{
 	FIADD, FISUB, FIDIV, FIMUL,
 	JA, JB, JAE, JBE,
 	FCOM, FCOMI, FCOMIP,
-	OFFSET, INC, DEC
+	INC, DEC
 };
 
 enum asm_reg_t{
@@ -24,35 +24,72 @@ enum asm_type_t{
 
 using namespace std;
 
+class asm_operand_t{
+public:
+	asm_operand_t(){}
+	virtual void print(ostream &){}
+};
+
+class asm_operand_reg_t: public asm_operand_t{
+protected:
+	asm_reg_t reg;
+public:	
+	asm_operand_reg_t(asm_reg_t);
+	void print(ostream &) override;
+};
+
+class asm_operand_const: public asm_operand_t{
+	string val;
+public:
+	asm_operand_const(string);
+	void print(ostream &) override;
+};
+
+class asm_operand_deref: public asm_operand_t{
+	asm_reg_t reg;
+public:
+	asm_operand_deref(asm_reg_t);
+	void print(ostream &) override;
+};
+
+class asm_operand_offset: public asm_operand_t{
+	string var;
+public:
+	asm_operand_offset(string);
+	void print(ostream &) override;
+};
 
 class asm_t{
-	string cmd;
+protected:
+	asm_op_t op;
 public:
 	asm_t(){}
-	asm_t(string);
+	asm_t(asm_op_t);
 	virtual void print(ostream &);
 };
 
-class asm_cmd_list: public asm_t{
-	vector<asm_t *> cmds;
-	int label_cnt;
+class asm_label_t: public asm_t{
+	string name;
 public:
-	asm_cmd_list(){ label_cnt = 0;}
-	void push_back(asm_t *cmd);
+	asm_label_t(string);
 	void print(ostream &) override;
-
-	void add(asm_op_t);
-	void add(asm_op_t, string);
-	void add(asm_op_t, asm_reg_t);
-	void add(asm_op_t, asm_reg_t, asm_reg_t);
-	void add(asm_op_t, asm_op_t, string);
-	void add_assign(asm_op_t, asm_reg_t, asm_reg_t);
-	void add(asm_op_t, asm_reg_t, string);
-	void add_dereference(asm_op_t, asm_reg_t);
-	void add_comment(string);
-	string get_label_name();
-	void add_label(string);
 };
+
+class asm_unar_op_t: public asm_t{
+	asm_operand_t *operand;
+public:
+	asm_unar_op_t(asm_op_t, asm_operand_t *);
+	void print(ostream &) override;
+};
+
+class asm_bin_op_t: public asm_t{
+	asm_operand_t *operand1, *operand2;
+public:
+	asm_bin_op_t(asm_op_t, asm_operand_t *, asm_operand_t *);
+	void print(ostream &) override;
+};
+
+class asm_cmd_list;
 
 class asm_function: public asm_t{
 protected:
@@ -76,6 +113,27 @@ class asm_global_var: public asm_t{
 public:
 	asm_global_var(string &, asm_type_t);
 	void print(ostream &os) override;
+};
+
+class asm_cmd_list: public asm_t{
+	vector<asm_t *> cmds;
+	int label_cnt;
+public:
+	asm_cmd_list(){ label_cnt = 0; }
+	void push_back(asm_t *cmd);
+	void print(ostream &) override;
+
+	void add(asm_op_t);	
+	void add(asm_op_t, string);
+	void add(asm_op_t, asm_reg_t);
+	void add(asm_op_t, asm_reg_t, asm_reg_t);
+	void add(asm_op_t, asm_reg_t, string);
+	
+	void add_offset(asm_op_t, string);
+	void add_assign(asm_op_t, asm_reg_t, asm_reg_t);
+	void add_deref(asm_op_t, asm_reg_t);
+	string get_label_name();
+	void add_label(string);
 };
 
 class parser;
