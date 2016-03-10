@@ -192,13 +192,21 @@ expr *parser::expression(sym_table *sym_tbl, int priority){
 	return ex;
 }
 
-expr * parser::new_expr_var(sym_table *sym_tbl, token tk){
-	if (tcast == false) return new expr_var(tk, nullptr);
+expr *parser::new_expr_var(sym_table *sym_tbl, token tk){
+	if (tcast == false){
+		if (sym_tbl == nullptr)
+			return new expr_global_var(tk, nullptr);
+		if (!table->local_exist(tk.src))
+			return new expr_local_var(tk, nullptr);
+		return new expr_global_var(tk, nullptr);
+	}
 	if (sym_tbl == nullptr) throw error("symbol table is nullptr ", tk.pos);
 	symbol *sym = sym_tbl->get_symbol(tk.get_src());
 	if (sym == nullptr)
 		throw error(tk.get_src() + " undefined ", tk.pos);
-	return new expr_var(tk, sym->type);
+	if (!table->local_exist(sym->name))
+		return new expr_local_var(tk, sym->type);
+	return new expr_global_var(tk, sym->type);
 }
 
 expr *parser::factor(sym_table *sym_tbl){
@@ -210,7 +218,7 @@ expr *parser::factor(sym_table *sym_tbl){
 		while (tk.type == TK_OPEN_BRACKET || tk.type == TK_OPEN_SQUARE_BRACKET || tk.type == TK_POINT || tk.type == TK_PTROP){
 			if (lxr->get().type == TK_POINT || lxr->get().type == TK_PTROP){
 				if (lxr->next().type == TK_ID){
-					ex = new struct_access(ex, new expr_var(lxr->get(), nullptr), tk);
+					ex = new struct_access(ex, new expr_local_var(lxr->get(), nullptr), tk);
 					lxr->next();
 				}
 			}
@@ -318,6 +326,18 @@ void parser::parse_fparams(sym_table *lst, vector<string> *params){
 			}
 		}
 	}
+	int last_size = 0, last_offset = 0;
+	for (auto it = params->rbegin(); it != params->rend(); it++){
+		sym_var_param *p = dynamic_cast<sym_var_param *>(lst->get_symbol(*it));
+		if (it == params->rbegin()){
+			last_offset = p->set_offset(8);
+			last_size = p->get_size();
+			continue;
+		}
+		last_offset = p->set_offset(last_offset + last_size);
+		last_size = p->get_size();
+		
+	}
 	if (lxr->get().type == TK_CLOSE_BRACKET)
 		lxr->next();
 	else
@@ -377,7 +397,7 @@ void parser::try_parse_struct_member_list(sym_struct *my_struct){
 }
 
 bool parser::is_expr_start(token tk, sym_table *sym_tbl){
-	return tk.is_literal() || tk.is_operator() || sym_tbl->symbol_not_alias_exist(tk.get_src());
+	return tk == TK_ID || tk.is_literal() || tk.is_operator() || sym_tbl->symbol_not_alias_exist(tk.get_src());
 }
 
 void parser::try_parse_stmt_body(sym_table *sym_tbl, stmt_block *sym_blck, sym_function *owner, bool loop = false){

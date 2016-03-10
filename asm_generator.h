@@ -47,8 +47,10 @@ public:
 
 class asm_operand_deref: public asm_operand_t{
 	asm_reg_t reg;
+	int offset;
 public:
 	asm_operand_deref(asm_reg_t);
+	asm_operand_deref(asm_reg_t, int);
 	void print(ostream &) override;
 };
 
@@ -115,6 +117,13 @@ public:
 	void print(ostream &os) override;
 };
 
+class asm_local_var: public asm_t{
+
+public:
+	asm_local_var();
+	void print(ostream &) override;
+};
+
 class asm_cmd_list: public asm_t{
 	vector<asm_t *> cmds;
 	int label_cnt;
@@ -132,6 +141,7 @@ public:
 	void add_offset(asm_op_t, string);
 	void add_assign(asm_op_t, asm_reg_t, asm_reg_t);
 	void add_deref(asm_op_t, asm_reg_t);
+	void add_deref(asm_op_t, asm_reg_t, int);
 	string get_label_name();
 	void add_label(string);
 };

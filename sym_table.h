@@ -28,7 +28,8 @@ public:
 	symbol(const string &sym_name) { name = sym_name; }
 	bool type_eq(string type_name);
 	sym_type *get_type(){ return type; }
-	virtual void generate(asm_code *) { return; }
+	virtual void generate(asm_code *){}
+	virtual void generate(asm_cmd_list *){}
 };
 
 symbol *make_symbol(declar &);
@@ -46,12 +47,15 @@ public:
 };
 
 class sym_type: public symbol{
+protected:
+	int size;
 public:
 	friend class declar;
 	friend bool equal(sym_type *, sym_type *);
 	void print(ostream &os, int level);
 	sym_type(){}
 	sym_type(const string &sym_name) { name = sym_name; type = nullptr; }
+	int get_size(){ return size; }
 	virtual string get_type_str_name();
 };
 
@@ -98,7 +102,7 @@ public:
 class sym_const: public sym_type{
 public:
 	void print(ostream &os, int level) override;
-	sym_const(sym_type *stype){ type = stype; }
+	sym_const(sym_type *);
 	string get_type_str_name() override;
 };
 
@@ -114,9 +118,14 @@ public:
 };
 
 class sym_var_param: public sym_var{
+	int offset;
+	int size;
 public:
 	void print(ostream &os, int level) override;
 	sym_var_param(const string &sym_name, sym_type *sym_param_type = nullptr);
+	int set_offset(int);
+	int get_size();
+	void generate(asm_cmd_list *) override;
 };
 
 class sym_var_global: public sym_var{

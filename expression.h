@@ -74,9 +74,17 @@ public:
 	void generate(asm_cmd_list *) override;
 };
 
-class expr_var: public expr{
+class expr_local_var: public expr{
 public:
-	expr_var(token t, sym_type *);
+	expr_local_var(token t, sym_type *);
+	void print(ostream &os, int level) override;
+	void generate(asm_cmd_list *) override;
+	void generate_addr(asm_cmd_list *) override;
+};
+
+class expr_global_var: public expr{
+public:
+	expr_global_var(token t, sym_type *);
 	void print(ostream &os, int level) override;
 	void generate(asm_cmd_list *) override;
 	void generate_addr(asm_cmd_list *) override;

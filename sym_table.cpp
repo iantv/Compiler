@@ -32,18 +32,37 @@ sym_struct::sym_struct(const string &sym_name, sym_table *lst){
 	table = lst;
 }
 
+sym_const::sym_const(sym_type *const_type){
+	type = const_type;
+}
+
 sym_var::sym_var(const string &sym_name, sym_type *sym_vartype){
 	name = sym_name; type = sym_vartype;
 }
 
 sym_var::sym_var(const string &sym_name, sym_type *sym_vartype, token tk){
-	name = sym_name; type = sym_vartype, var_token = tk;
+	name = sym_name; type = sym_vartype; var_token = tk;
 }
 
 sym_var_param::sym_var_param(const string &sym_name, sym_type *sym_param_type){
-	name = sym_name; type = sym_param_type; 
+	name = sym_name; type = sym_param_type;
+	string tname = type->get_type_str_name();
+	if (tname == token_names[TK_DOUBLE]){
+		size = 8;
+	} else if (tname == token_names[TK_INT]){
+		size = 4;
+	} else if (tname == token_names[TK_CHAR]){
+		size = 1;
+	}
 }
 
+int sym_var_param::set_offset(int param_offset){
+	return offset = param_offset;
+}
+
+int sym_var_param::get_size(){
+	return size;
+}
 sym_var_global::sym_var_global(const string &sym_name, sym_type *sym_param_type, token tk){
 	name = sym_name; type = sym_param_type;  var_token = tk;
 }
@@ -321,7 +340,7 @@ void sym_var_global::generate(asm_code *code){
 		code->add(new asm_global_var(var_token.get_src() + '_', DD));
 	}
 }
-/*
-void sym_pointer::generate(asm_cmd_list *cmds){
 
-}*/
+void sym_var_param::generate(asm_cmd_list *cmds){
+	cmds->add_deref(PUSH, EBP, offset);
+}

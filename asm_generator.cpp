@@ -135,6 +135,9 @@ void asm_cmd_list::add_deref(asm_op_t op, asm_reg_t reg){
 	cmds.push_back(new asm_unar_op_t(op, new asm_operand_deref(reg)));
 }
 
+void asm_cmd_list::add_deref(asm_op_t op, asm_reg_t reg, int offset){
+	cmds.push_back(new asm_unar_op_t(op, new asm_operand_deref(reg, offset)));
+}
 string asm_cmd_list::get_label_name(){
 	return "L_" + to_string(label_cnt++);
 }
@@ -189,10 +192,16 @@ void asm_operand_offset::print(ostream &os){
 
 asm_operand_deref::asm_operand_deref(asm_reg_t asm_reg){
 	reg = asm_reg;	
+	offset = 0;
+}
+
+asm_operand_deref::asm_operand_deref(asm_reg_t asm_reg, int asm_offset){
+	reg = asm_reg;	
+	offset = asm_offset;
 }
 
 void asm_operand_deref::print(ostream &os){
-	os << "[" << asm_reg_str[reg] << "]";
+	os << "[" << asm_reg_str[reg] << " + " << offset << "]";
 }
 
 /*------------------------------------class asm_unar_op_t----------------------------------*/
