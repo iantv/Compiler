@@ -21,7 +21,7 @@ expr_literal::expr_literal(token t): expr_bin_op::expr(){ tk = t; }
 expr_global_var::expr_global_var(token t, sym_type *var_type): expr_bin_op::expr(){ tk = t; type = var_type; }
 expr_local_var::expr_local_var(token t, sym_type *var_type): expr_bin_op::expr(){ tk = t; type = var_type; }
 expr_tern_op::expr_tern_op(expr *l, expr *m, expr *r, string s): left(l), middle(m), right(r), expr_bin_op::expr(){ op = s; };
-function::function(expr *id, const vector<expr *> &args): fid(id), expr_bin_op::expr(){ fargs = args; };
+expr_function::expr_function(expr *id, const vector<expr *> &args): fid(id), expr_bin_op::expr(){ fargs = args; };
 struct_access::struct_access(expr *l, expr *struct_field, token t): field(struct_field), left(l), expr_bin_op::expr(){ tk = t; };
 
 void expr::print_level(ostream &os, int level){
@@ -73,7 +73,7 @@ void expr_tern_op::print(ostream &os, int level){
 	left->print(os, level + 1);
 }
 
-void function::print(ostream &os, int level){
+void expr_function::print(ostream &os, int level){
 	for (int i = fargs.size() - 1; i >= 0; i--){
 		fargs[i]->print(os, level + 1);
 	}

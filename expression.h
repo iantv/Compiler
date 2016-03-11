@@ -98,11 +98,11 @@ public:
 	void print(ostream &os, int level);
 };
 
-class function:public expr{
+class expr_function:public expr{
 	expr *fid;
 	vector<expr *>fargs;
 public:
-	function(expr *id, const vector<expr *> &args);
+	expr_function(expr *id, const vector<expr *> &args);
 	void print(ostream &os, int level);
 };
 

@@ -226,7 +226,7 @@ expr *parser::factor(sym_table *sym_tbl){
 				ex = new expr_bin_op(ex, parse_index(sym_tbl), string("[]"));
 			}
 			if (lxr->get().type == TK_OPEN_BRACKET){
-				ex = new function(ex, parse_fargs(sym_tbl));
+				ex = new expr_function(ex, parse_fargs(sym_tbl));
 			}
 			tk = lxr->get();
 		}
@@ -249,7 +249,7 @@ expr *parser::factor(sym_table *sym_tbl){
 			//ex = new expr_cast2type(tk_next.get_src(), factor());
 		}
 		while (lxr->get().type == TK_OPEN_BRACKET){
-			ex = new function(ex, parse_fargs(sym_tbl));
+			ex = new expr_function(ex, parse_fargs(sym_tbl));
 		}
 		return ex;
 	}
