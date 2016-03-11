@@ -322,9 +322,11 @@ bool equal(sym_type *sym1, sym_type *sym2){
 
 void sym_function::generate(asm_code *code){
 	asm_cmd_list *cmds = new asm_cmd_list();
+	cmds->add(PUSH, EBP);
 	cmds->add(MOV, EBP, ESP);
 	block->generate(cmds);
 	cmds->add(MOV, ESP, EBP);
+	cmds->add(POP, EBP);
 	cmds->add(RET); // Do later for returning value
 	if (name == "main"){
 		code->add(new asm_main_function(cmds));
