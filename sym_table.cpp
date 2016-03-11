@@ -191,8 +191,11 @@ string sym_const::get_type_str_name(){
 /*------------------------------------------------SYM_TABLE------------------------------------------------*/
 
 bool sym_table::local_exist(string &name){
-	if (symbols.size() == 0)
+	if (symbols.size() == 0 && functions.size() == 0)
 		return false;
+	for (auto it = functions.begin(); it != functions.end(); it++)
+		if ((*it)->name == name)
+			return true;
 	return symbols.find(name) != symbols.end();
 }
 
