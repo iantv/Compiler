@@ -9,7 +9,7 @@ PDTESTCNT = 53
 ERRPRSDCL = 26 #Error Parser Declare
 TCAST = 2
 IMPTCAST = 8
-ASMCNT = 43
+ASMCNT = 44
 
 compiler = '../Debug/Compiler.exe '
 def testproc(testname, cmd, N, output, ansdir, runml = 0):

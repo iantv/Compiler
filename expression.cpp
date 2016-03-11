@@ -314,7 +314,7 @@ void expr_local_var::generate_addr(asm_cmd_list *cmds){
 }
 
 void expr_function::generate(asm_cmd_list *cmds){
-	for (auto it = fargs.rbegin(); it != fargs.rend(); it++)
+	for (auto it = fargs.begin(); it != fargs.end(); it++)
 		(*it)->generate(cmds);
 	fid->generate_addr(cmds);
 	cmds->add(POP, EAX);
