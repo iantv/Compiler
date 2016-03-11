@@ -73,9 +73,9 @@ asm_function::asm_function(string func_name, asm_cmd_list *fcmds){
 }
 
 void asm_function::print(ostream &os){
-	os << name << " proc" << endl;
+	os << name << "_ proc" << endl;
 	cmds->print(os);
-	os << name << " endp" << endl;
+	os << name << "_ endp" << endl;
 }
 
 /*-------------------------------class asm_global_var---------------------------------*/

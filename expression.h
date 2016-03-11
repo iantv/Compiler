@@ -104,6 +104,7 @@ class expr_function:public expr{
 public:
 	expr_function(expr *id, const vector<expr *> &args);
 	void print(ostream &os, int level);
+	void generate(asm_cmd_list *) override;
 };
 
 class struct_access:public expr{
