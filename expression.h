@@ -9,6 +9,7 @@
 
 class sym_type;
 class sym_table;
+class symbol;
 class expr_bin_op;
 class expr_postfix_unar_op;
 class expr_prefix_unar_op;
@@ -75,16 +76,20 @@ public:
 };
 
 class expr_local_var: public expr{
+	string name;
+	symbol *sym;
 public:
-	expr_local_var(token t, sym_type *);
+	expr_local_var(symbol *);
+	expr_local_var(string, sym_type *);
 	void print(ostream &os, int level) override;
 	void generate(asm_cmd_list *) override;
 	void generate_addr(asm_cmd_list *) override;
 };
 
 class expr_global_var: public expr{
+	string name;
 public:
-	expr_global_var(token t, sym_type *);
+	expr_global_var(string, sym_type *);
 	void print(ostream &os, int level) override;
 	void generate(asm_cmd_list *) override;
 	void generate_addr(asm_cmd_list *) override;

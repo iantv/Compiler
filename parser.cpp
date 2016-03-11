@@ -195,18 +195,18 @@ expr *parser::expression(sym_table *sym_tbl, int priority){
 expr *parser::new_expr_var(sym_table *sym_tbl, token tk){
 	if (tcast == false){
 		if (sym_tbl == nullptr)
-			return new expr_global_var(tk, nullptr);
+			return new expr_global_var(tk.get_src(), nullptr);
 		if (!table->local_exist(tk.src))
-			return new expr_local_var(tk, nullptr);
-		return new expr_global_var(tk, nullptr);
+			return new expr_local_var(tk.get_src(), nullptr);
+		return new expr_global_var(tk.get_src(), nullptr);
 	}
 	if (sym_tbl == nullptr) throw error("symbol table is nullptr ", tk.pos);
 	symbol *sym = sym_tbl->get_symbol(tk.get_src());
 	if (sym == nullptr)
 		throw error(tk.get_src() + " undefined ", tk.pos);
 	if (!table->local_exist(sym->name))
-		return new expr_local_var(tk, sym->type);
-	return new expr_global_var(tk, sym->type);
+		return new expr_local_var(sym);
+	return new expr_global_var(tk.get_src(), sym->type);
 }
 
 expr *parser::factor(sym_table *sym_tbl){
@@ -218,7 +218,7 @@ expr *parser::factor(sym_table *sym_tbl){
 		while (tk.type == TK_OPEN_BRACKET || tk.type == TK_OPEN_SQUARE_BRACKET || tk.type == TK_POINT || tk.type == TK_PTROP){
 			if (lxr->get().type == TK_POINT || lxr->get().type == TK_PTROP){
 				if (lxr->next().type == TK_ID){
-					ex = new struct_access(ex, new expr_local_var(lxr->get(), nullptr), tk);
+					ex = new struct_access(ex, new expr_local_var(lxr->get().get_src(), nullptr), tk);
 					lxr->next();
 				}
 			}
@@ -335,8 +335,7 @@ void parser::parse_fparams(sym_table *lst, vector<string> *params){
 			continue;
 		}
 		last_offset = p->set_offset(last_offset + last_size);
-		last_size = p->get_size();
-		
+		last_size = p->get_size();	
 	}
 	if (lxr->get().type == TK_CLOSE_BRACKET)
 		lxr->next();

@@ -202,7 +202,7 @@ void stmt_printf::print(ostream &os, int level){
 		args[i]->print(os, level + 2);
 }
 
-void stmt_printf::generate(asm_cmd_list * cmds){
+void stmt_printf::generate(asm_cmd_list *cmds){
 	for (auto it = args.rbegin(); it != args.rend(); it++){
 		(*it)->generate(cmds);
 		cmds->add(PUSH, EAX);

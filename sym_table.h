@@ -21,6 +21,7 @@ public:
 	friend class declar;
 	friend class sym_var;
 	friend class expr;
+	friend class expr_local_var;
 	friend symbol *make_symbol(declar &dcl);
 	virtual void print(ostream &os, int level){};
 	friend symbol *add_elem_to_list(symbol *sym_list, symbol *sym2);
@@ -121,6 +122,7 @@ class sym_var_param: public sym_var{
 	int offset;
 	int size;
 public:
+	friend class expr_local_var;
 	void print(ostream &os, int level) override;
 	sym_var_param(const string &sym_name, sym_type *sym_param_type = nullptr);
 	int set_offset(int);

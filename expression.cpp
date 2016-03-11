@@ -18,8 +18,9 @@ expr_postfix_unar_op::expr_postfix_unar_op(expr *e, token t): ex(e), expr_bin_op
 }
 
 expr_literal::expr_literal(token t): expr_bin_op::expr(){ tk = t; }
-expr_global_var::expr_global_var(token t, sym_type *var_type): expr_bin_op::expr(){ tk = t; type = var_type; }
-expr_local_var::expr_local_var(token t, sym_type *var_type): expr_bin_op::expr(){ tk = t; type = var_type; }
+expr_global_var::expr_global_var(string gname, sym_type *var_type): expr_bin_op::expr(){ name = gname; type = var_type; }
+expr_local_var::expr_local_var(string lname, sym_type *var_type): expr_bin_op::expr(){ name = lname; type = var_type; }
+expr_local_var::expr_local_var(symbol *local_sym){ sym = local_sym; type = sym->get_type(); name = sym->name; }
 expr_tern_op::expr_tern_op(expr *l, expr *m, expr *r, string s): left(l), middle(m), right(r), expr_bin_op::expr(){ op = s; };
 expr_function::expr_function(expr *id, const vector<expr *> &args): fid(id), expr_bin_op::expr(){ fargs = args; };
 struct_access::struct_access(expr *l, expr *struct_field, token t): field(struct_field), left(l), expr_bin_op::expr(){ tk = t; };
@@ -57,12 +58,12 @@ void expr_literal::print(ostream &os, int level){
 
 void expr_global_var::print(ostream &os, int level){
 	print_level(os, level);
-	os << tk.get_src() << endl;
+	os << name << endl;
 }
 
 void expr_local_var::print(ostream &os, int level){
 	print_level(os, level);
-	os << tk.get_src() << endl;
+	os << name << endl;
 }
 
 void expr_tern_op::print(ostream &os, int level){
@@ -294,15 +295,18 @@ void expr_literal::generate(asm_cmd_list *cmds){
 }
 
 void expr_global_var::generate(asm_cmd_list *cmds){
-	cmds->add(PUSH, tk.get_src() + '_');	
+	cmds->add(PUSH, name + '_');	
 }
 
 void expr_global_var::generate_addr(asm_cmd_list * cmds){
-	cmds->add_offset(PUSH, tk.get_src() + '_');
+	cmds->add_offset(PUSH, name + '_');
 }
 
 void expr_local_var::generate(asm_cmd_list *cmds){
-
+	int offset = 0;
+	if (typeid(*sym) == typeid(sym_var_param))
+		offset = dynamic_cast<sym_var_param *>(sym)->offset;
+	cmds->add_deref(PUSH, EBP, offset);
 }
 
 void expr_local_var::generate_addr(asm_cmd_list *cmds){

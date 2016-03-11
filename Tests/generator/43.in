@@ -1,0 +1,6 @@
+void f(int a){
+	printf("Hello%d", a);
+}
+void main(){
+	f(1);
+}
