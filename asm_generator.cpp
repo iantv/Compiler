@@ -51,10 +51,9 @@ void asm_code::add(asm_function *new_func){
 	code.push_back(new_func);
 }
 
-void asm_code::add(asm_global_var *new_var){
+void asm_code::add_data(asm_t *new_var){
 	data.push_back(new_var);
 }
-
 /*-------------------------------class asm_function------------------------------*/
 
 asm_main_function::asm_main_function(asm_cmd_list *fcmds){
@@ -87,6 +86,18 @@ asm_global_var::asm_global_var(string &name, asm_type_t type){
 
 void asm_global_var::print(ostream &os){
 	os << '\t' << gv_name << '\t' << asm_type_str[gv_type] << '\t' << 0 << endl;
+}
+
+/*-------------------------------class asm_global_array-------------------------------*/
+
+asm_global_array::asm_global_array(string &name, asm_type_t type, size_t length){
+	ga_name = name;
+	ga_type = type;
+	size = length;
+}
+
+void asm_global_array::print(ostream &os){
+	os << '\t' << ga_name << '\t' << asm_type_str[ga_type] << '\t' << size << '\t' << "\tdup(0)" << endl;
 }
 
 /*-------------------------------class asm_cmd_list---------------------------------*/

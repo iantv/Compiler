@@ -48,6 +48,7 @@ public:
 	void generate_simple_bin_op(asm_cmd_list *, token_t); /* +, -, *, / */
 	void generate_rel_bin_op(asm_cmd_list *);
 	void generate_assign_bin_op(asm_cmd_list *);
+	void generate_array_elem(asm_cmd_list *);
 };
 
 class expr_prefix_unar_op: public expr{

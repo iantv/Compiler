@@ -362,12 +362,16 @@ void sym_function::generate(asm_code *code){
 
 void sym_var_global::generate(asm_code *code){
 	if (var_token.get_type_name() == "char"){
-		code->add(new asm_global_var(name + '_', DB));
+		code->add_data(new asm_global_var(name + '_', DB));
 	} else {
-		code->add(new asm_global_var(name + '_', DD));
+		code->add_data(new asm_global_var(name + '_', DD));
 	}
 }
 
 void sym_var_param::generate(asm_cmd_list *cmds){
 	cmds->add_deref(PUSH, EBP, offset);
+}
+
+void sym_array::generate(asm_code *code){
+	code->add_data(new asm_global_array(name + '_', DB, length));
 }

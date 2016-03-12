@@ -224,9 +224,22 @@ void expr_bin_op::generate_assign_bin_op(asm_cmd_list *cmds){
 		case TK_AND_ASSIGN:		{ generate_simple_bin_op(cmds, TK_AND_BIT);		break; }
 		case TK_SHL_ASSIGN:		{ generate_simple_bin_op(cmds, TK_SHL);			break; }
 		case TK_SHR_ASSIGN:		{ generate_simple_bin_op(cmds, TK_SHR);			break; }
+		
 	}
 	cmds->add(POP, EBX);
 	cmds->add_assign(MOV, EBX, EAX);
+}
+
+void expr_bin_op::generate_array_elem(asm_cmd_list *cmds){
+	left->generate_addr(cmds);
+	right->generate(cmds);
+	cmds->add(POP, EAX);
+	cmds->add(POP, EBX);
+	cmds->add(IMUL, EAX, to_string(left->type->get_size()));
+	cmds->add(ADD, EBX, EAX);
+	cmds->add_deref(PUSH, EBX);
+	cmds->add(POP, EAX);
+	cmds->add(PUSH, EAX);
 }
 
 void expr_bin_op::generate(asm_cmd_list *cmds){
@@ -235,6 +248,8 @@ void expr_bin_op::generate(asm_cmd_list *cmds){
 	} else if (tk.is_rel_bin_op()) {
 		generate_rel_bin_op(cmds);
 		return;
+	} else if (op == "[]"){
+		generate_array_elem(cmds);
 	} else {
 		generate_simple_bin_op(cmds, tk.get_type());
 	}

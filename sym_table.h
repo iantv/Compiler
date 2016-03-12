@@ -69,6 +69,7 @@ public:
 	void print(ostream &os, int level) override;
 	sym_array(size_t size){ length = size; }
 	string get_type_str_name() override;
+	void generate(asm_code *) override;
 };
 
 class sym_struct: public sym_type{

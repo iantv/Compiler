@@ -117,6 +117,15 @@ public:
 	void print(ostream &os) override;
 };
 
+class asm_global_array: public asm_t{
+	string ga_name;
+	asm_type_t ga_type;
+	int size;
+public:
+	asm_global_array(string &, asm_type_t, size_t);
+	void print(ostream &os) override;
+};
+
 class asm_local_var: public asm_t{
 
 public:
@@ -156,7 +165,7 @@ public:
 	void print(ostream &);
 
 	void add(asm_function *);
-	void add(asm_global_var *);
+	void add_data(asm_t *);
 };
 
 #endif
