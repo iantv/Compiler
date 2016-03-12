@@ -1,0 +1,7 @@
+int f(int param){
+	int a = 10;
+	return a + param;
+}
+void main(){
+	printf("%d", f(5));
+}

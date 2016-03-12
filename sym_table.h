@@ -10,6 +10,7 @@ using namespace std;
 class sym_type;
 class sym_var_param;
 class sym_var;
+class stmt_block;
 
 class symbol{
 protected:
@@ -22,6 +23,7 @@ public:
 	friend class sym_var;
 	friend class expr;
 	friend class expr_local_var;
+	friend class stmt_block;
 	friend symbol *make_symbol(declar &dcl);
 	virtual void print(ostream &os, int level){};
 	friend symbol *add_elem_to_list(symbol *sym_list, symbol *sym2);
@@ -111,23 +113,25 @@ public:
 class sym_var: public symbol{
 protected:
 	token var_token;
+	int offset;
+	int size;
 public:
+	friend class sym_table;
 	friend class parser;
-	sym_var(){}
+	friend class expr_local_var;
+	sym_var(){ offset = 0; size = 0; }
 	void print(ostream &os, int level) override;
 	sym_var(const string &sym_name, sym_type *sym_vartype = nullptr);
 	sym_var(const string &, sym_type *, token);
+	virtual int get_size(){ return size; }
 };
 
 class sym_var_param: public sym_var{
-	int offset;
-	int size;
 public:
 	friend class expr_local_var;
 	void print(ostream &os, int level) override;
 	sym_var_param(const string &sym_name, sym_type *sym_param_type = nullptr);
 	int set_offset(int);
-	int get_size();
 	void generate(asm_cmd_list *) override;
 };
 
@@ -142,13 +146,15 @@ class sym_table{
 	vector<sym_function *> functions;
 	sym_table *prev;
 	int level;
+	int cur_offset;
 public:
-	sym_table(){ prev = nullptr; level = 0; }
-	sym_table(sym_table *sym_table_prev): prev(sym_table_prev){ level = prev->level + 1; }
+	sym_table(){ prev = nullptr; level = 0; cur_offset = 0; }
+	sym_table(sym_table *sym_table_prev): prev(sym_table_prev){ level = prev->level + 1; cur_offset = prev->cur_offset; }
 	friend class sym_function;
 	friend class sym_func_type;
 	friend class parser;
 	friend class asm_code;
+	friend class stmt_block;
 	void print(ostream &os, int level);
 	void add_sym(symbol *sym);
 	void del_sym(symbol *sym);
@@ -163,4 +169,5 @@ public:
 	sym_type *get_type_by_synonym(string s);
 	bool symbol_not_alias_exist(string s);
 	int count_symbols(){ return symbols.size(); }
+	void calc_offset(symbol *);
 };

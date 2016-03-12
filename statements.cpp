@@ -66,6 +66,11 @@ void stmt_block::print(ostream &os, int level){
 }
 
 void stmt_block::generate(asm_cmd_list *cmds){
+	int nbyte = 0;
+	for (auto it = table->symbols.begin(); it != table->symbols.end(); it++){
+		nbyte += (*it).second->type->get_size();
+	}
+	cmds->add(SUB, ESP, to_string(nbyte));
 	for (auto it = stmt_list.begin(); it != stmt_list.end(); it++){
 		(*it)->generate(cmds);
 		if (typeid(*it) == typeid(stmt_return)){

@@ -2,6 +2,18 @@
 #include "statements.h"
 #include "parser.h"
 
+int gen_size(string type_name){
+	if (type_name == token_names[TK_DOUBLE]){
+		return 8;
+	} else if (type_name == token_names[TK_INT]){
+		return 4;
+	} else if (type_name == token_names[TK_CHAR]){
+		return 1;
+	} else {
+		/* DO ...for other types pointers, arrays, structures */
+	}
+}
+
 bool symbol::type_eq(string type_name){
 	return type->name == type_name;
 }
@@ -37,32 +49,24 @@ sym_const::sym_const(sym_type *const_type){
 }
 
 sym_var::sym_var(const string &sym_name, sym_type *sym_vartype){
+	offset = 0;
 	name = sym_name; type = sym_vartype;
 }
 
 sym_var::sym_var(const string &sym_name, sym_type *sym_vartype, token tk){
+	offset = 0;
 	name = sym_name; type = sym_vartype; var_token = tk;
 }
 
 sym_var_param::sym_var_param(const string &sym_name, sym_type *sym_param_type){
 	name = sym_name; type = sym_param_type;
-	string tname = type->get_type_str_name();
-	if (tname == token_names[TK_DOUBLE]){
-		size = 8;
-	} else if (tname == token_names[TK_INT]){
-		size = 4;
-	} else if (tname == token_names[TK_CHAR]){
-		size = 1;
-	}
+	size = gen_size(type->get_type_str_name());
 }
 
 int sym_var_param::set_offset(int param_offset){
 	return offset = param_offset;
 }
 
-int sym_var_param::get_size(){
-	return size;
-}
 sym_var_global::sym_var_global(const string &sym_name, sym_type *sym_param_type, token tk){
 	name = sym_name; type = sym_param_type;  var_token = tk;
 }
@@ -160,13 +164,7 @@ string sym_type::get_type_str_name(){
 sym_type::sym_type(const string &sym_name){
 	name = sym_name;
 	type = nullptr;
-	if (name == token_names[TK_DOUBLE]){
-		size = 8;
-	} else if (name == token_names[TK_INT]){
-		size = 4;
-	} else if (name == token_names[TK_CHAR]){
-		size = 1;
-	}
+	size = gen_size(name);
 }
 
 string sym_array::get_type_str_name(){
@@ -267,6 +265,16 @@ bool sym_table::type_by_name(string &type_name){
 	return false;
 }
 
+void sym_table::calc_offset(symbol *sym){
+	if (prev == nullptr)
+		return;
+	if (typeid(*sym) != typeid(sym_var))
+		return;
+	sym_var *t = dynamic_cast<sym_var *>(sym);
+	t->offset = cur_offset;
+	cur_offset += t->size;
+}
+
 void sym_table::add_sym(symbol *sym){
 	if (typeid(*sym).name() == typeid(sym_function).name()){
 		functions.push_back(dynamic_cast<sym_function *>(sym));
@@ -274,6 +282,7 @@ void sym_table::add_sym(symbol *sym){
 	}
 	if (local_exist(sym->name))
 		throw 1;
+	calc_offset(sym);
 	symbols.insert(pair<string, symbol *>(sym->name, sym));
 }
 

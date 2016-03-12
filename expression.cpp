@@ -303,14 +303,29 @@ void expr_global_var::generate_addr(asm_cmd_list * cmds){
 }
 
 void expr_local_var::generate(asm_cmd_list *cmds){
-	int offset = 0;
-	if (typeid(*sym) == typeid(sym_var_param))
-		offset = dynamic_cast<sym_var_param *>(sym)->offset;
-	cmds->add_deref(PUSH, EBP, offset);
+	if (typeid(*sym) == typeid(sym_var_param)){
+		int offset = dynamic_cast<sym_var_param *>(sym)->offset;
+		cmds->add_deref(PUSH, EBP, offset);
+	} else {
+		generate_addr(cmds);
+		cmds->add(POP, EAX);
+		cmds->add_deref(PUSH, EAX);
+	}
 }
 
 void expr_local_var::generate_addr(asm_cmd_list *cmds){
-
+	int offset = 0;
+	if (typeid(*sym) == typeid(sym_var_param)){
+		sym_var_param *svp  = dynamic_cast<sym_var_param *>(sym);
+		offset = svp->offset + svp->type->get_size();
+	} else if (typeid(*sym) == typeid(sym_var)){
+		sym_var *sv  = dynamic_cast<sym_var *>(sym);
+		offset = sv->offset + sv->type->get_size();
+		cmds->add(MOV, EAX, EBP);
+		cmds->add(SUB, EAX, to_string(offset));
+	}
+	
+	cmds->add(PUSH, EAX);
 }
 
 void expr_function::generate(asm_cmd_list *cmds){
