@@ -157,6 +157,18 @@ string sym_type::get_type_str_name(){
 	return name;
 }
 
+sym_type::sym_type(const string &sym_name){
+	name = sym_name;
+	type = nullptr;
+	if (name == token_names[TK_DOUBLE]){
+		size = 8;
+	} else if (name == token_names[TK_INT]){
+		size = 4;
+	} else if (name == token_names[TK_CHAR]){
+		size = 1;
+	}
+}
+
 string sym_array::get_type_str_name(){
 	return "array of " + type->get_type_str_name();
 }
@@ -328,6 +340,7 @@ void sym_function::generate(asm_code *code){
 	cmds->add(PUSH, EBP);
 	cmds->add(MOV, EBP, ESP);
 	block->generate(cmds);
+	cmds->add_label(name + "_return");
 	cmds->add(MOV, ESP, EBP);
 	cmds->add(POP, EBP);
 	cmds->add(RET); // Do later for returning value

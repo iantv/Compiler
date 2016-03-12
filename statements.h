@@ -90,6 +90,7 @@ class stmt_return: public stmt{
 public:
 	stmt_return(stmt_expr *);
 	void print(ostream &os, int level);
+	void generate(asm_cmd_list *) override;
 };
 
 class stmt_printf: public stmt{

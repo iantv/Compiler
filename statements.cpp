@@ -66,8 +66,12 @@ void stmt_block::print(ostream &os, int level){
 }
 
 void stmt_block::generate(asm_cmd_list *cmds){
-	for (auto it = stmt_list.begin(); it != stmt_list.end(); it++)
+	for (auto it = stmt_list.begin(); it != stmt_list.end(); it++){
 		(*it)->generate(cmds);
+		if (typeid(*it) == typeid(stmt_return)){
+			cmds->add(JMP, owner->name + "_return");
+		}
+	}
 }
 
 /*--------------------------------------------STMT_IF--------------------------------------------*/
@@ -184,6 +188,10 @@ void stmt_return::print(ostream &os, int level){
 		ex->print(os, level + 1);
 	} else 
 		os << endl;
+}
+
+void stmt_return::generate(asm_cmd_list *cmds){
+	ex->generate(cmds);
 }
 
 /*--------------------------------------------STMT_PRINTF--------------------------------------------*/

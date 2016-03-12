@@ -319,6 +319,7 @@ void expr_function::generate(asm_cmd_list *cmds){
 	fid->generate_addr(cmds);
 	cmds->add(POP, EAX);
 	cmds->add(CALL, EAX);
+	cmds->add(PUSH, EAX);
 }
 
 /*-------------------------------------------------Type casting-------------------------------------------------*/
@@ -343,4 +344,3 @@ void expr_cast2type::print(ostream &os, int level){
 	print_level(os, level);
 	os << op << endl;
 }
-
