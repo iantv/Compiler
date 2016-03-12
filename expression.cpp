@@ -289,6 +289,8 @@ void expr_postfix_unar_op::generate(asm_cmd_list *cmds){
 void expr_literal::generate(asm_cmd_list *cmds){
 	if (tk == TK_STRING_LITERAL){
 		cmds->add_offset(PUSH, "STR_LITERAL(\'" + tk.get_src() + "\')");
+	} else if (tk == TK_CHAR_VAL){
+		cmds->add(PUSH, "\'" + tk.get_src() + "\'");
 	} else {
 		cmds->add(PUSH, tk.get_src());
 	}
