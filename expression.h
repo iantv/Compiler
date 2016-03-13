@@ -45,6 +45,7 @@ public:
 	expr_bin_op(expr *l, expr *r, string op);
 	void print(ostream &os, int level) override;
 	void generate(asm_cmd_list *) override;
+	void generate_addr(asm_cmd_list *) override;
 	void generate_simple_bin_op(asm_cmd_list *, token_t); /* +, -, *, / */
 	void generate_rel_bin_op(asm_cmd_list *);
 	void generate_assign_bin_op(asm_cmd_list *);

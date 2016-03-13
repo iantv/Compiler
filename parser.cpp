@@ -67,6 +67,7 @@ const string &declar::get_name(){
 bool declar::check_id(symbol *sym){ return id == sym; }
 
 /*---------------------------------------class parser --------------------------------------*/
+
 parser::parser(lexer *l): lxr(l), table(new sym_table()) { 	init_prelude(); tcast = true; point_of_entry = false; }
 
 vector<expr *> parser::parse_fargs(sym_table *sym_tbl){
@@ -114,6 +115,18 @@ expr *parser::new_expr_bin_op(expr *ex1, expr *ex2, token tk){
 		}
 	}
 	return new expr_bin_op(ex1, ex2, tk);;
+}
+
+expr *parser::new_expr_bin_op(expr *ex1, expr *ex2, string op){
+	if (tcast == false)
+		return new expr_bin_op(ex1, ex2, op);
+	if (op == "[]"){
+		if (ex2->of_ctype(token_names[TK_DOUBLE]))
+			ex2 = new expr_cast2type(token_names[TK_INT], ex2, prelude);
+		else if (ex2->of_ctype(token_names[TK_CHAR]))
+			ex2 = new expr_cast2type(token_names[TK_INT], ex2, prelude);
+	}
+	return new expr_bin_op(ex1, ex2, op);
 }
 
 expr *parser::try_cast2type(expr *ex, sym_type *type, sym_table *sym_tbl){
@@ -223,7 +236,7 @@ expr *parser::factor(sym_table *sym_tbl){
 				}
 			}
 			if (lxr->get().type == TK_OPEN_SQUARE_BRACKET){
-				ex = new expr_bin_op(ex, parse_index(sym_tbl), string("[]"));
+				ex = new_expr_bin_op(ex, parse_index(sym_tbl), string("[]"));
 			}
 			if (lxr->get().type == TK_OPEN_BRACKET){
 				ex = new expr_function(ex, parse_fargs(sym_tbl));

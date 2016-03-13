@@ -58,7 +58,8 @@ class parser{
 	void init_prelude(); /* init global symtable prelude */
 	void try_type_cast(expr **, expr **);
 	
-	expr *new_expr_bin_op(expr *ex1, expr *ex2, token tk);
+	expr *new_expr_bin_op(expr *, expr *, token );
+	expr *new_expr_bin_op(expr *, expr *, string);
 	expr *new_expr_var(sym_table *, token);
 	expr *new_expr_postfix_unar_op(sym_table *, expr *, token);
 	expr *new_expr_prefix_unar_op(sym_table *, expr *, token);

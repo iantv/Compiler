@@ -1,0 +1,5 @@
+int a[10];
+void main(){
+	a[0] = 1;
+	printf("%d %d", a[0], a[1]);
+}

@@ -6,7 +6,7 @@ expr_bin_op::expr_bin_op(expr *l, expr *r, token t): left(l), right(r), expr_bin
 	type = l->type; /* Assign type of one of two operand, because type casting happens in the function which call this */
 	tk = t; 
 }
-expr_bin_op::expr_bin_op(expr *l, expr *r, string s): left(l), right(r), expr_bin_op::expr(){ op = s; }
+expr_bin_op::expr_bin_op(expr *l, expr *r, string s): left(l), right(r), expr_bin_op::expr(){ type = l->type; op = s; }
 expr_prefix_unar_op::expr_prefix_unar_op(expr *e, token t): ex(e), expr_bin_op::expr(){ 
 	type = e->type;
 	tk = t; 
@@ -231,15 +231,10 @@ void expr_bin_op::generate_assign_bin_op(asm_cmd_list *cmds){
 }
 
 void expr_bin_op::generate_array_elem(asm_cmd_list *cmds){
-	left->generate_addr(cmds);
-	right->generate(cmds);
+	generate_addr(cmds);
 	cmds->add(POP, EAX);
-	cmds->add(POP, EBX);
-	cmds->add(IMUL, EAX, to_string(left->type->get_size()));
-	cmds->add(ADD, EBX, EAX);
-	cmds->add_deref(PUSH, EBX);
+	cmds->add_deref(PUSH, EAX);
 	cmds->add(POP, EAX);
-	cmds->add(PUSH, EAX);
 }
 
 void expr_bin_op::generate(asm_cmd_list *cmds){
@@ -254,6 +249,19 @@ void expr_bin_op::generate(asm_cmd_list *cmds){
 		generate_simple_bin_op(cmds, tk.get_type());
 	}
 	cmds->add(PUSH, EAX);
+}
+
+void expr_bin_op::generate_addr(asm_cmd_list *cmds){
+	if (op == "[]"){
+		left->generate_addr(cmds);
+		right->generate(cmds);
+		cmds->add(POP, EAX);
+		cmds->add(POP, EBX);
+		cmds->add(IMUL, EAX, to_string(left->type->get_size()));
+		cmds->add(ADD, EAX, EBX);
+		cmds->add(PUSH, EAX);
+	}
+
 }
 
 void expr_prefix_unar_op::generate(asm_cmd_list *cmds){
