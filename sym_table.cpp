@@ -373,5 +373,8 @@ void sym_var_param::generate(asm_cmd_list *cmds){
 }
 
 void sym_array::generate(asm_code *code){
-	code->add_data(new asm_global_array(name + '_', DD, length));
+	if (type->get_size() == 4)
+		code->add_data(new asm_global_array(name + '_', DD, length));
+	else if (type->get_size() == 1)
+		code->add_data(new asm_global_array(name + '_', DB, length));
 }
