@@ -33,6 +33,7 @@ public:
 	sym_type *get_type(){ return type; }
 	virtual void generate(asm_code *){}
 	virtual void generate(asm_cmd_list *){}
+	virtual int get_size(){ return 1;} 
 };
 
 symbol *make_symbol(declar &);
@@ -59,17 +60,33 @@ public:
 	void print(ostream &os, int level);
 	sym_type(){}
 	sym_type(const string &);
-	virtual int get_size(){ return size; }
+	int get_size() override;
 	virtual string get_type_str_name();
 };
 
 class sym_array: public sym_type{
+protected:
 	size_t length;
 public:
+	sym_array(){ length = 0; }
 	void print(ostream &os, int level) override;
-	sym_array(size_t size){ length = size; }
 	string get_type_str_name() override;
+	int get_size() override;
+};
+
+class sym_global_array: public sym_array{
+public:
+	sym_global_array(size_t);
 	void generate(asm_code *) override;
+};
+
+class sym_local_array: public sym_array{
+	int offset;
+public:
+	friend class expr_local_var;
+	friend class sym_table;
+	sym_local_array(size_t);
+	void generate(asm_cmd_list *) override;
 };
 
 class sym_struct: public sym_type{
@@ -115,16 +132,15 @@ class sym_var: public symbol{
 protected:
 	token var_token;
 	int offset;
-	int size;
 public:
 	friend class sym_table;
 	friend class parser;
 	friend class expr_local_var;
-	sym_var(){ offset = 0; size = 0; }
+	sym_var(){ offset = 0; }
 	void print(ostream &os, int level) override;
 	sym_var(const string &sym_name, sym_type *sym_vartype = nullptr);
 	sym_var(const string &, sym_type *, token);
-	virtual int get_size(){ return size; }
+	int get_size() override;
 };
 
 class sym_var_param: public sym_var{

@@ -126,6 +126,11 @@ public:
 	void print(ostream &os) override;
 };
 
+class asm_local_array: public asm_t{
+public:
+	asm_local_array(string &, asm_type_t);
+
+};
 class asm_local_var: public asm_t{
 
 public:

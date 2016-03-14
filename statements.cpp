@@ -68,7 +68,7 @@ void stmt_block::print(ostream &os, int level){
 void stmt_block::generate(asm_cmd_list *cmds){
 	int nbyte = 0;
 	for (auto it = table->symbols.begin(); it != table->symbols.end(); it++){
-		nbyte += (*it).second->type->get_size();
+		nbyte += (*it).second->get_size();
 	}
 	cmds->add(SUB, ESP, to_string(nbyte));
 	for (auto it = stmt_list.begin(); it != stmt_list.end(); it++){
@@ -77,6 +77,7 @@ void stmt_block::generate(asm_cmd_list *cmds){
 			cmds->add(JMP, owner->name + "_return");
 		}
 	}
+	cmds->add(ADD, ESP, to_string(nbyte));
 }
 
 /*--------------------------------------------STMT_IF--------------------------------------------*/

@@ -2,6 +2,154 @@
 #include "statements.h"
 #include "parser.h"
 
+/*------------------------------------------------SYM_TABLE------------------------------------------------*/
+
+bool sym_table::local_exist(string &name){
+	if (symbols.size() == 0 && functions.size() == 0)
+		return false;
+	for (auto it = functions.begin(); it != functions.end(); it++)
+		if ((*it)->name == name)
+			return true;
+	return symbols.find(name) != symbols.end();
+}
+
+symbol *sym_table::get_symbol(string s){
+	map<string, symbol *>::iterator it = symbols.find(s.c_str());
+	vector<sym_function *>::iterator fit = functions.begin();
+	if (it != symbols.end())
+		return it->second;
+	for (;fit != functions.end(); fit++)
+		if ((*fit)->name == s)
+			return (*fit);
+	if (prev == nullptr)
+		return nullptr;
+	return prev->get_symbol(s);
+}
+
+sym_type* sym_table::get_type_specifier(string s){
+	/*symbol *t = get_symbol(s);
+	string id = typeid(*t).name();*/ //DO correct!!!
+	return dynamic_cast<sym_type *>(get_symbol(s));
+};
+
+bool sym_table::global_exist(string &name){
+	sym_table *st = prev;
+	while (st){
+		if (st->local_exist(name))
+			return true;
+		st = st->prev;
+	}
+	return false;
+}
+
+bool sym_table::type_exists_by_real_typename(string &type_name){
+	map<string, symbol *>::iterator it;
+	for (it = symbols.begin(); it != symbols.end(); it++){
+		symbol *sym = (*it).second;
+		if (typeid(*sym) == typeid(sym_alias) || typeid(*sym) == typeid(sym_const) || typeid(*sym) == typeid(sym_global_array) || typeid(*sym) == typeid(sym_struct) || typeid(*sym) == typeid(sym_pointer) || typeid(*sym) == typeid(sym_func_type)){
+			sym_type *st = dynamic_cast<sym_type *>(sym);
+			if (st->get_type_str_name() == type_name)
+				return true;
+		}
+	}
+	if (prev == nullptr) return false;
+	return prev->type_exists_by_real_typename(type_name);
+}
+
+bool sym_table::type_by_name(string &type_name){
+	map<string, symbol *>::iterator it;
+	for (it = symbols.begin(); it != symbols.end(); it++){
+		symbol *sym = (*it).second;
+		if (typeid(*sym) == typeid(sym_alias) || typeid(*sym) == typeid(sym_const) || typeid(*sym) == typeid(sym_global_array) || typeid(*sym) == typeid(sym_struct) || typeid(*sym) == typeid(sym_pointer) || typeid(*sym) == typeid(sym_func_type)){
+			sym_type *st = dynamic_cast<sym_type *>(sym);
+			if (sym->name == type_name)
+				return true;
+		}
+	}
+	return false;
+}
+
+void sym_table::calc_offset(symbol *sym){
+	if (prev == nullptr)
+		return;
+	if (typeid(*sym) == typeid(sym_var)){
+		sym_var *t = dynamic_cast<sym_var *>(sym);
+		t->offset = cur_offset;
+		cur_offset += sym->get_type()->get_size();
+	} else if (typeid(*sym) == typeid(sym_local_array)){
+		sym_local_array *t = dynamic_cast<sym_local_array *>(sym);
+		t->offset = cur_offset;
+		cur_offset += t->length * sym->get_type()->get_size();
+	}
+}
+
+void sym_table::add_sym(symbol *sym){
+	if (typeid(*sym).name() == typeid(sym_function).name()){
+		functions.push_back(dynamic_cast<sym_function *>(sym));
+		return;
+	}
+	if (local_exist(sym->name))
+		throw 1;
+	calc_offset(sym);
+	symbols.insert(pair<string, symbol *>(sym->name, sym));
+}
+
+void sym_table::del_sym(symbol *sym){
+	if (local_exist(sym->name))
+		symbols.erase(sym->name);
+}
+
+void sym_table::print(ostream &os, int level){
+	for (int i = 0; i < (int)functions.size(); i++){
+		functions[i]->print(os, level);
+	}
+	for (auto it = symbols.begin(); it != symbols.end(); ++it){
+		symbol *t = it->second;
+		if (typeid(*t).name() == typeid(sym_var_param).name())
+			continue;
+		t->print(os, level);
+	}
+}
+
+sym_type *sym_table::get_type_by_synonym(string s){
+	sym_type *t = get_type_specifier(s);
+	if (t == nullptr) return nullptr;
+	string id = typeid(*t).name();
+	if (id == typeid(sym_alias).name()){
+		return t->type;
+	}
+	return nullptr;
+}
+
+bool sym_table::type_alias_exist(string s){
+	if (local_exist(s) || global_exist(s)){
+		return get_type_by_synonym(s) != nullptr;
+	}
+	return false;
+}
+
+bool sym_table::symbol_not_alias_exist(string s){
+	if (local_exist(s) || global_exist(s)){
+		return get_type_by_synonym(s) == nullptr;
+	}
+	return false;
+}
+
+bool sym_table::local_is_empty(){
+	return symbols.size() == 0;
+}
+
+bool equal(sym_type *sym1, sym_type *sym2){
+	sym_type *t1 = sym1, *t2 = sym2;
+	while (t1 != nullptr && t2 != nullptr && t1->type && t2->type && (t1->name == t2->name)){
+		t1 = t1->type;
+		t2 = t2->type;
+	}
+	if (t1 == t2)
+		return true;
+	return false;
+}
+
 int gen_size(string type_name){
 	if (type_name == token_names[TK_DOUBLE]){
 		return 8;
@@ -60,7 +208,6 @@ sym_var::sym_var(const string &sym_name, sym_type *sym_vartype, token tk){
 
 sym_var_param::sym_var_param(const string &sym_name, sym_type *sym_param_type){
 	name = sym_name; type = sym_param_type;
-	size = gen_size(type->get_type_str_name());
 }
 
 int sym_var_param::set_offset(int param_offset){
@@ -69,6 +216,14 @@ int sym_var_param::set_offset(int param_offset){
 
 sym_var_global::sym_var_global(const string &sym_name, sym_type *sym_param_type, token tk){
 	name = sym_name; type = sym_param_type;  var_token = tk;
+}
+
+sym_global_array::sym_global_array(size_t arr_length){
+	length = arr_length;
+}
+
+sym_local_array::sym_local_array(size_t arr_length){
+	length = arr_length; offset = 0;
 }
 
 static void print_level(ostream &os, int level){
@@ -198,148 +353,16 @@ string sym_const::get_type_str_name(){
 	return "constant " + type->get_type_str_name();
 }
 
-/*------------------------------------------------SYM_TABLE------------------------------------------------*/
-
-bool sym_table::local_exist(string &name){
-	if (symbols.size() == 0 && functions.size() == 0)
-		return false;
-	for (auto it = functions.begin(); it != functions.end(); it++)
-		if ((*it)->name == name)
-			return true;
-	return symbols.find(name) != symbols.end();
+int sym_type::get_size(){
+	return size;
 }
 
-symbol *sym_table::get_symbol(string s){
-	map<string, symbol *>::iterator it = symbols.find(s.c_str());
-	vector<sym_function *>::iterator fit = functions.begin();
-	if (it != symbols.end())
-		return it->second;
-	for (;fit != functions.end(); fit++)
-		if ((*fit)->name == s)
-			return (*fit);
-	if (prev == nullptr)
-		return nullptr;
-	return prev->get_symbol(s);
+int sym_array::get_size(){
+	return type->get_size()*length;
 }
 
-sym_type* sym_table::get_type_specifier(string s){
-	/*symbol *t = get_symbol(s);
-	string id = typeid(*t).name();*/ //DO correct!!!
-	return dynamic_cast<sym_type *>(get_symbol(s));
-};
-
-bool sym_table::global_exist(string &name){
-	sym_table *st = prev;
-	while (st){
-		if (st->local_exist(name))
-			return true;
-		st = st->prev;
-	}
-	return false;
-}
-
-bool sym_table::type_exists_by_real_typename(string &type_name){
-	map<string, symbol *>::iterator it;
-	for (it = symbols.begin(); it != symbols.end(); it++){
-		symbol *sym = (*it).second;
-		if (typeid(*sym) == typeid(sym_alias) || typeid(*sym) == typeid(sym_const) || typeid(*sym) == typeid(sym_array) || typeid(*sym) == typeid(sym_struct) || typeid(*sym) == typeid(sym_pointer) || typeid(*sym) == typeid(sym_func_type)){
-			sym_type *st = dynamic_cast<sym_type *>(sym);
-			if (st->get_type_str_name() == type_name)
-				return true;
-		}
-	}
-	if (prev == nullptr) return false;
-	return prev->type_exists_by_real_typename(type_name);
-}
-
-bool sym_table::type_by_name(string &type_name){
-	map<string, symbol *>::iterator it;
-	for (it = symbols.begin(); it != symbols.end(); it++){
-		symbol *sym = (*it).second;
-		if (typeid(*sym) == typeid(sym_alias) || typeid(*sym) == typeid(sym_const) || typeid(*sym) == typeid(sym_array) || typeid(*sym) == typeid(sym_struct) || typeid(*sym) == typeid(sym_pointer) || typeid(*sym) == typeid(sym_func_type)){
-			sym_type *st = dynamic_cast<sym_type *>(sym);
-			if (sym->name == type_name)
-				return true;
-		}
-	}
-	return false;
-}
-
-void sym_table::calc_offset(symbol *sym){
-	if (prev == nullptr)
-		return;
-	if (typeid(*sym) != typeid(sym_var))
-		return;
-	sym_var *t = dynamic_cast<sym_var *>(sym);
-	t->offset = cur_offset;
-	cur_offset += t->size;
-}
-
-void sym_table::add_sym(symbol *sym){
-	if (typeid(*sym).name() == typeid(sym_function).name()){
-		functions.push_back(dynamic_cast<sym_function *>(sym));
-		return;
-	}
-	if (local_exist(sym->name))
-		throw 1;
-	calc_offset(sym);
-	symbols.insert(pair<string, symbol *>(sym->name, sym));
-}
-
-void sym_table::del_sym(symbol *sym){
-	if (local_exist(sym->name))
-		symbols.erase(sym->name);
-}
-
-void sym_table::print(ostream &os, int level){
-	for (int i = 0; i < (int)functions.size(); i++){
-		functions[i]->print(os, level);
-	}
-	for (auto it = symbols.begin(); it != symbols.end(); ++it){
-		symbol *t = it->second;
-		if (typeid(*t).name() == typeid(sym_var_param).name())
-			continue;
-		t->print(os, level);
-	}
-}
-
-sym_type *sym_table::get_type_by_synonym(string s){
-	sym_type *t = get_type_specifier(s);
-	if (t == nullptr) return nullptr;
-	string id = typeid(*t).name();
-	if (id == typeid(sym_alias).name()){
-		return t->type;
-	}
-	return nullptr;
-}
-
-bool sym_table::type_alias_exist(string s){
-	if (local_exist(s) || global_exist(s)){
-		return get_type_by_synonym(s) != nullptr;
-	}
-	return false;
-}
-
-bool sym_table::symbol_not_alias_exist(string s){
-	if (local_exist(s) || global_exist(s)){
-		return get_type_by_synonym(s) == nullptr;
-	}
-	return false;
-}
-
-bool sym_table::local_is_empty(){
-	return symbols.size() == 0;
-}
-
-bool equal(sym_type *sym1, sym_type *sym2){
-	sym_type *t1 = sym1, *t2 = sym2;
-	while (t1 != nullptr && t2 != nullptr && t1->type && t2->type && (t1->name == t2->name)){
-		t1 = t1->type;
-		t2 = t2->type;
-	}
-	if (t1 == t2)
-		return true;
-	return false;
+int sym_var::get_size(){
+	return type->get_size();
 }
 
 /*------------------------------GENERATE METHODS------------------------------*/
@@ -361,20 +384,27 @@ void sym_function::generate(asm_code *code){
 }
 
 void sym_var_global::generate(asm_code *code){
-	if (var_token.get_type_name() == "char"){
-		code->add_data(new asm_global_var(name + '_', DB));
-	} else {
-		code->add_data(new asm_global_var(name + '_', DD));
+	asm_type_t asm_type = DD;
+	switch (type->get_size()){
+		case 4: { asm_type = DD; break; }
+		case 1: { asm_type = DB; break; }
 	}
+	code->add_data(new asm_global_var(name + '_', asm_type));
 }
 
 void sym_var_param::generate(asm_cmd_list *cmds){
 	cmds->add_deref(PUSH, EBP, offset);
 }
 
-void sym_array::generate(asm_code *code){
-	if (type->get_size() == 4)
-		code->add_data(new asm_global_array(name + '_', DD, length));
-	else if (type->get_size() == 1)
-		code->add_data(new asm_global_array(name + '_', DB, length));
+void sym_global_array::generate(asm_code *code){
+	asm_type_t asm_type = DD;
+	switch (type->get_size()){
+		case 4: { asm_type = DD; break; }
+		case 1: { asm_type = DB; break; }
+	}
+	code->add_data(new asm_global_array(name + '_', asm_type, length));
+}
+
+void sym_local_array::generate(asm_cmd_list *cmds){	
+	cmds->add_deref(PUSH, EBP, offset);
 }

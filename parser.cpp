@@ -344,11 +344,11 @@ void parser::parse_fparams(sym_table *lst, vector<string> *params){
 		sym_var_param *p = dynamic_cast<sym_var_param *>(lst->get_symbol(*it));
 		if (it == params->rbegin()){
 			last_offset = p->set_offset(8);
-			last_size = p->get_size();
+			last_size = p->get_type()->get_size();
 			continue;
 		}
 		last_offset = p->set_offset(last_offset + last_size);
-		last_size = p->get_size();	
+		last_size = p->get_type()->get_size();	
 	}
 	if (lxr->get().type == TK_CLOSE_BRACKET)
 		lxr->next();
@@ -828,13 +828,15 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 		while (((tk.type == TK_OPEN_BRACKET) || (tk.type == TK_OPEN_SQUARE_BRACKET)) && tk.type != NOT_TK){
 			if (tk.type == TK_OPEN_SQUARE_BRACKET){
 				if (info.check_id(nullptr)){
-					info.set_id(new sym_array(parse_size_of_array()));
+					size_t size = parse_size_of_array();
+					symbol *arr = (sym_tbl->prev == nullptr) ? (symbol *)(new sym_global_array(size)) : (symbol *)(new sym_local_array(size)); 
+					info.set_id(arr);
 					info.set_name(info.name);
 				} else {
 					if (dir_dcl)
-						info.set_back_type(new sym_array(parse_size_of_array()));
+						info.set_back_type(new sym_global_array(parse_size_of_array()));
 					else
-						info.set_type(new sym_array(parse_size_of_array()));		
+						info.set_type(new sym_global_array(parse_size_of_array()));		
 				}
 				tk = lxr->next();
 			} else if (tk.type == TK_OPEN_BRACKET){
@@ -846,7 +848,7 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 					info.set_id(f);
 				} else {
 					string s = (info.get_type() == nullptr) ? typeid(*info.get_id()).name() : typeid(*info.get_type()).name();
-					if (s == typeid(sym_array).name()){
+					if (s == typeid(sym_global_array).name()){
 						throw error(C2092, "element type of array cannot be function", tk.pos);
 					} else if (s == typeid(sym_function).name() || s == typeid(sym_func_type).name()){
 						throw error(C2091, "function returns function", tk.pos);

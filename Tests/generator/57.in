@@ -1,0 +1,7 @@
+void main(){
+	int b[10];
+	char a[10];
+	b[3] = 123;
+	a[2] = 'a';
+	printf("%d %c", b[3], a[2]);
+}

@@ -348,10 +348,15 @@ void expr_local_var::generate_addr(asm_cmd_list *cmds){
 		offset = sv->offset + sv->type->get_size();
 		cmds->add(MOV, EAX, EBP);
 		cmds->add(SUB, EAX, to_string(offset));
+	} else if (typeid(*sym) == typeid(sym_local_array)){
+		sym_local_array *slv  = dynamic_cast<sym_local_array *>(sym);
+		offset = slv->offset + slv->type->get_size();
+		cmds->add(MOV, EAX, EBP);
+		cmds->add(SUB, EAX, to_string(offset));
 	}
-	
 	cmds->add(PUSH, EAX);
 }
+
 
 void expr_function::generate(asm_cmd_list *cmds){
 	for (auto it = fargs.begin(); it != fargs.end(); it++)
