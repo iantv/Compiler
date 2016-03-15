@@ -23,6 +23,7 @@ public:
 	friend class sym_var;
 	friend class expr;
 	friend class expr_local_var;
+	friend class expr_global_var;
 	friend class stmt_block;
 	friend symbol *make_symbol(declar &dcl);
 	virtual void print(ostream &os, int level){};
@@ -62,6 +63,7 @@ public:
 	sym_type(const string &);
 	int get_size() override;
 	virtual string get_type_str_name();
+	virtual int get_size_of_elem(){ return size; }
 };
 
 class sym_array: public sym_type{
@@ -72,6 +74,7 @@ public:
 	void print(ostream &os, int level) override;
 	string get_type_str_name() override;
 	int get_size() override;
+	int get_size_of_elem() override;
 };
 
 class sym_global_array: public sym_array{
@@ -96,6 +99,7 @@ public:
 	void print(ostream &os, int level) override;
 	sym_struct(const string &sym_name, sym_table *lst);
 	string get_type_str_name() override;
+	void generate(asm_cmd_list *) override;
 };
 
 class sym_alias: public sym_type{

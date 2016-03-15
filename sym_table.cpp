@@ -361,6 +361,10 @@ int sym_array::get_size(){
 	return type->get_size()*length;
 }
 
+int sym_array::get_size_of_elem(){
+	return type->get_size();
+}
+
 int sym_var::get_size(){
 	return type->get_size();
 }
@@ -402,9 +406,13 @@ void sym_global_array::generate(asm_code *code){
 		case 4: { asm_type = DD; break; }
 		case 1: { asm_type = DB; break; }
 	}
-	code->add_data(new asm_global_array(name + '_', asm_type, length));
+	code->add_data(new asm_global_array(name + '_', asm_type, length*type->get_size()));
 }
 
 void sym_local_array::generate(asm_cmd_list *cmds){	
 	cmds->add_deref(PUSH, EBP, offset);
+}
+
+void sym_struct::generate(asm_cmd_list *cmds){
+	
 }

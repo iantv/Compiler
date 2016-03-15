@@ -219,7 +219,7 @@ expr *parser::new_expr_var(sym_table *sym_tbl, token tk){
 		throw error(tk.get_src() + " undefined ", tk.pos);
 	if (!table->local_exist(sym->name))
 		return new expr_local_var(sym);
-	return new expr_global_var(tk.get_src(), sym->type);
+	return new expr_global_var(sym);
 }
 
 expr *parser::factor(sym_table *sym_tbl){
@@ -681,7 +681,7 @@ void parser::check_decl2errors(sym_table *sym_tbl, symbol **t, token tk){
 }
 
 void parser::try_parse_init(symbol *sym, sym_table *sym_tbl, stmt_block *stmt_blck){
-	if (lxr->get().type != TK_ASSIGN || (typeid(*sym).name() != typeid(sym_var).name() && typeid(*sym) != typeid(sym_var_global))) return;
+	if (lxr->get().type != TK_ASSIGN || (typeid(*sym) != typeid(sym_var) && typeid(*sym) != typeid(sym_var_global))) return;
 	sym_var *t = dynamic_cast<sym_var *>(sym);
 	token tk = lxr->get(); lxr->next();
 	stmt *statement = new stmt_expr(new_expr_bin_op(new_expr_var(sym_tbl, t->var_token), expression(sym_tbl, 2), tk), NOT_COND);

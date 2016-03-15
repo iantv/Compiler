@@ -19,6 +19,7 @@ expr_postfix_unar_op::expr_postfix_unar_op(expr *e, token t): ex(e), expr_bin_op
 
 expr_literal::expr_literal(token t): expr_bin_op::expr(){ tk = t; }
 expr_global_var::expr_global_var(string gname, sym_type *var_type): expr_bin_op::expr(){ name = gname; type = var_type; }
+expr_global_var::expr_global_var(symbol *global_sym){ sym = global_sym; type = sym->get_type(); name = sym->name; }
 expr_local_var::expr_local_var(string lname, sym_type *var_type): expr_bin_op::expr(){ name = lname; type = var_type; }
 expr_local_var::expr_local_var(symbol *local_sym){ sym = local_sym; type = sym->get_type(); name = sym->name; }
 expr_tern_op::expr_tern_op(expr *l, expr *m, expr *r, string s): left(l), middle(m), right(r), expr_bin_op::expr(){ op = s; };
@@ -254,14 +255,18 @@ void expr_bin_op::generate(asm_cmd_list *cmds){
 void expr_bin_op::generate_addr(asm_cmd_list *cmds){
 	if (op == "[]"){
 		left->generate_addr(cmds);
-		right->generate(cmds);
-		cmds->add(POP, EAX);
 		cmds->add(POP, EBX);
-		cmds->add(IMUL, EAX, to_string(left->type->get_size()));
+		if (left->op == "[]"){
+			cmds->add(MOV, EAX, to_string(dynamic_cast<expr_bin_op *>(left)->type->get_size_of_elem()));
+			cmds->add(IMUL, EAX, right->tk.get_src());
+		} else {
+			right->generate(cmds);
+			cmds->add(POP, EAX);
+			cmds->add(IMUL, EAX, to_string(left->type->get_size()));
+		}
 		cmds->add(ADD, EAX, EBX);
 		cmds->add(PUSH, EAX);
 	}
-
 }
 
 void expr_prefix_unar_op::generate(asm_cmd_list *cmds){
@@ -320,7 +325,11 @@ void expr_literal::generate(asm_cmd_list *cmds){
 }
 
 void expr_global_var::generate(asm_cmd_list *cmds){
-	cmds->add(PUSH, name + '_');	
+	if (typeid(*sym) == typeid(sym_global_array)){
+		generate_addr(cmds);
+	} else {
+		cmds->add(PUSH, name + '_');
+	}
 }
 
 void expr_global_var::generate_addr(asm_cmd_list * cmds){

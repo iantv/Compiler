@@ -97,7 +97,7 @@ asm_global_array::asm_global_array(string &name, asm_type_t type, size_t length)
 }
 
 void asm_global_array::print(ostream &os){
-	os << '\t' << ga_name << '\t' << asm_type_str[ga_type] << '\t' << size << '\t' << "\tdup(0)" << endl;
+	os << '\t' << ga_name << '\t' << asm_type_str[ga_type] << '\t' << size << "\tdup(0)" << endl;
 }
 
 /*-------------------------------class asm_cmd_list---------------------------------*/

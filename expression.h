@@ -90,8 +90,10 @@ public:
 
 class expr_global_var: public expr{
 	string name;
+	symbol *sym;
 public:
 	expr_global_var(string, sym_type *);
+	expr_global_var(symbol *);
 	void print(ostream &os, int level) override;
 	void generate(asm_cmd_list *) override;
 	void generate_addr(asm_cmd_list *) override;
