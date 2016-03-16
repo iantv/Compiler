@@ -266,7 +266,7 @@ void expr_bin_op::generate_addr(asm_cmd_list *cmds){
 		cmds->add(POP, EAX);
 		int size = left->type->get_size_of_elem();
 		if (expr_var *v = dynamic_cast<expr_var *>(left))
-			size = v->get_size_of_elem() || size;
+			size = v->get_size_of_elem();
 		cmds->add(IMUL, EAX, to_string(size));
 		cmds->add(ADD, EAX, EBX);
 		cmds->add(PUSH, EAX);
