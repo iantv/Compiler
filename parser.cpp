@@ -825,6 +825,7 @@ declar parser::parse_dir_declare(sym_table *sym_tbl, bool tdef, bool tconst){
 				info.set_id(new sym_var(info.name, nullptr, tk_id));
 		}
 	} else {
+	//if (tk.type != TK_OPEN_BRACKET){
 		while (((tk.type == TK_OPEN_BRACKET) || (tk.type == TK_OPEN_SQUARE_BRACKET)) && tk.type != NOT_TK){
 			if (tk.type == TK_OPEN_SQUARE_BRACKET){
 				if (info.check_id(nullptr)){

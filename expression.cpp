@@ -18,9 +18,9 @@ expr_postfix_unar_op::expr_postfix_unar_op(expr *e, token t): ex(e), expr_bin_op
 }
 
 expr_literal::expr_literal(token t): expr_bin_op::expr(){ tk = t; }
-expr_global_var::expr_global_var(string gname, sym_type *var_type): expr_bin_op::expr(){ name = gname; type = var_type; }
+expr_global_var::expr_global_var(string gname, sym_type *var_type){ name = gname; type = var_type; }
 expr_global_var::expr_global_var(symbol *global_sym){ sym = global_sym; type = sym->get_type(); name = sym->name; }
-expr_local_var::expr_local_var(string lname, sym_type *var_type): expr_bin_op::expr(){ name = lname; type = var_type; }
+expr_local_var::expr_local_var(string lname, sym_type *var_type){ name = lname; type = var_type; }
 expr_local_var::expr_local_var(symbol *local_sym){ sym = local_sym; type = sym->get_type(); name = sym->name; }
 expr_tern_op::expr_tern_op(expr *l, expr *m, expr *r, string s): left(l), middle(m), right(r), expr_bin_op::expr(){ op = s; };
 expr_function::expr_function(expr *id, const vector<expr *> &args): fid(id), expr_bin_op::expr(){ fargs = args; };
@@ -252,18 +252,22 @@ void expr_bin_op::generate(asm_cmd_list *cmds){
 	cmds->add(PUSH, EAX);
 }
 
+int expr_var::get_size_of_elem(){
+	if (sym_array *arr = dynamic_cast<sym_array *>(sym))
+		return arr->get_size_of_elem();
+	return 0;
+}
+
 void expr_bin_op::generate_addr(asm_cmd_list *cmds){
 	if (op == "[]"){
+		right->generate(cmds);
 		left->generate_addr(cmds);
 		cmds->add(POP, EBX);
-		if (left->op == "[]"){
-			cmds->add(MOV, EAX, to_string(dynamic_cast<expr_bin_op *>(left)->type->get_size_of_elem()));
-			cmds->add(IMUL, EAX, right->tk.get_src());
-		} else {
-			right->generate(cmds);
-			cmds->add(POP, EAX);
-			cmds->add(IMUL, EAX, to_string(left->type->get_size()));
-		}
+		cmds->add(POP, EAX);
+		int size = left->type->get_size_of_elem();
+		if (expr_var *v = dynamic_cast<expr_var *>(left))
+			size = v->get_size_of_elem() || size;
+		cmds->add(IMUL, EAX, to_string(size));
 		cmds->add(ADD, EAX, EBX);
 		cmds->add(PUSH, EAX);
 	}
@@ -352,14 +356,12 @@ void expr_local_var::generate_addr(asm_cmd_list *cmds){
 	if (typeid(*sym) == typeid(sym_var_param)){
 		sym_var_param *svp  = dynamic_cast<sym_var_param *>(sym);
 		offset = svp->offset + svp->type->get_size();
-	} else if (typeid(*sym) == typeid(sym_var)){
-		sym_var *sv  = dynamic_cast<sym_var *>(sym);
+	} else if (sym_var *sv  = dynamic_cast<sym_var *>(sym)){
 		offset = sv->offset + sv->type->get_size();
 		cmds->add(MOV, EAX, EBP);
 		cmds->add(SUB, EAX, to_string(offset));
-	} else if (typeid(*sym) == typeid(sym_local_array)){
-		sym_local_array *slv  = dynamic_cast<sym_local_array *>(sym);
-		offset = slv->offset + slv->type->get_size();
+	} else if (sym_local_array *slv = dynamic_cast<sym_local_array *>(sym)){
+		offset = slv->offset + slv->get_size();
 		cmds->add(MOV, EAX, EBP);
 		cmds->add(SUB, EAX, to_string(offset));
 	}

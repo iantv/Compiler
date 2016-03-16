@@ -77,10 +77,18 @@ public:
 	void generate(asm_cmd_list *) override;
 };
 
-class expr_local_var: public expr{
+class expr_var: public expr{
+protected:
 	string name;
 	symbol *sym;
 public:
+	expr_var(){}
+	int get_size_of_elem();
+};
+
+class expr_local_var: public expr_var{
+public:
+	friend class expr_bin_op;
 	expr_local_var(symbol *);
 	expr_local_var(string, sym_type *);
 	void print(ostream &os, int level) override;
@@ -88,10 +96,9 @@ public:
 	void generate_addr(asm_cmd_list *) override;
 };
 
-class expr_global_var: public expr{
-	string name;
-	symbol *sym;
+class expr_global_var: public expr_var{
 public:
+	friend class expr_bin_op;
 	expr_global_var(string, sym_type *);
 	expr_global_var(symbol *);
 	void print(ostream &os, int level) override;
