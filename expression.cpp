@@ -1,6 +1,6 @@
 #include "sym_table.h"
 #include <map>
-
+// hello 2
 expr::expr(){ type = nullptr; }
 expr_bin_op::expr_bin_op(expr *l, expr *r, token t): left(l), right(r), expr_bin_op::expr() {
 	type = l->type; /* Assign type of one of two operand, because type casting happens in the function which call this */
